@@ -1,38 +1,47 @@
 {
   "name": "codecollab",
   "version": "1.0.0",
-  "description": "Smart hackathon teammate discovery platform for Singapore university students",
-  "main": "index.js",
-  "scripts": {
-    "start": "cd client && npm start",
-    "client": "cd client && npm start",
-    "server": "cd server && npm run dev",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "install-client": "cd client && npm install",
-    "install-server": "cd server && npm install",
-    "install-all": "npm install && npm run install-client && npm run install-server",
-    "build": "cd client && npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "private": true,
+  "dependencies": {
+    "axios": "^1.6.2",
+    "firebase": "^10.7.1",
+    "framer-motion": "^11.18.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "socket.io-client": "^4.6.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/yourusername/CodeCollab.git"
-  },
-  "keywords": [
-    "hackathon",
-    "collaboration",
-    "team-formation",
-    "matching",
-    "students",
-    "singapore"
-  ],
-  "author": "G3T3 - Singapore Management University",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/yourusername/CodeCollab/issues"
-  },
-  "homepage": "https://github.com/yourusername/CodeCollab#readme",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.1",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.4.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
