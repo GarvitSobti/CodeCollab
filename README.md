@@ -46,128 +46,34 @@ CodeCollab is a full-stack web application built for a university software engin
 
 ---
 
-## 🏗️ Project Structure
-
-```
-CodeCollab/
-├── client/                 # React frontend application
-│   ├── public/            # Static assets
-│   ├── src/
-│   │   ├── components/    # Reusable UI components
-│   │   ├── pages/         # Page-level components
-│   │   ├── services/      # API service layer
-│   │   ├── utils/         # Helper functions
-│   │   ├── hooks/         # Custom React hooks
-│   │   ├── contexts/      # React Context providers
-│   │   └── assets/        # Images, fonts, etc.
-│   └── package.json
-│
-├── server/                # Node.js backend application
-│   ├── src/
-│   │   ├── config/        # Configuration files
-│   │   ├── controllers/   # Route controllers
-│   │   ├── models/        # Database models (Sequelize)
-│   │   ├── routes/        # API routes
-│   │   ├── middleware/    # Express middleware
-│   │   ├── services/      # Business logic
-│   │   └── utils/         # Helper functions
-│   └── package.json
-│
-├── docs/                  # Documentation
-│   ├── architecture.md    # System architecture
-│   ├── api.md            # API documentation
-│   ├── database-schema.md # Database design
-│   └── deployment.md     # Deployment guide
-│
-└── .github/              # GitHub configuration
-    ├── workflows/        # CI/CD workflows
-    └── ISSUE_TEMPLATE/   # Issue templates
-```
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Node.js** 18.x or higher
-- **PostgreSQL** 15.x or higher
-- **npm** or **yarn**
-- **Git**
+- Node.js 18.x or higher
+- PostgreSQL 15.x or higher
+- npm or yarn
+- Git
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/CodeCollab.git
-   cd CodeCollab
-   ```
+See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed setup instructions.
 
-2. **Install dependencies**
-   ```bash
-   # Install root dependencies
-   npm install
+```bash
+# Install dependencies
+npm install
+cd client && npm install
+cd ../server && npm install
 
-   # Install client dependencies
-   cd client
-   npm install
+# Set up environment variables
+# Copy .env.example to .env in both client/ and server/
 
-   # Install server dependencies
-   cd ../server
-   npm install
-   ```
+# Run the application
+npm run dev
+```
 
-3. **Set up environment variables**
-   
-   Create `.env` files in both `client/` and `server/` directories:
-
-   **client/.env**
-   ```env
-   REACT_APP_API_URL=http://localhost:5000
-   REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
-   REACT_APP_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-   REACT_APP_FIREBASE_PROJECT_ID=your_firebase_project_id
-   ```
-
-   **server/.env**
-   ```env
-   PORT=5000
-   DATABASE_URL=postgresql://username:password@localhost:5432/codecollab
-   JWT_SECRET=your_jwt_secret
-   FIREBASE_PROJECT_ID=your_firebase_project_id
-   FIREBASE_PRIVATE_KEY=your_firebase_private_key
-   FIREBASE_CLIENT_EMAIL=your_firebase_client_email
-   SENDGRID_API_KEY=your_sendgrid_api_key
-   GITHUB_API_TOKEN=your_github_token
-   ```
-
-4. **Set up the database**
-   ```bash
-   # Create PostgreSQL database
-   createdb codecollab
-
-   # Run migrations
-   cd server
-   npm run migrate
-   ```
-
-5. **Run the application**
-
-   Open two terminal windows:
-
-   **Terminal 1 - Frontend**
-   ```bash
-   cd client
-   npm start
-   ```
-   Frontend runs on `http://localhost:3000`
-
-   **Terminal 2 - Backend**
-   ```bash
-   cd server
-   npm run dev
-   ```
-   Backend runs on `http://localhost:5000`
+Frontend: `http://localhost:3000`  
+Backend: `http://localhost:5000`
 
 ---
 
