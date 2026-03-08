@@ -1,6 +1,6 @@
-# CodeCollab 🚀
+# CodeCollab
 
-> **Smart hackathon teammate discovery platform for Singapore university students**
+> A web platform for university students to connect and collaborate on hackathons
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-18.x-blue.svg)](https://reactjs.org/)
@@ -11,73 +11,38 @@
 
 ## 📖 Overview
 
-**CodeCollab** is a web platform that connects university students in Singapore for hackathon collaboration. We solve the critical pain point of finding reliable teammates with complementary skills beyond your immediate friend circle.
-
-### The Problem
-
-- **91.7%** of students find their friends too busy or not interested in hackathons
-- **70.8%** struggle to find teammates with complementary skills
-- **62.5%** can't judge the reliability of potential teammates they haven't worked with
-- **50%** don't know where to look beyond their friend group
-
-### Our Solution
-
-CodeCollab combines **smart skill-based matching**, **peer reviews**, and **hackathon discovery** in one platform — helping students find the right teammates, build trust, and discover opportunities.
+CodeCollab is a full-stack web application built for a university software engineering course project. The platform facilitates team formation and collaboration for hackathon events.
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-### 🎯 Smart Collaborator Matching
-- AI-powered matching algorithm that pairs users with **complementary** (not just similar) skills
-- Filter by programming languages, experience level, availability, and interests
-- Swipe-based interface for quick teammate discovery
-
-### ⭐ Peer Review System
-- Rate teammates on collaboration quality, technical skills, and reliability
-- Build trust before committing to a team
-- Transparent, verified reviews from past hackathons
-
-### 🏆 Curated Hackathon Discovery
-- Browse upcoming hackathons in Singapore with filters for difficulty, theme, and prizes
-- Integrated with Devpost and other hackathon platforms
-- Bookmark and track hackathons you're interested in
-
-### 💬 Real-Time Messaging
-- Direct messaging and group chats
-- Coordinate with potential teammates before forming a team
-- In-app notifications for invites and messages
-
-### 👤 Rich User Profiles
-- Showcase your skills, past projects, and GitHub repositories
-- Link to portfolio, LinkedIn, and social profiles
-- Display peer reviews and hackathon history
+- User authentication and profile management
+- Hackathon discovery and browsing
+- Team formation tools
+- Real-time messaging
+- Peer review system
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React.js 18.x** - Component-based UI framework
-- **React Router** - Client-side routing
-- **Axios** - HTTP client for API calls
-- **Socket.io Client** - Real-time messaging
-- **Tailwind CSS** - Utility-first styling
+- React.js 18.x
+- React Router
+- Axios
+- Socket.io Client
 
 ### Backend
-- **Node.js 18.x** - JavaScript runtime
-- **Express.js** - Web application framework
-- **PostgreSQL 15.x** - Relational database
-- **Sequelize** - ORM for database management
-- **Socket.io** - Real-time bidirectional communication
-- **Firebase Auth** - OAuth authentication (Google, GitHub)
+- Node.js 18.x
+- Express.js
+- PostgreSQL 15.x
+- Sequelize ORM
+- Socket.io
+- Firebase Authentication
 
-### Infrastructure & Tools
-- **Vercel** - Frontend hosting
-- **Vercel Serverless Functions** - Backend hosting (or alternative free-tier cloud)
-- **SendGrid** - Email notifications
-- **GitHub API** - Optional skill verification
-- **Devpost API** - Hackathon listings
+### Deployment
+- Vercel (Frontend & Backend)
 
 ---
 
@@ -213,32 +178,14 @@ CodeCollab/
 - [Database Schema](docs/database-schema.md)
 - [Deployment Guide](docs/deployment.md)
 
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+---Setup Guide](SETUP_GUIDE.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
 
 ---
 
 ## 👥 Team
 
-**G3T3 - Singapore Management University**
-
-- Developer 1
-- Developer 2
-- Developer 3
-- Developer 4
-- Developer 5
-
+**G3T3** - Singapore Management University  
 *IS112: Innovation and Digital Enterprise Project*
 
 ---
@@ -246,42 +193,3 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🎯 Project Roadmap
-
-### Phase 1: MVP (Weeks 1-11)
-- ✅ Market research and validation
-- ⬜ Core authentication (Google, GitHub OAuth)
-- ⬜ User profiles and skill tagging
-- ⬜ Basic matching algorithm
-- ⬜ Hackathon discovery integration
-- ⬜ Peer review system
-- ⬜ Real-time messaging
-- ⬜ Deployment on Vercel
-
-### Phase 2: Growth (Months 3-6)
-- ⬜ Advanced matching filters
-- ⬜ Profile analytics
-- ⬜ Email notifications
-- ⬜ Mobile-responsive optimizations
-- ⬜ SMU campus launch
-
-### Phase 3: Scale (Months 6-18)
-- ⬜ Expansion to NUS, NTU, SUTD
-- ⬜ Freemium features
-- ⬜ Hackathon organizer partnerships
-- ⬜ Corporate recruitment features
-
----
-
-## 📞 Contact
-
-For questions or support, please open an issue or contact us at:
-- **Email**: codecollab.sg@example.com
-- **Telegram**: @CodeCollabSG
-
----
-
-<p align="center">Made with ❤️ by students, for students</p>
