@@ -2,3 +2,14 @@
   min-height: 100vh;
 }
 
+/* Ensure smooth transitions for theme changes */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.15s;
+  transition-timing-function: ease-out;
+}
+
+/* Disable transitions on page load to prevent flash */
+.no-transitions * {
+  transition: none !important;
+}
