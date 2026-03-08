@@ -92,7 +92,7 @@ Backend: `http://localhost:5000`
 ## 👥 Team
 
 **G3T3** - Singapore Management University  
-*IS112: Innovation and Digital Enterprise Project*
+*CS206: Software Product Management*
 
 ---
 
