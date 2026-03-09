@@ -1,0 +1,269 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users & Skills ─────────────────────────────────────────
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  name            String
+  avatarUrl       String?
+  bio             String?
+  university      String?
+  graduationYear  Int?
+  githubUrl       String?
+  linkedinUrl     String?
+  experienceLevel ExperienceLevel @default(INTERMEDIATE)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  skills              UserSkill[]
+  preferences         UserPreference?
+  hackathonInterests  HackathonInterest[]
+  teamMemberships     TeamMember[]
+  sentInvites         TeamInvite[]       @relation("InviteSender")
+  receivedInvites     TeamInvite[]       @relation("InviteReceiver")
+  writtenReviews      Review[]           @relation("ReviewAuthor")
+  receivedReviews     Review[]           @relation("ReviewTarget")
+  messages            Message[]
+  notifications       Notification[]
+  notificationPrefs   NotificationPreference?
+  createdTeams        Team[]             @relation("TeamCreator")
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Skill {
+  id       String        @id @default(uuid())
+  name     String        @unique
+  category SkillCategory
+
+  users UserSkill[]
+}
+
+enum SkillCategory {
+  FRONTEND
+  BACKEND
+  MOBILE
+  DATA
+  DEVOPS
+  DESIGN
+  OTHER
+}
+
+model UserSkill {
+  userId           String
+  skillId          String
+  proficiencyLevel Int    @default(3) // 1-5 scale
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([userId, skillId])
+}
+
+model UserPreference {
+  id                      String   @id @default(uuid())
+  userId                  String   @unique
+  preferredExperienceLevels ExperienceLevel[]
+  preferredSkillCategories  SkillCategory[]
+  preferredTeamSize       Int?
+  lookingFor              LookingFor[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum LookingFor {
+  LEARN
+  COMPETE
+  NETWORK
+}
+
+// ─── Hackathons ─────────────────────────────────────────────
+
+model Hackathon {
+  id                   String   @id @default(uuid())
+  name                 String
+  description          String
+  url                  String?
+  imageUrl             String?
+  startDate            DateTime
+  endDate              DateTime
+  registrationDeadline DateTime?
+  location             String?
+  isOnline             Boolean  @default(false)
+  minTeamSize          Int      @default(1)
+  maxTeamSize          Int      @default(5)
+  difficultyLevel      ExperienceLevel @default(INTERMEDIATE)
+  tags                 String[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  interests HackathonInterest[]
+  teams     Team[]
+}
+
+model HackathonInterest {
+  userId      String
+  hackathonId String
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+
+  @@id([userId, hackathonId])
+}
+
+// ─── Teams ──────────────────────────────────────────────────
+
+model Team {
+  id          String     @id @default(uuid())
+  name        String
+  hackathonId String
+  createdById String
+  status      TeamStatus @default(FORMING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  hackathon Hackathon    @relation(fields: [hackathonId], references: [id])
+  createdBy User         @relation("TeamCreator", fields: [createdById], references: [id])
+  members   TeamMember[]
+  invites   TeamInvite[]
+  messages  Message[]
+  reviews   Review[]
+}
+
+enum TeamStatus {
+  FORMING
+  COMPLETE
+  COMPETING
+  FINISHED
+}
+
+model TeamMember {
+  teamId   String
+  userId   String
+  role     TeamRole @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([teamId, userId])
+}
+
+enum TeamRole {
+  LEADER
+  MEMBER
+}
+
+model TeamInvite {
+  id         String       @id @default(uuid())
+  teamId     String
+  fromUserId String
+  toUserId   String
+  status     InviteStatus @default(PENDING)
+  message    String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  team     Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  fromUser User @relation("InviteSender", fields: [fromUserId], references: [id])
+  toUser   User @relation("InviteReceiver", fields: [toUserId], references: [id])
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// ─── Reviews ────────────────────────────────────────────────
+
+model Review {
+  id           String       @id @default(uuid())
+  authorId     String
+  targetUserId String
+  teamId       String
+  rating       ReviewRating
+  content      String
+  isAnonymous  Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+
+  author     User @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetUser User @relation("ReviewTarget", fields: [targetUserId], references: [id])
+  team       Team @relation(fields: [teamId], references: [id])
+}
+
+enum ReviewRating {
+  POSITIVE
+  NEGATIVE
+}
+
+// ─── Messaging ──────────────────────────────────────────────
+
+model Message {
+  id        String      @id @default(uuid())
+  teamId    String
+  senderId  String
+  content   String
+  type      MessageType @default(TEXT)
+  createdAt DateTime    @default(now())
+
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sender User @relation(fields: [senderId], references: [id])
+
+  @@index([teamId, createdAt])
+}
+
+enum MessageType {
+  TEXT
+  SYSTEM
+}
+
+// ─── Notifications ──────────────────────────────────────────
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  type        NotificationType
+  title       String
+  content     String
+  relatedId   String?
+  relatedType String?
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+enum NotificationType {
+  TEAM_INVITE
+  HACKATHON_ALERT
+  REVIEW_RECEIVED
+  TEAM_UPDATE
+  SYSTEM
+}
+
+model NotificationPreference {
+  id                 String  @id @default(uuid())
+  userId             String  @unique
+  hackathonAlerts    Boolean @default(true)
+  teamInviteAlerts   Boolean @default(true)
+  reviewAlerts       Boolean @default(true)
+  emailNotifications Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

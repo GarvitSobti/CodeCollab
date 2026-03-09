@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="docs/logo.png" alt="CodeCollab" width="260"/>
-</p>
-
 # CodeCollab
 
 > Find the right people. Build something great.
@@ -129,7 +125,7 @@ CodeCollab/
     <td align="center">
       <a href="https://github.com/wzinl">
         <img src="https://github.com/wzinl.png" width="72" style="border-radius:12px"/><br/>
-        <sub><b>Wai Zin Lin</b></sub>
+        <sub><b>Zin</b></sub>
       </a>
     </td>
     <td align="center">
