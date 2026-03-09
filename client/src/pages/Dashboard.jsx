@@ -1,209 +1,136 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import Navigation from '../components/Navigation';
 
-const Dashboard = () => {
-  // Mock data - will be replaced with API calls
-  const stats = {
-    matches: 12,
-    hackathons: 5,
-    messages: 8,
-  };
+const members = [
+  { initials: 'JT', name: 'Jamie Tan', uni: 'NUS · CS Year 2', role: 'Frontend Lead', roleColor: { bg: 'rgba(255,107,107,0.1)', c: 'var(--coral)' }, gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', skills: ['React', 'TypeScript', 'Figma'], progress: 87 },
+  { initials: 'WM', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', role: 'ML Engineer', roleColor: { bg: 'rgba(66,165,245,0.1)', c: 'var(--sky)' }, gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', skills: ['Python', 'TensorFlow', 'AWS'], progress: 91 },
+  { initials: 'EH', name: 'Emily Huang', uni: 'SMU · IS Year 3', role: 'Full-Stack', roleColor: { bg: 'rgba(255,138,101,0.1)', c: 'var(--peach)' }, gradient: 'linear-gradient(135deg,#ff8a65,#ff6b6b)', skills: ['Node.js', 'React', 'PostgreSQL'], progress: 78 },
+  { initials: 'PS', name: 'Priya Sharma', uni: 'SMU · IS Year 2', role: 'Backend Dev', roleColor: { bg: 'rgba(179,157,219,0.1)', c: 'var(--lavender)' }, gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', skills: ['Node.js', 'Docker', 'PostgreSQL'], progress: 82 },
+];
 
-  const recentMatches = [
-    { id: 1, name: 'Alex Chen', avatar: null, university: 'NUS' },
-    { id: 2, name: 'Sarah Tan', avatar: null, university: 'NTU' },
-    { id: 3, name: 'Marcus Lim', avatar: null, university: 'SMU' },
-  ];
+const chatMessages = [
+  { initials: 'JT', gradient: 'linear-gradient(135deg,var(--coral),var(--peach))', text: 'Just pushed the swipe animation update! Check the PR when you can 🎨', self: false },
+  { initials: 'WM', gradient: 'linear-gradient(135deg,var(--sky),var(--lavender))', text: 'Matching algorithm v2 is up — accuracy went from 78% to 91%! 📈', self: false },
+  { initials: 'EH', gradient: 'linear-gradient(135deg,var(--peach),var(--coral))', text: "Amazing work both of you! I'll review the PRs tonight", self: true },
+  { initials: 'PS', gradient: 'linear-gradient(135deg,var(--lavender),var(--rose))', text: 'Database is optimized! Query time down to 12ms avg. Ready for the demo 🚀', self: false },
+];
 
-  const upcomingHackathons = [
-    {
-      id: 1,
-      name: 'NUS Hack&Roll 2026',
-      date: 'March 15-16, 2026',
-      participants: 500,
-    },
-    {
-      id: 2,
-      name: 'NTU AI Hackathon',
-      date: 'March 22-23, 2026',
-      participants: 300,
-    },
-  ];
+const sprint = [
+  { emoji: '✅', title: 'API Matching Algorithm', sub: 'Assigned to Wei Ming · Completed', bg: 'rgba(102,187,106,0.12)' },
+  { emoji: '🔄', title: 'Swipe UI Component', sub: 'Assigned to Jamie · In Progress', bg: 'rgba(255,138,101,0.12)' },
+  { emoji: '📝', title: 'Database Migration', sub: 'Assigned to Priya · In Progress', bg: 'rgba(179,157,219,0.12)' },
+  { emoji: '⏳', title: 'Pitch Deck', sub: 'Assigned to You · Pending', bg: 'rgba(66,165,245,0.12)' },
+];
 
+export default function Dashboard() {
   return (
-    <div className="min-h-screen pb-20">
+    <div style={{ minHeight: '100vh' }}>
+      <div className="mesh-bg">
+        <div className="mesh-blob blob-1" /><div className="mesh-blob blob-2" />
+        <div className="mesh-blob blob-3" /><div className="mesh-blob blob-4" />
+      </div>
+      <div className="noise" />
       <Navigation />
-      
-      <div className="pt-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-10"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">
-              Welcome back!
-            </h1>
-            <p className="text-lg text-gray-500 dark:text-gray-400">
-              Ready to find your next hackathon teammate?
+
+      <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
+
+        <div style={{ marginBottom: 36 }}>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.2, marginBottom: 8 }}>
+            🌿 Team <span className="flowing-text">Alpha</span>
+          </h1>
+          <p style={{ fontSize: '0.95rem', color: 'var(--text-body)' }}>
+            Manage your hackathon squad. Assign roles, track progress, and keep the conversation flowing.
+          </p>
+        </div>
+
+        {/* Team overview + sprint */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 32 }}>
+          <div style={{ padding: 24, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Team Alpha</h2>
+              <span style={{ padding: '3px 10px', borderRadius: 8, fontSize: '0.65rem', fontWeight: 700, background: 'rgba(102,187,106,0.12)', color: 'var(--mint)' }}>Active</span>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-body)', lineHeight: 1.6, marginBottom: 18 }}>
+              Building CodeCollab — the ultimate hackathon teammate finder for Singapore university students. Competing in SMU .Hack 2025.
             </p>
-          </motion.div>
-
-          {/* Quick Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10"
-          >
-            <div className="card-hover p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shadow-smooth">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
+            <div style={{ display: 'flex', gap: 20 }}>
+              {[{ val: '4', lbl: 'Members', c: 'var(--coral)' }, { val: '3', lbl: 'Hackathons', c: 'var(--mint)' }, { val: '★ 4.8', lbl: 'Avg Rating', c: 'var(--honey)' }, { val: '2', lbl: 'Wins', c: 'var(--sky)' }].map(s => (
+                <div key={s.lbl} style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: '1.3rem', fontWeight: 800, display: 'block', color: s.c }}>{s.val}</span>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--text-soft)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{s.lbl}</span>
                 </div>
-                <span className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">{stats.matches}</span>
-              </div>
-              <h3 className="text-base font-semibold mb-0.5 tracking-tight">Active Matches</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">People you've connected with</p>
+              ))}
             </div>
+          </div>
 
-            <div className="card-hover p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center shadow-smooth">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
+          <div style={{ padding: 24, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 16 }}>📋 Current Sprint</div>
+            {sprint.map(s => (
+              <div key={s.title} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 16, marginBottom: 8, background: 'var(--bg)' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>{s.emoji}</div>
+                <div>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 700 }}>{s.title}</h4>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--text-soft)', marginTop: 2 }}>{s.sub}</p>
                 </div>
-                <span className="text-3xl font-bold bg-gradient-to-br from-accent-500 to-accent-600 bg-clip-text text-transparent">{stats.hackathons}</span>
               </div>
-              <h3 className="text-base font-semibold mb-0.5 tracking-tight">Hackathons Joined</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Your hackathon journey</p>
-            </div>
+            ))}
+          </div>
+        </div>
 
-            <div className="card-hover p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-success-500 to-success-600 flex items-center justify-center shadow-smooth">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <span className="text-3xl font-bold bg-gradient-to-br from-success-500 to-success-600 bg-clip-text text-transparent">{stats.messages}</span>
-              </div>
-              <h3 className="text-base font-semibold mb-0.5 tracking-tight">Unread Messages</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">New conversations</p>
-            </div>
-          </motion.div>
-
-          {/* CTA Section - For You */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="card-hover p-8 md:p-10 mb-10 gradient-mesh border-primary-200/50 dark:border-primary-800/50"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-glow-indigo">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Discover Your Perfect Match</h2>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-6 text-base">
-              Find teammates and teams matched to your skills and interests. Swipe to connect!
-            </p>
-            <Link to="/discover" className="btn-primary inline-block">
-              Start Discovering
-            </Link>
-          </motion.div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Recent Matches */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+        {/* Members */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, letterSpacing: '-0.02em' }}>Team Members</h2>
+          <button style={{ padding: '8px 18px', borderRadius: 12, fontSize: '0.78rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.08)', background: 'var(--bg-card)', color: 'var(--text-soft)', cursor: 'pointer' }}>+ Invite Member</button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 32 }}>
+          {members.map(m => (
+            <div key={m.name} style={{ padding: 22, borderRadius: 20, background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)', transition: 'all 0.3s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-heavy)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-card)'; }}
             >
-              <div className="card-hover p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-xl font-bold tracking-tight">Recent Matches</h2>
-                  <Link to="/matches" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-semibold">
-                    View All
-                  </Link>
-                </div>
-                <div className="space-y-2">
-                  {recentMatches.map((match) => (
-                    <div
-                      key={match.id}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100/70 dark:hover:bg-gray-800/70 transition-all duration-150 cursor-pointer border border-transparent hover:border-gray-200/60 dark:hover:border-gray-700/60"
-                    >
-                      <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-smooth">
-                        <span className="text-white font-semibold text-sm">{match.name?.charAt(0)}</span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm tracking-tight">{match.name}</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{match.university}</p>
-                      </div>
-                      <button className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:scale-110 transition-transform">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: m.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1rem', color: 'white' }}>{m.initials}</div>
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>{m.name}</h4>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-soft)' }}>{m.uni}</p>
                 </div>
               </div>
-            </motion.div>
+              <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: 9, fontSize: '0.65rem', fontWeight: 700, marginBottom: 12, background: m.roleColor.bg, color: m.roleColor.c }}>{m.role}</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
+                {m.skills.map(s => (
+                  <span key={s} style={{ padding: '3px 9px', borderRadius: 8, fontSize: '0.62rem', fontWeight: 600, fontFamily: "'Fira Code', monospace", background: 'var(--bg)', color: 'var(--text-soft)' }}>{s}</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-soft)', whiteSpace: 'nowrap' }}>Contribution</span>
+                <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--bg)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${m.progress}%`, borderRadius: 3, background: 'linear-gradient(90deg, var(--peach), var(--coral))', transition: 'width 1s' }} />
+                </div>
+                <span style={{ fontSize: '0.65rem', fontWeight: 700, fontFamily: "'Fira Code', monospace", color: 'var(--coral)' }}>{m.progress}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
 
-            {/* Upcoming Hackathons */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="card-hover p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-xl font-bold tracking-tight">Upcoming Hackathons</h2>
-                  <Link to="/hackathons" className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-sm font-semibold">
-                    View All
-                  </Link>
-                </div>
-                <div className="space-y-3">
-                  {upcomingHackathons.map((hackathon) => (
-                    <div
-                      key={hackathon.id}
-                      className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800 dark:to-gray-800/50 hover:from-gray-100 hover:to-gray-100 dark:hover:from-gray-700 dark:hover:to-gray-700 transition-all duration-150 cursor-pointer border border-gray-200/40 dark:border-gray-700/40 hover:border-primary-300/60 dark:hover:border-primary-700/60 hover:shadow-smooth"
-                    >
-                      <h3 className="font-semibold text-sm mb-2.5 tracking-tight">{hackathon.name}</h3>
-                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          {hackathon.date}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                          {hackathon.participants} participants
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        {/* Team chat */}
+        <div style={{ padding: 28, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
+          <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 20 }}>💬 Team Chat</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {chatMessages.map((m, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, flexDirection: m.self ? 'row-reverse' : 'row' }}>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: m.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>{m.initials}</div>
+                <div style={{ padding: '10px 16px', borderRadius: 16, fontSize: '0.8rem', lineHeight: 1.6, maxWidth: '75%', background: m.self ? 'linear-gradient(135deg, var(--peach), var(--coral))' : 'var(--bg)', color: m.self ? 'white' : 'var(--text-body)', borderTopRightRadius: m.self ? 4 : 16, borderTopLeftRadius: m.self ? 16 : 4 }}>{m.text}</div>
               </div>
-            </motion.div>
+            ))}
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <input placeholder="Message Team Alpha..." style={{ flex: 1, padding: '12px 18px', borderRadius: 14, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.06)', fontFamily: 'inherit', fontSize: '0.8rem', color: 'var(--text-dark)', outline: 'none' }} />
+              <button style={{ width: 44, height: 44, borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, var(--peach), var(--coral))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}
