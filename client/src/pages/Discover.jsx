@@ -80,12 +80,12 @@ const Discover = () => {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-6"
+            className="text-center mb-8"
           >
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
-              Discover
+            <h1 className="text-5xl font-bold mb-3 tracking-tight">
+              <span className="gradient-primary bg-clip-text text-transparent">Discover</span>
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-500 dark:text-gray-400 text-base">
               Swipe right to like, left to pass
             </p>
           </motion.div>
@@ -94,25 +94,25 @@ const Discover = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex justify-center mb-8"
+            className="flex justify-center mb-10"
           >
-            <div className="card p-1 flex">
+            <div className="card p-1.5 flex shadow-smooth">
               <button
                 onClick={() => setMode('teammates')}
-                className={`px-6 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+                className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   mode === 'teammates'
-                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'gradient-primary text-white shadow-glow-indigo transform scale-[1.02]'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100/50 dark:hover:bg-gray-800/50'
                 }`}
               >
                 Find Teammates
               </button>
               <button
                 onClick={() => setMode('teams')}
-                className={`px-6 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+                className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-150 ${
                   mode === 'teams'
-                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'gradient-primary text-white shadow-glow-indigo transform scale-[1.02]'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100/50 dark:hover:bg-gray-800/50'
                 }`}
               >
                 Find Teams

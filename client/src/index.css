@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -12,36 +12,78 @@
   }
 
   body {
-    @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans;
+    @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-50 min-h-screen font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm;
+    @apply bg-white dark:bg-gray-900 border border-gray-200/60 dark:border-gray-800/60 rounded-2xl shadow-smooth;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-smooth-lg hover:border-gray-300/60 dark:hover:border-gray-700/60 transition-all duration-200;
+  }
+
+  .glass-effect {
+    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50;
   }
   
   .btn-primary {
-    @apply bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium py-3 px-6 rounded-xl 
-    hover:shadow-lg hover:shadow-primary-500/25 transform hover:scale-[1.02] transition-all duration-200 active:scale-[0.98];
+    @apply relative bg-gradient-to-br from-primary-600 via-primary-600 to-primary-700 text-white font-semibold 
+    py-2.5 px-5 rounded-xl shadow-smooth hover:shadow-glow-indigo transform hover:scale-[1.01] active:scale-[0.99]
+    transition-all duration-150 ease-out;
+  }
+
+  .btn-primary::before {
+    content: '';
+    @apply absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-150;
   }
   
   .btn-secondary {
-    @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium py-3 px-6 rounded-xl 
-    hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200;
+    @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold 
+    py-2.5 px-5 rounded-xl border border-gray-200 dark:border-gray-700 
+    hover:bg-gray-200 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600
+    transform hover:scale-[1.01] active:scale-[0.99] transition-all duration-150;
   }
 
   .btn-ghost {
-    @apply text-gray-600 dark:text-gray-400 font-medium py-2 px-4 rounded-lg
-    hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200;
+    @apply text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg
+    hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150;
+  }
+
+  .btn-action {
+    @apply w-14 h-14 rounded-full shadow-smooth-lg flex items-center justify-center
+    transform hover:scale-110 active:scale-95 transition-all duration-150;
   }
   
   .input-field {
-    @apply w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 
-    rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all;
+    @apply w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 
+    rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 
+    placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all duration-150;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .gradient-primary {
+    @apply bg-gradient-to-br from-primary-500 via-primary-600 to-accent-600;
+  }
+
+  .gradient-mesh {
+    background: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
   }
 }

@@ -26,7 +26,7 @@ const SwipeCard = ({ user, onSwipe }) => {
       animate={{ x: exitX }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      <div className="card h-full overflow-hidden relative">
+      <div className="card h-full overflow-hidden relative shadow-smooth-xl">
         {/* Profile Image */}
         <div className="absolute inset-0">
           {user.avatar ? (
@@ -54,7 +54,7 @@ const SwipeCard = ({ user, onSwipe }) => {
             {user.skills?.slice(0, 4).map((skill, idx) => (
               <span
                 key={idx}
-                className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm"
+                className="px-2.5 py-1 bg-white/15 backdrop-blur-md rounded-lg text-xs font-semibold border border-white/20"
               >
                 {skill}
               </span>
@@ -65,36 +65,30 @@ const SwipeCard = ({ user, onSwipe }) => {
           <p className="text-white/80 text-sm line-clamp-2">{user.bio}</p>
 
           {/* Stats */}
-          <div className="flex gap-6 mt-4 text-sm">
-            <div>
+          <div className="flex gap-3 mt-4 text-xs">
+            <div className="px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
               <span className="font-semibold">{user.hackathonsCount || 0}</span>
-              <span className="text-white/70 ml-1">Hackathons</span>
+              <span className="text-white/80 ml-1">Hackathons</span>
             </div>
-            <div>
+            <div className="px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
               <span className="font-semibold">{user.projectsCount || 0}</span>
-              <span className="text-white/70 ml-1">Projects</span>
+              <span className="text-white/80 ml-1">Projects</span>
             </div>
-            {user.rating && (
-              <div>
-                <span className="font-semibold">{user.rating.toFixed(1)}</span>
-                <span className="text-white/70 ml-1">Rating</span>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Swipe indicators */}
         <motion.div
-          className="absolute top-8 right-8 bg-green-500 text-white font-bold text-2xl px-6 py-3 rounded-xl border-4 border-white rotate-12"
+          className="absolute top-6 right-6 bg-success-500 text-white font-bold text-xl px-5 py-2.5 rounded-xl shadow-smooth-lg rotate-12"
           style={{ opacity: useTransform(x, [0, 100], [0, 1]) }}
         >
-          LIKE
+          ✓ LIKE
         </motion.div>
         <motion.div
-          className="absolute top-8 left-8 bg-red-500 text-white font-bold text-2xl px-6 py-3 rounded-xl border-4 border-white -rotate-12"
+          className="absolute top-6 left-6 bg-danger-500 text-white font-bold text-xl px-5 py-2.5 rounded-xl shadow-smooth-lg -rotate-12"
           style={{ opacity: useTransform(x, [-100, 0], [1, 0]) }}
         >
-          PASS
+          ✕ PASS
         </motion.div>
       </div>
     </motion.div>

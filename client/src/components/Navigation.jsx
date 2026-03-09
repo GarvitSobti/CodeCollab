@@ -58,17 +58,17 @@ const Navigation = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
+    <nav className="fixed top-0 left-0 right-0 z-50 glass-effect shadow-smooth">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/dashboard" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center transform group-hover:scale-105 transition-transform duration-200">
+          <Link to="/dashboard" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center transform group-hover:scale-105 transition-all duration-150 shadow-smooth">
               <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+            <span className="text-xl font-bold gradient-primary bg-clip-text text-transparent tracking-tight">
               CodeCollab
             </span>
           </Link>
@@ -79,19 +79,19 @@ const Navigation = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 ${
+                className={`relative px-3.5 py-2 rounded-xl transition-all duration-150 flex items-center gap-2 ${
                   isActive(item.path)
-                    ? 'text-primary-600 dark:text-primary-400'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'text-primary-600 dark:text-primary-400 font-semibold'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium'
                 }`}
               >
                 {item.icon}
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className="text-sm">{item.label}</span>
                 {isActive(item.path) && (
                   <motion.div
                     layoutId="activeNav"
-                    className="absolute inset-0 bg-primary-50 dark:bg-primary-900/20 rounded-lg -z-10"
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className="absolute inset-0 bg-primary-100/60 dark:bg-primary-900/30 rounded-xl -z-10 border border-primary-200/60 dark:border-primary-800/60"
+                    transition={{ type: 'spring', stiffness: 380, damping: 35 }}
                   />
                 )}
               </Link>
@@ -103,7 +103,7 @@ const Navigation = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-105 transition-all duration-150 shadow-smooth"
             >
               {theme === 'light' ? (
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@ const Navigation = () => {
             </button>
 
             {/* User Avatar */}
-            <button className="w-9 h-9 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center hover:scale-105 transition-transform duration-200">
+            <button className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center hover:scale-105 transition-all duration-150 shadow-smooth">
               <span className="text-sm font-semibold text-white">JD</span>
             </button>
           </div>
