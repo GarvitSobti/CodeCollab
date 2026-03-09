@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 
-const SwipeCard = ({ user, onSwipe, isLast }) => {
+const SwipeCard = ({ user, onSwipe }) => {
   const [exitX, setExitX] = useState(0);
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-25, 25]);
+  const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
   
   const handleDragEnd = (_, info) => {
@@ -26,36 +26,35 @@ const SwipeCard = ({ user, onSwipe, isLast }) => {
       animate={{ x: exitX }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      <div className="glass-card h-full p-6 flex flex-col justify-between relative overflow-hidden">
-        {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-dark-900/90 via-dark-900/50 to-transparent z-0" />
-        
+      <div className="card h-full overflow-hidden relative">
         {/* Profile Image */}
-        <div className="relative z-10 flex-1 flex items-center justify-center">
-          <div className="w-48 h-48 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 p-1">
-            <div className="w-full h-full rounded-full bg-dark-800 flex items-center justify-center overflow-hidden">
-              {user.avatar ? (
-                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-6xl">{user.name?.charAt(0)}</span>
-              )}
+        <div className="absolute inset-0">
+          {user.avatar ? (
+            <img 
+              src={user.avatar} 
+              alt={user.name} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center">
+              <span className="text-8xl text-white font-bold">{user.name?.charAt(0)}</span>
             </div>
-          </div>
+          )}
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         </div>
 
-        {/* User Info */}
-        <div className="relative z-10 space-y-4">
-          <div>
-            <h2 className="text-3xl font-bold mb-1">{user.name}</h2>
-            <p className="text-primary-400 text-lg">{user.university || 'NUS'}</p>
-          </div>
+        {/* User Info - Bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+          <h2 className="text-3xl font-bold mb-1">{user.name}</h2>
+          <p className="text-white/90 text-lg mb-3">{user.university || 'NUS'}</p>
 
           {/* Skills */}
-          <div className="flex flex-wrap gap-2">
-            {user.skills?.slice(0, 6).map((skill, idx) => (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {user.skills?.slice(0, 4).map((skill, idx) => (
               <span
                 key={idx}
-                className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20"
+                className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm"
               >
                 {skill}
               </span>
@@ -63,39 +62,39 @@ const SwipeCard = ({ user, onSwipe, isLast }) => {
           </div>
 
           {/* Bio */}
-          <p className="text-dark-300 line-clamp-3">{user.bio || 'No bio available'}</p>
+          <p className="text-white/80 text-sm line-clamp-2">{user.bio}</p>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-primary-400">{user.hackathonsCount || 0}</p>
-              <p className="text-xs text-dark-400">Hackathons</p>
+          <div className="flex gap-6 mt-4 text-sm">
+            <div>
+              <span className="font-semibold">{user.hackathonsCount || 0}</span>
+              <span className="text-white/70 ml-1">Hackathons</span>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-accent-400">{user.projectsCount || 0}</p>
-              <p className="text-xs text-dark-400">Projects</p>
+            <div>
+              <span className="font-semibold">{user.projectsCount || 0}</span>
+              <span className="text-white/70 ml-1">Projects</span>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-green-400">
-                {user.rating ? user.rating.toFixed(1) : 'N/A'}
-              </p>
-              <p className="text-xs text-dark-400">Rating</p>
-            </div>
+            {user.rating && (
+              <div>
+                <span className="font-semibold">{user.rating.toFixed(1)}</span>
+                <span className="text-white/70 ml-1">Rating</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Swipe indicators (appear on drag) */}
+        {/* Swipe indicators */}
         <motion.div
-          className="absolute top-8 left-8 text-6xl font-bold text-green-400 rotate-[-20deg] opacity-0"
+          className="absolute top-8 right-8 bg-green-500 text-white font-bold text-2xl px-6 py-3 rounded-xl border-4 border-white rotate-12"
           style={{ opacity: useTransform(x, [0, 100], [0, 1]) }}
         >
-          MATCH
+          LIKE
         </motion.div>
         <motion.div
-          className="absolute top-8 right-8 text-6xl font-bold text-red-400 rotate-[20deg] opacity-0"
+          className="absolute top-8 left-8 bg-red-500 text-white font-bold text-2xl px-6 py-3 rounded-xl border-4 border-white -rotate-12"
           style={{ opacity: useTransform(x, [-100, 0], [1, 0]) }}
         >
-          NOPE
+          PASS
         </motion.div>
       </div>
     </motion.div>
@@ -103,3 +102,4 @@ const SwipeCard = ({ user, onSwipe, isLast }) => {
 };
 
 export default SwipeCard;
+

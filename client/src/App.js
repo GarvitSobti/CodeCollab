@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css';
 
 // Pages
@@ -15,19 +16,21 @@ const Messages = () => <div><h1>Messages</h1></div>;
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/discover" element={<Discover />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/hackathons" element={<Hackathons />} />
-          <Route path="/messages" element={<Messages />} />
-        </Routes>
-      </div>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/discover" element={<Discover />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/hackathons" element={<Hackathons />} />
+            <Route path="/messages" element={<Messages />} />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 

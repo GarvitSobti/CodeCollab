@@ -11,10 +11,10 @@ const Discover = () => {
     {
       id: 1,
       name: 'Alex Chen',
-      university: 'NUS',
+      university: 'National University of Singapore',
       avatar: null,
       bio: 'Full-stack developer passionate about AI and ML. Looking for teammates to build innovative solutions at hackathons!',
-      skills: ['React', 'Node.js', 'Python', 'TensorFlow', 'AWS', 'Docker'],
+      skills: ['React', 'Node.js', 'Python', 'TensorFlow'],
       hackathonsCount: 8,
       projectsCount: 15,
       rating: 4.8,
@@ -22,10 +22,10 @@ const Discover = () => {
     {
       id: 2,
       name: 'Sarah Tan',
-      university: 'NTU',
+      university: 'Nanyang Technological University',
       avatar: null,
       bio: 'UI/UX designer & frontend dev. Love creating beautiful, user-friendly interfaces. Let\'s build something amazing together!',
-      skills: ['Figma', 'React', 'TypeScript', 'Tailwind', 'Animation'],
+      skills: ['Figma', 'React', 'TypeScript', 'Tailwind'],
       hackathonsCount: 5,
       projectsCount: 12,
       rating: 4.9,
@@ -33,10 +33,10 @@ const Discover = () => {
     {
       id: 3,
       name: 'Marcus Lim',
-      university: 'SMU',
+      university: 'Singapore Management University',
       avatar: null,
       bio: 'Backend engineer & DevOps enthusiast. Experienced in building scalable systems and cloud infrastructure.',
-      skills: ['Go', 'Kubernetes', 'PostgreSQL', 'Redis', 'gRPC'],
+      skills: ['Go', 'Kubernetes', 'PostgreSQL', 'Redis'],
       hackathonsCount: 12,
       projectsCount: 20,
       rating: 4.7,
@@ -44,10 +44,10 @@ const Discover = () => {
     {
       id: 4,
       name: 'Priya Kumar',
-      university: 'NUS',
+      university: 'National University of Singapore',
       avatar: null,
       bio: 'Data scientist & ML engineer. Passionate about solving real-world problems with AI and analytics.',
-      skills: ['Python', 'PyTorch', 'Pandas', 'SQL', 'Jupyter'],
+      skills: ['Python', 'PyTorch', 'Pandas', 'SQL'],
       hackathonsCount: 6,
       projectsCount: 10,
       rating: 4.6,
@@ -58,28 +58,13 @@ const Discover = () => {
     {
       id: 1,
       name: 'AI Innovators',
-      university: 'NUS',
+      university: 'National University of Singapore',
       avatar: null,
       bio: 'Building an AI-powered study assistant. Looking for a frontend developer to join our team!',
       skills: ['Python', 'TensorFlow', 'React', 'Firebase'],
       hackathonsCount: 3,
       projectsCount: 1,
       rating: 4.5,
-      membersCount: 3,
-      lookingFor: 'Frontend Developer',
-    },
-    {
-      id: 2,
-      name: 'GreenTech Squad',
-      university: 'NTU',
-      avatar: null,
-      bio: 'Creating a sustainability tracking app. Need a backend engineer with database experience.',
-      skills: ['React Native', 'Node.js', 'MongoDB'],
-      hackathonsCount: 2,
-      projectsCount: 1,
-      rating: 4.7,
-      membersCount: 2,
-      lookingFor: 'Backend Engineer',
     },
   ];
 
@@ -89,19 +74,19 @@ const Discover = () => {
     <div className="min-h-screen pb-20">
       <Navigation />
       
-      <div className="pt-24 px-4">
+      <div className="pt-20 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
+            className="text-center mb-6"
           >
-            <h1 className="text-5xl font-bold mb-3">
-              <span className="gradient-text">For You</span>
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+              Discover
             </h1>
-            <p className="text-dark-300 text-lg">
-              Swipe right to connect, left to pass
+            <p className="text-gray-600 dark:text-gray-400">
+              Swipe right to like, left to pass
             </p>
           </motion.div>
 
@@ -109,28 +94,28 @@ const Discover = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex justify-center mb-12"
+            className="flex justify-center mb-8"
           >
-            <div className="glass-card p-1 flex">
+            <div className="card p-1 flex">
               <button
                 onClick={() => setMode('teammates')}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+                className={`px-6 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                   mode === 'teammates'
-                    ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white'
-                    : 'text-dark-300 hover:text-white'
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
                 }`}
               >
-                🤝 Find Teammates
+                Find Teammates
               </button>
               <button
                 onClick={() => setMode('teams')}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
+                className={`px-6 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                   mode === 'teams'
-                    ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white'
-                    : 'text-dark-300 hover:text-white'
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
                 }`}
               >
-                👥 Find Teams
+                Find Teams
               </button>
             </div>
           </motion.div>
@@ -141,35 +126,9 @@ const Discover = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="mb-20"
+            className="mb-24"
           >
             <SwipeContainer users={currentData} type={mode} />
-          </motion.div>
-
-          {/* Instructions */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="max-w-md mx-auto mt-16 text-center"
-          >
-            <div className="glass-card p-6">
-              <h3 className="text-lg font-semibold mb-4">How it works</h3>
-              <div className="space-y-3 text-sm text-dark-300">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">👈</span>
-                  <p className="text-left">Swipe left or tap ❌ to pass</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">👉</span>
-                  <p className="text-left">Swipe right or tap ✅ to match</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">↩️</span>
-                  <p className="text-left">Tap undo to review your last swipe</p>
-                </div>
-              </div>
-            </div>
           </motion.div>
         </div>
       </div>
