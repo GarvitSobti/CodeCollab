@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.png" alt="CodeCollab" width="260"/>
+</p>
+
 # CodeCollab
 
 > Find the right people. Build something great.
