@@ -30,6 +30,11 @@ export const adminApi = {
     return data;
   },
 
+  async getAuditLogs() {
+    const { data } = await http.get('/analytics/audit/logs');
+    return data;
+  },
+
   async listHackathons() {
     const { data } = await http.get('/hackathons');
     return data;

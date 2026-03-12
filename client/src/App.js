@@ -14,6 +14,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminHackathons from './pages/admin/AdminHackathons';
 import AdminHackathonForm from './pages/admin/AdminHackathonForm';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminCompanyProfile from './pages/admin/AdminCompanyProfile';
+import AdminAuditLogs from './pages/admin/AdminAuditLogs';
 import AdminRouteGuard from './components/admin/AdminRouteGuard';
 
 function App() {
@@ -68,6 +70,22 @@ function App() {
             element={(
               <AdminRouteGuard>
                 <AdminAnalytics />
+              </AdminRouteGuard>
+            )}
+          />
+          <Route
+            path="/admin/company"
+            element={(
+              <AdminRouteGuard roles={['SUPER_ADMIN', 'EDITOR']}>
+                <AdminCompanyProfile />
+              </AdminRouteGuard>
+            )}
+          />
+          <Route
+            path="/admin/audit-logs"
+            element={(
+              <AdminRouteGuard>
+                <AdminAuditLogs />
               </AdminRouteGuard>
             )}
           />

@@ -13,8 +13,16 @@ export default function AdminAnalytics() {
   const [skills, setSkills] = useState(null);
   const [engagement, setEngagement] = useState(null);
   const [talent, setTalent] = useState(null);
+  const [hackathons, setHackathons] = useState([]);
+  const [compareId, setCompareId] = useState('');
+  const [compareRegistrations, setCompareRegistrations] = useState(null);
+  const [compareEngagement, setCompareEngagement] = useState(null);
 
   useEffect(() => {
+    adminApi.listHackathons().then((response) => {
+      setHackathons((response.data || []).filter((item) => item.id !== id));
+    });
+
     Promise.all([
       adminApi.getRegistrationsAnalytics(id),
       adminApi.getDemographicsAnalytics(id),
@@ -29,6 +37,22 @@ export default function AdminAnalytics() {
       setTalent(t.data);
     });
   }, [id]);
+
+  useEffect(() => {
+    if (!compareId) {
+      setCompareRegistrations(null);
+      setCompareEngagement(null);
+      return;
+    }
+
+    Promise.all([
+      adminApi.getRegistrationsAnalytics(compareId),
+      adminApi.getEngagementAnalytics(compareId)
+    ]).then(([registrationsResponse, engagementResponse]) => {
+      setCompareRegistrations(registrationsResponse.data);
+      setCompareEngagement(engagementResponse.data);
+    });
+  }, [compareId]);
 
   const topMetrics = useMemo(() => {
     if (!registrations || !engagement) return [];
@@ -53,7 +77,13 @@ export default function AdminAnalytics() {
     <AdminLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <h2 style={{ fontSize: '1.35rem' }}>Analytics</h2>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <select value={compareId} onChange={(event) => setCompareId(event.target.value)} style={{ ...buttonLinkStyle, minWidth: 220 }}>
+            <option value="">Compare with another hackathon</option>
+            {hackathons.map((hackathon) => (
+              <option key={hackathon.id} value={hackathon.id}>{hackathon.eventName}</option>
+            ))}
+          </select>
           <a href={adminApi.exportParticipantsUrl(id, 'csv')} target="_blank" rel="noreferrer" style={buttonLinkStyle}>Export CSV</a>
           <a href={adminApi.exportParticipantsUrl(id, 'pdf')} target="_blank" rel="noreferrer" style={buttonLinkStyle}>Export PDF</a>
         </div>
@@ -97,6 +127,21 @@ export default function AdminAnalytics() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginTop: 12 }}>
         <section style={panelStyle}>
+          <h3 style={titleStyle}>Year of Study</h3>
+          <SimpleBarChart data={demographics.yearBreakdown} valueKey="value" labelKey="label" color="#42a5f5" />
+        </section>
+        <section style={panelStyle}>
+          <h3 style={titleStyle}>Team vs Individual</h3>
+          <SimpleBarChart data={demographics.teamVsIndividual} valueKey="value" labelKey="label" color="#ff8a65" />
+        </section>
+        <section style={panelStyle}>
+          <h3 style={titleStyle}>Stack Preferences</h3>
+          <SimpleBarChart data={skills.stackPreferences} valueKey="value" labelKey="stack" color="#ffca28" />
+        </section>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginTop: 12 }}>
+        <section style={panelStyle}>
           <h3 style={titleStyle}>Engagement</h3>
           <p style={listText}>Active Participants: {engagement.activeParticipants}%</p>
           <p style={listText}>Messages/Day: {engagement.messageFrequencyPerDay}</p>
@@ -120,6 +165,36 @@ export default function AdminAnalytics() {
           <p style={listText}>Avg Skill Level: {skills.averageSkillLevel}</p>
         </section>
       </div>
+
+      {compareRegistrations && compareEngagement && (
+        <div style={{ ...panelStyle, marginTop: 12 }}>
+          <h3 style={titleStyle}>Comparative Snapshot</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 10 }}>
+            <CompareCard
+              label="Registrations"
+              primary={registrations.totals.signups}
+              secondary={compareRegistrations.totals.signups}
+            />
+            <CompareCard
+              label="Views"
+              primary={registrations.totals.views}
+              secondary={compareRegistrations.totals.views}
+            />
+            <CompareCard
+              label="Profile Completion"
+              primary={engagement.profileCompletionRate}
+              secondary={compareEngagement.profileCompletionRate}
+              suffix="%"
+            />
+            <CompareCard
+              label="Team Formation"
+              primary={engagement.teamFormationProgress}
+              secondary={compareEngagement.teamFormationProgress}
+              suffix="%"
+            />
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
@@ -240,6 +315,21 @@ function SimpleBarChart({ data, valueKey, labelKey, color }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function CompareCard({ label, primary, secondary, suffix = '' }) {
+  const diff = primary - secondary;
+  const positive = diff >= 0;
+  return (
+    <div style={{ border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, padding: 12, background: '#fcfcfc' }}>
+      <div style={{ fontSize: '0.72rem', color: 'var(--text-soft)' }}>{label}</div>
+      <div style={{ fontSize: '1rem', fontWeight: 700 }}>{primary}{suffix}</div>
+      <div style={{ fontSize: '0.76rem', color: 'var(--text-soft)' }}>Compared event: {secondary}{suffix}</div>
+      <div style={{ fontSize: '0.78rem', color: positive ? 'var(--mint)' : 'var(--coral)', marginTop: 4 }}>
+        {positive ? '+' : ''}{diff}{suffix}
+      </div>
     </div>
   );
 }

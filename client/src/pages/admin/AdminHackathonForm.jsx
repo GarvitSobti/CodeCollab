@@ -15,6 +15,9 @@ const initialForm = {
   teamSizeMax: 5,
   categoriesText: '',
   registrationRequirementsText: '',
+  prizesText: '',
+  sponsorsText: '',
+  faqText: '',
   status: 'DRAFT'
 };
 
@@ -43,6 +46,9 @@ export default function AdminHackathonForm() {
         teamSizeMax: hackathon.teamSizeMax || 5,
         categoriesText: (hackathon.categories || []).join(', '),
         registrationRequirementsText: (hackathon.registrationRequirements || []).join(', '),
+        prizesText: (hackathon.prizes || []).map((item) => `${item.title}:${item.amount}`).join(', '),
+        sponsorsText: (hackathon.sponsors || []).map((item) => `${item.name}|${item.link}`).join(', '),
+        faqText: (hackathon.faq || []).map((item) => `${item.question}?${item.answer}`).join(' || '),
         status: hackathon.status || 'DRAFT'
       });
     });
@@ -69,9 +75,30 @@ export default function AdminHackathonForm() {
         categories: form.categoriesText.split(',').map((item) => item.trim()).filter(Boolean),
         registrationRequirements: form.registrationRequirementsText.split(',').map((item) => item.trim()).filter(Boolean),
         status: form.status,
-        prizes: [],
-        sponsors: [],
-        faq: []
+        prizes: form.prizesText
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .map((item) => {
+            const [title, amount] = item.split(':').map((value) => value.trim());
+            return { title, amount: Number(amount || 0) };
+          }),
+        sponsors: form.sponsorsText
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .map((item) => {
+            const [name, link] = item.split('|').map((value) => value.trim());
+            return { name, link, logoUrl: '' };
+          }),
+        faq: form.faqText
+          .split('||')
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .map((item) => {
+            const [question, answer] = item.split('?').map((value) => value.trim());
+            return { question: `${question}?`, answer: answer || '' };
+          })
       };
 
       if (isEdit) {
@@ -190,6 +217,39 @@ export default function AdminHackathonForm() {
             style={inputStyle}
           />
           <p style={helperStyle}>Tip: keep requirements concise and measurable for faster approvals.</p>
+        </div>
+
+        <div style={sectionStyle}>
+          <h3 style={sectionTitleStyle}>Prizes, Sponsors and FAQ</h3>
+          <p style={sectionDescriptionStyle}>Capture the additional event context companies need before publishing. Simple text formats are supported for now.</p>
+
+          <label style={labelStyle}>Prizes</label>
+          <input
+            placeholder="e.g. Grand Prize:8000, Best UX:2000"
+            value={form.prizesText}
+            onChange={(event) => handleChange('prizesText', event.target.value)}
+            style={inputStyle}
+          />
+          <p style={helperStyle}>Format each prize as title:amount.</p>
+
+          <label style={{ ...labelStyle, marginTop: 8 }}>Sponsors</label>
+          <input
+            placeholder="e.g. CloudNova|https://cloudnova.example, MediStack|https://medistack.example"
+            value={form.sponsorsText}
+            onChange={(event) => handleChange('sponsorsText', event.target.value)}
+            style={inputStyle}
+          />
+          <p style={helperStyle}>Format each sponsor as name|link.</p>
+
+          <label style={{ ...labelStyle, marginTop: 8 }}>FAQ</label>
+          <textarea
+            placeholder="e.g. Who can join? University students only || Is submission required? Yes, before the final showcase"
+            value={form.faqText}
+            onChange={(event) => handleChange('faqText', event.target.value)}
+            rows={3}
+            style={inputStyle}
+          />
+          <p style={helperStyle}>Separate each FAQ item with || and use one ? to split question and answer.</p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

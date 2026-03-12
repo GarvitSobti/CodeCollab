@@ -72,6 +72,36 @@ const hackathons = [
     updatedAt: new Date().toISOString(),
     archivedAt: null,
     clonedFromId: null
+  },
+  {
+    id: 'hack-002',
+    companyId: 'comp-001',
+    eventName: 'InnovateX HealthSprint 2026',
+    description: 'Prototype digital health tools for inclusive care access.',
+    registrationStartDate: '2026-05-01',
+    registrationEndDate: '2026-05-25',
+    hackathonStartDate: '2026-06-06',
+    hackathonEndDate: '2026-06-08',
+    venue: 'VIRTUAL',
+    teamSizeMin: 1,
+    teamSizeMax: 4,
+    categories: ['HealthTech', 'AI/ML', 'Accessibility'],
+    prizes: [
+      { title: 'Winner', amount: 6000 },
+      { title: 'Best UX', amount: 2000 }
+    ],
+    sponsors: [
+      { name: 'MediStack', logoUrl: '', link: 'https://medistack.example' }
+    ],
+    faq: [
+      { question: 'Can non-medical students join?', answer: 'Yes, cross-functional teams are encouraged.' }
+    ],
+    registrationRequirements: ['Student ID', 'LinkedIn profile'],
+    status: HACKATHON_STATUS.DRAFT,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    archivedAt: null,
+    clonedFromId: null
   }
 ];
 
@@ -142,6 +172,72 @@ const participantSnapshotByHackathon = {
       ],
       skillDiversityScore: 8.1,
       mostActiveParticipants: 27
+    }
+  },
+  'hack-002': {
+    registrationsByDay: [
+      { date: '2026-05-01', registrations: 8, views: 150, clicks: 54 },
+      { date: '2026-05-02', registrations: 11, views: 190, clicks: 66 },
+      { date: '2026-05-03', registrations: 16, views: 220, clicks: 91 },
+      { date: '2026-05-04', registrations: 18, views: 265, clicks: 104 },
+      { date: '2026-05-05', registrations: 22, views: 300, clicks: 119 }
+    ],
+    demographics: {
+      universityDistribution: [
+        { name: 'NUS', value: 22 },
+        { name: 'NTU', value: 24 },
+        { name: 'SMU', value: 26 },
+        { name: 'SUTD', value: 18 },
+        { name: 'Others', value: 10 }
+      ],
+      yearBreakdown: [
+        { label: 'Year 1', value: 14 },
+        { label: 'Year 2', value: 27 },
+        { label: 'Year 3', value: 34 },
+        { label: 'Year 4', value: 25 }
+      ],
+      majorBreakdown: [
+        { label: 'Computer Science', value: 33 },
+        { label: 'Biomedical Engineering', value: 23 },
+        { label: 'Information Systems', value: 26 },
+        { label: 'Design', value: 18 }
+      ],
+      teamVsIndividual: [
+        { label: 'Team', value: 61 },
+        { label: 'Individual', value: 39 }
+      ]
+    },
+    skills: {
+      commonSkills: [
+        { skill: 'Python', value: 52 },
+        { skill: 'Figma', value: 31 },
+        { skill: 'React', value: 29 },
+        { skill: 'SQL', value: 27 },
+        { skill: 'TensorFlow', value: 24 }
+      ],
+      averageSkillLevel: 3.3,
+      gapAreas: ['Healthcare Domain Expertise', 'Data Visualization'],
+      stackPreferences: [
+        { stack: 'Python + Streamlit', value: 32 },
+        { stack: 'React + Node.js', value: 29 },
+        { stack: 'Mobile First', value: 21 },
+        { stack: 'Other', value: 18 }
+      ]
+    },
+    engagement: {
+      profileCompletionRate: 76,
+      teamFormationProgress: 54,
+      activeParticipants: 69,
+      messageFrequencyPerDay: 301
+    },
+    talentInsights: {
+      topPerformers: [
+        { name: 'Sara Lim', score: 94 },
+        { name: 'Joel Goh', score: 89 },
+        { name: 'Aisha Rahman', score: 88 }
+      ],
+      skillDiversityScore: 7.4,
+      mostActiveParticipants: 19
     }
   }
 };

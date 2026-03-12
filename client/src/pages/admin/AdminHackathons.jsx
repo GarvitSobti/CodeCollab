@@ -45,6 +45,7 @@ export default function AdminHackathons() {
             <div>
               <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{hackathon.eventName}</div>
               <div style={{ color: 'var(--text-soft)', fontSize: '0.75rem' }}>{hackathon.registrationStartDate} to {hackathon.registrationEndDate}</div>
+              <div style={{ color: 'var(--text-soft)', fontSize: '0.72rem', marginTop: 3 }}>{(hackathon.categories || []).join(' · ')}</div>
             </div>
             <div style={{ fontSize: '0.78rem' }}>{hackathon.status}</div>
             <div style={{ fontSize: '0.78rem' }}>{hackathon.venue}</div>
