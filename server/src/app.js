@@ -9,10 +9,34 @@ const socketIo = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
+const adminAuthRoutes = require('./routes/adminAuthRoutes');
+const adminHackathonRoutes = require('./routes/adminHackathonRoutes');
+const adminAnalyticsRoutes = require('./routes/adminAnalyticsRoutes');
+
+const allowedOrigins = [
+  process.env.CORS_ORIGIN,
+  process.env.SOCKET_CORS_ORIGIN,
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001'
+].filter(Boolean);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  return allowedOrigins.includes(origin);
+}
+
 // Socket.io setup
 const io = socketIo(server, {
   cors: {
-    origin: process.env.SOCKET_CORS_ORIGIN || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('CORS not allowed'));
+    },
     methods: ['GET', 'POST']
   }
 });
@@ -20,7 +44,13 @@ const io = socketIo(server, {
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error('CORS not allowed'));
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -54,6 +84,9 @@ app.get('/', (req, res) => {
 // app.use('/api/matching', matchingRoutes);
 // app.use('/api/reviews', reviewRoutes);
 // app.use('/api/messages', messageRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/admin/hackathons', adminHackathonRoutes);
+app.use('/api/admin/analytics', adminAnalyticsRoutes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
