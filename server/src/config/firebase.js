@@ -9,9 +9,11 @@ const serviceAccount = {
   client_email: process.env.FIREBASE_CLIENT_EMAIL
 };
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+}
 
 console.log('✅ Firebase Admin initialized successfully');
 
