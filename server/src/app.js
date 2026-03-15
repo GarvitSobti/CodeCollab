@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const http = require('http');
 const socketIo = require('socket.io');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -40,15 +41,15 @@ app.get('/', (req, res) => {
 });
 
 // Import routes here (uncomment when routes are created)
-// const authRoutes = require('./routes/authRoutes');
 // const userRoutes = require('./routes/userRoutes');
 // const hackathonRoutes = require('./routes/hackathonRoutes');
 // const matchingRoutes = require('./routes/matchingRoutes');
 // const reviewRoutes = require('./routes/reviewRoutes');
 // const messageRoutes = require('./routes/messageRoutes');
 
+app.use('/api/v1/auth', authRoutes);
+
 // Use routes (uncomment when routes are created)
-// app.use('/api/auth', authRoutes);
 // app.use('/api/users', userRoutes);
 // app.use('/api/hackathons', hackathonRoutes);
 // app.use('/api/matching', matchingRoutes);
