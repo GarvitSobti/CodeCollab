@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
 import Navigation from '../components/Navigation';
 
+const memberGradients = {
+  JT: 'linear-gradient(135deg,#ff6b6b,#ff8a65)',
+  WM: 'linear-gradient(135deg,#42a5f5,#1e88e5)',
+  PS: 'linear-gradient(135deg,#b39ddb,#7e57c2)',
+};
+
 const conversations = [
+  { initials: 'TA', name: 'Team Alpha', team: true, preview: 'Database is optimized! Query time down to 12ms avg.', time: '5m', unread: 2, online: true, gradient: 'linear-gradient(135deg,var(--accent),var(--peach))', messages: [
+    { text: 'Just pushed the swipe animation update! Check the PR when you can \u{1f3a8}', self: false, time: '10:30', sender: 'JT' },
+    { text: 'Matching algorithm v2 is up \u2014 accuracy went from 78% to 91%! \u{1f4c8}', self: false, time: '10:35', sender: 'WM' },
+    { text: "Amazing work both of you! I'll review the PRs tonight", self: true, time: '10:40' },
+    { text: 'Database is optimized! Query time down to 12ms avg. Ready for the demo \u{1f680}', self: false, time: '10:45', sender: 'PS' },
+  ]},
   { initials: 'JT', name: 'Jamie Tan', preview: "Let's sync up before the hackathon!", time: '2m', unread: 3, online: true, gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', messages: [
     { text: 'Hey! Did you see the new problem statement?', self: false, time: '10:02' },
     { text: 'Just saw it. The AI track looks really interesting', self: true, time: '10:04' },
@@ -61,7 +73,10 @@ export default function Messages() {
                     {c.online && <div style={{ position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: '#5a9a5e', border: '2px solid var(--bg-card)' }} />}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: 2 }}>{c.name}</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <h4 style={{ fontSize: '0.85rem', fontWeight: 700 }}>{c.name}</h4>
+                      {c.team && <span style={{ fontSize: '0.55rem', fontWeight: 700, padding: '1px 6px', borderRadius: 5, background: 'var(--accent-light)', color: 'var(--accent)' }}>Your Team</span>}
+                    </div>
                     <p style={{ fontSize: '0.72rem', color: 'var(--text-soft)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.preview}</p>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -85,7 +100,7 @@ export default function Messages() {
             <div style={{ flex: 1, padding: 24, display: 'flex', flexDirection: 'column', gap: 14, overflowY: 'auto', minHeight: 0 }}>
               {msgs[active].map((m, i) => (
                 <div key={i} style={{ display: 'flex', gap: 10, flexDirection: m.self ? 'row-reverse' : 'row' }}>
-                  {!m.self && <div style={{ width: 32, height: 32, borderRadius: 10, background: conversations[active].gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>{conversations[active].initials}</div>}
+                  {!m.self && <div style={{ width: 32, height: 32, borderRadius: 10, background: (m.sender && memberGradients[m.sender]) || conversations[active].gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>{m.sender || conversations[active].initials}</div>}
                   <div style={{ padding: '10px 16px', borderRadius: 16, fontSize: '0.82rem', lineHeight: 1.6, maxWidth: '70%', background: m.self ? 'var(--accent)' : 'var(--bg)', color: m.self ? 'white' : 'var(--text-body)', borderTopRightRadius: m.self ? 4 : 16, borderTopLeftRadius: m.self ? 16 : 4 }}>{m.text}</div>
                 </div>
               ))}
