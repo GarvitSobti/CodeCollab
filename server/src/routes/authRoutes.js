@@ -1,5 +1,6 @@
 const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -56,17 +57,40 @@ async function syncUserProfile({ uid, email, name, picture }) {
 router.post('/register-or-sync', authMiddleware, async (req, res) => {
   const { uid, email, name, picture } = req.auth;
 
-  await syncUserProfile({ uid, email, name, picture });
+  try {
+    const [user, created] = await User.findOrCreate({
+      where: { firebaseUid: uid },
+      defaults: {
+        email,
+        name: name || null,
+        avatarUrl: picture || null,
+      },
+    });
 
-  return res.status(200).json({
-    message: 'Firebase identity verified',
-    user: {
-      firebaseUid: uid,
-      email,
-      name,
-      avatarUrl: picture,
-    },
-  });
+    if (!created) {
+      await user.update({
+        email,
+        name: name || null,
+        avatarUrl: picture || null,
+      });
+    }
+
+    return res.status(created ? 201 : 200).json({
+      message: created ? 'User registered' : 'User synced',
+      user: {
+        id: user.id,
+        firebaseUid: user.firebaseUid,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+      },
+    });
+  } catch (err) {
+    console.error('register-or-sync error:', err.message);
+    return res.status(500).json({
+      error: { message: 'Failed to register or sync user', status: 500 },
+    });
+  }
 });
 
 router.get('/me', authMiddleware, async (req, res) => {
