@@ -112,6 +112,23 @@ export default function Login() {
             <h1 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>CodeCollab</h1>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-soft)' }}>Find your perfect hackathon teammates</p>
+          <div style={{ marginTop: 10 }}>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/login')}
+              style={{
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--text-faint)',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Organizer sign in
+            </button>
+          </div>
         </div>
 
         {/* Card */}
