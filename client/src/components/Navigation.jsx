@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const navLinks = [
   { label: 'Discover', path: '/discover' },
@@ -15,6 +16,20 @@ const petalAngles = [270, 342, 54, 126, 198];
 export default function Navigation() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
+
+  const displayName = user?.displayName || user?.email || 'User';
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'U';
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <nav style={{
@@ -78,6 +93,16 @@ export default function Navigation() {
       </div>
 
       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: '8px 12px', borderRadius: 10, background: 'var(--bg-card)',
+            border: '1px solid rgba(0,0,0,0.08)', color: 'var(--text-soft)',
+            fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
+          }}
+        >
+          Sign Out
+        </button>
         <button style={{
           width: 38, height: 38, borderRadius: 12, background: 'var(--bg-card)',
           border: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center',
@@ -101,7 +126,7 @@ export default function Navigation() {
             fontWeight: 700, fontSize: '0.75rem', color: 'white', cursor: 'pointer',
           }}
         >
-          EH
+          {initials}
         </div>
       </div>
     </nav>

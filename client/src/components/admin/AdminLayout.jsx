@@ -41,7 +41,7 @@ export default function AdminLayout({ children }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/admin')}
             style={{
               border: 'none',
               background: 'transparent',
