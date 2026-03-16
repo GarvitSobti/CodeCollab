@@ -13,7 +13,6 @@ export default function Login() {
     registerWithEmailPassword,
     signInWithGoogle,
     signInWithGithub,
-    logout,
     fetchProvidersByEmail,
   } = useAuth();
 
