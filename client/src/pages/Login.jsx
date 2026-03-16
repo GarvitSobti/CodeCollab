@@ -25,6 +25,10 @@ export default function Login() {
       setErrorMessage('An account already exists with this email using a different sign-in method.');
       return;
     }
+    if (typeof fetchProvidersByEmail !== 'function') {
+      setErrorMessage('An account already exists with this email using a different sign-in method.');
+      return;
+    }
     try {
       const methods = await fetchProvidersByEmail(emailAddr);
       if (methods.length) {
