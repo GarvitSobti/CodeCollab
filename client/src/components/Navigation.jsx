@@ -18,17 +18,17 @@ export default function Navigation() {
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, height: 72,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '0 40px', zIndex: 100,
+      padding: '0 clamp(12px, 3vw, 40px)', gap: 12, zIndex: 100,
       background: 'rgba(250, 247, 242, 0.85)',
       backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
       borderBottom: '1px solid rgba(0,0,0,0.05)',
     }}>
       <div
         onClick={() => navigate('/discover')}
-        style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flexShrink: 0 }}
       >
         <BrandFlower />
-        <h1 style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>
+        <h1 className="brand-name" style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>
           CodeCollab
         </h1>
       </div>
@@ -43,7 +43,7 @@ export default function Navigation() {
               key={path}
               onClick={() => navigate(path)}
               style={{
-                fontSize: '0.8rem', fontWeight: 600, padding: '8px 18px', borderRadius: 10,
+                fontSize: '0.8rem', fontWeight: 600, padding: '8px 18px', borderRadius: 10, whiteSpace: 'nowrap',
                 cursor: 'pointer', transition: 'all 0.2s',
                 color: active ? 'var(--text-dark)' : 'var(--text-soft)',
                 background: active ? 'var(--bg-card)' : 'transparent',
@@ -56,7 +56,7 @@ export default function Navigation() {
         })}
       </div>
 
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
         <button style={{
           width: 38, height: 38, borderRadius: 12, background: 'var(--bg-card)',
           border: '1px solid rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center',

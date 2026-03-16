@@ -82,5 +82,10 @@ body {
 }
 
 @media (max-width: 768px) {
-  .nav-links { display: none !important; }
+  .brand-name { display: none; }
+  .nav-links span { padding: 6px 10px !important; font-size: 0.72rem !important; }
+}
+
+@media (max-width: 520px) {
+  .nav-links span { padding: 5px 7px !important; font-size: 0.62rem !important; }
 }
