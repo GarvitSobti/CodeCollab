@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import BrandFlower from '../components/BrandFlower';
@@ -11,11 +11,6 @@ const bloomColors = [
   'var(--sky)',       // m
 ];
 
-const particlePalette = [
-  'var(--peach)', 'var(--lavender)', 'var(--mint)',
-  'var(--sky)', 'var(--honey)', 'var(--rose)',
-];
-
 const steps = [
   { label: 'Swipe', desc: 'Browse students with complementary skills — your next teammate is one flick away.', color: 'var(--peach)' },
   { label: 'Match', desc: 'When the interest is mutual, you\'re instantly connected and ready to chat.', color: 'var(--lavender)' },
@@ -23,46 +18,6 @@ const steps = [
 ];
 
 const ease = [0.16, 1, 0.3, 1];
-
-/* ─── Ambient petal particles floating upward ─── */
-function FloatingParticles() {
-  const particles = useMemo(() =>
-    Array.from({ length: 22 }, (_, i) => ({
-      id: i,
-      color: particlePalette[i % particlePalette.length],
-      size: 4 + Math.random() * 10,
-      left: Math.random() * 100,
-      delay: Math.random() * 12,
-      duration: 14 + Math.random() * 16,
-      drift: -50 + Math.random() * 100,
-      opacity: 0.15 + Math.random() * 0.35,
-    })),
-    []
-  );
-
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-      {particles.map(p => (
-        <div
-          key={p.id}
-          className="floating-particle"
-          style={{
-            position: 'absolute',
-            width: p.size, height: p.size,
-            borderRadius: '50%',
-            background: p.color,
-            left: `${p.left}%`,
-            bottom: '-20px',
-            '--drift': `${p.drift}px`,
-            '--target-opacity': p.opacity,
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.duration}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 export default function Home() {
   const navigate = useNavigate();
@@ -102,8 +57,6 @@ export default function Home() {
 
       {/* ─── Hero ─── */}
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '72px 40px 0', position: 'relative', overflow: 'hidden' }}>
-
-        <FloatingParticles />
 
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 800 }}>
           <motion.h1
