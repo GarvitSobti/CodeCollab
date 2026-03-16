@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 const profiles = [
-  { name: 'Jamie Tan', uni: 'NUS · CS Year 2', skills: ['React', 'TypeScript', 'Figma'], hackathons: 5, rating: 4.8, reviews: 12, match: 92, quote: 'Loves building pixel-perfect UIs. Always ships ahead of schedule.', gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#ffe0d6,#ffd4cc,#ffeee8)', initials: 'JT', skillColors: [{bg:'rgba(255,107,107,0.1)',c:'#ff6b6b'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(179,157,219,0.1)',c:'#b39ddb'}] },
-  { name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', skills: ['Python', 'TensorFlow', 'AWS'], hackathons: 8, rating: 4.9, reviews: 21, match: 88, quote: 'ML wizard who makes complex models feel simple. Great team player.', gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', bannerGrad: 'linear-gradient(135deg,#d6eaff,#c8e0ff,#e0f0ff)', initials: 'WM', skillColors: [{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(102,187,106,0.1)',c:'#66bb6a'}] },
-  { name: 'Priya Sharma', uni: 'SMU · IS Year 2', skills: ['Node.js', 'PostgreSQL', 'Docker'], hackathons: 3, rating: 4.7, reviews: 8, match: 95, quote: 'Backend powerhouse. Set up our entire API in one night at HackNUS.', gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', bannerGrad: 'linear-gradient(135deg,#ece0ff,#e0d4f5,#f0e8ff)', initials: 'PS', skillColors: [{bg:'rgba(179,157,219,0.1)',c:'#b39ddb'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(255,138,101,0.1)',c:'#ff8a65'}] },
-  { name: 'Alex Ng', uni: 'SUTD · EPD Year 3', skills: ['Flutter', 'Firebase', 'UI/UX'], hackathons: 6, rating: 4.6, reviews: 15, match: 84, quote: 'Cross-platform maestro. His mobile apps always win the design award.', gradient: 'linear-gradient(135deg,#66bb6a,#43a047)', bannerGrad: 'linear-gradient(135deg,#dcf5dd,#c8eeca,#e8f8e8)', initials: 'AN', skillColors: [{bg:'rgba(102,187,106,0.1)',c:'#66bb6a'},{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(240,98,146,0.1)',c:'#f06292'}] },
-  { name: 'Sarah Lim', uni: 'NUS · CS Year 4', skills: ['Rust', 'Go', 'Systems'], hackathons: 11, rating: 5.0, reviews: 28, match: 90, quote: 'Senior dev energy. Mentored our whole team and we placed 1st.', gradient: 'linear-gradient(135deg,#ffca28,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#fff5d6,#ffedcc,#fff8e0)', initials: 'SL', skillColors: [{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(255,107,107,0.1)',c:'#ff6b6b'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'}] },
+  { name: 'Jamie Tan', uni: 'NUS · CS Year 2', skills: ['React', 'TypeScript', 'Figma'], hackathons: 5, rating: 4.8, reviews: 12, match: 92, quote: 'Loves building pixel-perfect UIs. Always ships ahead of schedule.', gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#ffe0d6,#ffd4cc,#ffeee8)', initials: 'JT' },
+  { name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', skills: ['Python', 'TensorFlow', 'AWS'], hackathons: 8, rating: 4.9, reviews: 21, match: 88, quote: 'ML wizard who makes complex models feel simple. Great team player.', gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', bannerGrad: 'linear-gradient(135deg,#d6eaff,#c8e0ff,#e0f0ff)', initials: 'WM' },
+  { name: 'Priya Sharma', uni: 'SMU · IS Year 2', skills: ['Node.js', 'PostgreSQL', 'Docker'], hackathons: 3, rating: 4.7, reviews: 8, match: 95, quote: 'Backend powerhouse. Set up our entire API in one night at HackNUS.', gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', bannerGrad: 'linear-gradient(135deg,#ece0ff,#e0d4f5,#f0e8ff)', initials: 'PS' },
+  { name: 'Alex Ng', uni: 'SUTD · EPD Year 3', skills: ['Flutter', 'Firebase', 'UI/UX'], hackathons: 6, rating: 4.6, reviews: 15, match: 84, quote: 'Cross-platform maestro. His mobile apps always win the design award.', gradient: 'linear-gradient(135deg,#66bb6a,#43a047)', bannerGrad: 'linear-gradient(135deg,#dcf5dd,#c8eeca,#e8f8e8)', initials: 'AN' },
+  { name: 'Sarah Lim', uni: 'NUS · CS Year 4', skills: ['Rust', 'Go', 'Systems'], hackathons: 11, rating: 5.0, reviews: 28, match: 90, quote: 'Senior dev energy. Mentored our whole team and we placed 1st.', gradient: 'linear-gradient(135deg,#ffca28,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#fff5d6,#ffedcc,#fff8e0)', initials: 'SL' },
 ];
 
 function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
@@ -131,15 +131,15 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
       <div className="swipe-label-connect" style={{
         position: 'absolute', top: 28, right: 20, padding: '10px 24px',
         borderRadius: 14, fontWeight: 800, fontSize: '1.2rem',
-        background: 'rgba(102,187,106,0.12)', color: 'var(--mint)',
-        border: '2.5px solid var(--mint)', transform: 'rotate(8deg)',
+        background: 'var(--accent-light)', color: 'var(--accent)',
+        border: '2.5px solid var(--accent)', transform: 'rotate(8deg)',
         opacity: 0, pointerEvents: 'none', zIndex: 10,
       }}>Connect</div>
       <div className="swipe-label-pass" style={{
         position: 'absolute', top: 28, left: 20, padding: '10px 24px',
         borderRadius: 14, fontWeight: 800, fontSize: '1.2rem',
-        background: 'rgba(255,107,107,0.12)', color: 'var(--coral)',
-        border: '2.5px solid var(--coral)', transform: 'rotate(-8deg)',
+        background: 'rgba(0,0,0,0.04)', color: 'var(--text-soft)',
+        border: '2.5px solid var(--text-soft)', transform: 'rotate(-8deg)',
         opacity: 0, pointerEvents: 'none', zIndex: 10,
       }}>Pass</div>
 
@@ -154,11 +154,11 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
           position: 'absolute', top: 16, right: 16, padding: '6px 14px',
           borderRadius: 10, fontSize: '0.8rem', fontWeight: 700,
           fontFamily: "'Fira Code', monospace", background: 'rgba(255,255,255,0.92)',
-          color: 'var(--mint)',
+          color: 'var(--accent)',
           display: 'flex', alignItems: 'center', gap: 6,
         }}>
           <div style={{
-            width: 7, height: 7, borderRadius: '50%', background: 'var(--mint)',
+            width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)',
             animation: 'pulseDot 1.8s infinite',
           }} />
           {profile.match}% match
@@ -180,11 +180,11 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-          {profile.skills.map((s, i) => (
+          {profile.skills.map((s) => (
             <span key={s} style={{
               padding: '5px 14px', borderRadius: 10, fontSize: '0.75rem',
               fontWeight: 600, fontFamily: "'Fira Code', monospace",
-              background: profile.skillColors[i].bg, color: profile.skillColors[i].c,
+              background: 'var(--bg-warm)', color: 'var(--text-body)',
             }}>{s}</span>
           ))}
         </div>
@@ -192,13 +192,13 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
           {[
             { val: profile.hackathons, lbl: 'Hackathons' },
-            { val: `${profile.rating}`, lbl: 'Rating', color: '#f9a825' },
+            { val: profile.rating, lbl: 'Rating' },
             { val: profile.reviews, lbl: 'Reviews' },
-          ].map(({ val, lbl, color }) => (
+          ].map(({ val, lbl }) => (
             <div key={lbl} style={{
               textAlign: 'center', padding: '14px 8px', borderRadius: 14, background: 'var(--bg)',
             }}>
-              <span style={{ fontSize: '1.15rem', fontWeight: 700, display: 'block', color: color || 'inherit' }}>{val}</span>
+              <span style={{ fontSize: '1.15rem', fontWeight: 700, display: 'block' }}>{val}</span>
               <span style={{ fontSize: '0.65rem', color: 'var(--text-soft)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{lbl}</span>
             </div>
           ))}
@@ -211,7 +211,7 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
         }}>
           <span style={{
             position: 'absolute', top: -2, left: 12, fontSize: '2rem',
-            fontStyle: 'normal', fontWeight: 800, color: 'var(--lavender)', opacity: 0.4,
+            fontStyle: 'normal', fontWeight: 800, color: 'var(--accent)', opacity: 0.2,
           }}>"</span>
           <span style={{ paddingLeft: 4 }}>{profile.quote}</span>
         </div>
@@ -286,7 +286,7 @@ export default function SwipeContainer() {
             alignItems: 'center', justifyContent: 'center', color: 'var(--text-soft)',
             boxShadow: 'var(--shadow-soft)', transition: 'all 0.35s cubic-bezier(0.23,1,0.32,1)',
           }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--coral)'; e.currentTarget.style.color = 'var(--coral)'; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--text-soft)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -294,29 +294,15 @@ export default function SwipeContainer() {
           </svg>
         </button>
         <button
-          style={{
-            width: 54, height: 54, borderRadius: '50%', border: '2px solid rgba(0,0,0,0.06)',
-            background: 'var(--bg-card)', cursor: 'pointer', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', color: 'var(--text-soft)',
-            boxShadow: 'var(--shadow-soft)',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--honey)'; e.currentTarget.style.color = 'var(--honey)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
-        >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
-        </button>
-        <button
           onClick={advance}
           style={{
             width: 64, height: 64, borderRadius: '50%', border: 'none',
-            background: 'linear-gradient(135deg, var(--mint), #43a047)',
+            background: 'var(--accent)',
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'white', boxShadow: '0 6px 24px rgba(102,187,106,0.35)',
+            color: 'white', boxShadow: 'var(--shadow-card)',
             transition: 'all 0.35s cubic-bezier(0.23,1,0.32,1)',
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.15)'; }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
         >
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">

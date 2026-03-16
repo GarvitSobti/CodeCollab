@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BrandFlower from '../components/BrandFlower';
 
-const petalColors = ['var(--peach)', 'var(--coral)', 'var(--lavender)', 'var(--mint)', 'var(--sky)'];
-const petalAngles = [270, 342, 54, 126, 198];
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,28 +14,12 @@ export default function Login() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="mesh-bg">
-        <div className="mesh-blob blob-1" />
-        <div className="mesh-blob blob-2" />
-        <div className="mesh-blob blob-3" />
-      </div>
-      <div className="noise" />
-
-      <div className="stagger" style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 440, padding: '0 24px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+      <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 440, padding: '0 24px' }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 12 }} onClick={() => navigate('/')}>
-            <div style={{ width: 40, height: 40, position: 'relative' }}>
-              {petalColors.map((bg, i) => {
-                const r = 11;
-                const angle = (petalAngles[i] * Math.PI) / 180;
-                const x = 50 + r * Math.cos(angle);
-                const y = 50 + r * Math.sin(angle);
-                return <div key={i} style={{ position: 'absolute', width: 13, height: 13, borderRadius: '50%', background: bg, top: `${y}%`, left: `${x}%`, transform: 'translate(-50%,-50%)' }} />;
-              })}
-              <div style={{ position: 'absolute', width: 10, height: 10, borderRadius: '50%', background: 'var(--honey)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 2 }} />
-            </div>
+            <BrandFlower />
             <h1 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>CodeCollab</h1>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-soft)' }}>Find your perfect hackathon teammates</p>
@@ -56,7 +39,7 @@ export default function Login() {
                 placeholder="your.email@university.edu"
                 required
                 style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.08)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                onFocus={e => e.target.style.borderColor = 'var(--peach)'}
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.08)'}
               />
             </div>
@@ -69,11 +52,11 @@ export default function Login() {
                 placeholder="••••••••"
                 required
                 style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.08)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                onFocus={e => e.target.style.borderColor = 'var(--peach)'}
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.08)'}
               />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '13px', borderRadius: 12, fontSize: '0.9rem', fontWeight: 700, border: 'none', background: 'linear-gradient(135deg, var(--peach), var(--coral))', color: 'white', cursor: 'pointer', boxShadow: '0 4px 16px rgba(255,138,101,0.3)', transition: 'all 0.2s' }}>
+            <button type="submit" style={{ width: '100%', padding: '13px', borderRadius: 12, fontSize: '0.9rem', fontWeight: 700, border: 'none', background: 'var(--accent)', color: 'white', cursor: 'pointer', boxShadow: 'var(--shadow-card)', transition: 'opacity 0.2s' }}>
               Sign In
             </button>
           </form>
@@ -86,7 +69,7 @@ export default function Login() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.08)', background: 'var(--bg-card)', color: 'var(--text-dark)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'border-color 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--coral)'}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'}
               onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'}
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
@@ -110,8 +93,8 @@ export default function Login() {
 
           <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-soft)', marginTop: 20 }}>
             Don't have an account?{' '}
-            <span style={{ color: 'var(--peach)', fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/discover')}>
-              Explore the app →
+            <span style={{ color: 'var(--accent)', fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/discover')}>
+              Explore the app
             </span>
           </p>
         </div>

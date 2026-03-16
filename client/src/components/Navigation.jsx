@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import BrandFlower from './BrandFlower';
 
 const navLinks = [
   { label: 'Discover', path: '/discover' },
@@ -8,9 +9,6 @@ const navLinks = [
   { label: 'Messages', path: '/messages' },
   { label: 'Profile', path: '/profile' },
 ];
-
-const petalColors = ['var(--peach)', 'var(--coral)', 'var(--lavender)', 'var(--mint)', 'var(--sky)'];
-const petalAngles = [270, 342, 54, 126, 198];
 
 export default function Navigation() {
   const navigate = useNavigate();
@@ -29,26 +27,7 @@ export default function Navigation() {
         onClick={() => navigate('/discover')}
         style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
       >
-        <div style={{ width: 36, height: 36, position: 'relative' }}>
-          {petalColors.map((bg, i) => {
-            const r = 10;
-            const angle = (petalAngles[i] * Math.PI) / 180;
-            const x = 50 + r * Math.cos(angle);
-            const y = 50 + r * Math.sin(angle);
-            return (
-              <div key={i} style={{
-                position: 'absolute', width: 12, height: 12, borderRadius: '50%',
-                background: bg, top: `${y}%`, left: `${x}%`,
-                transform: 'translate(-50%,-50%)',
-              }} />
-            );
-          })}
-          <div style={{
-            position: 'absolute', width: 9, height: 9, borderRadius: '50%',
-            background: 'var(--honey)', top: '50%', left: '50%',
-            transform: 'translate(-50%,-50%)', zIndex: 2,
-          }} />
-        </div>
+        <BrandFlower />
         <h1 style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>
           CodeCollab
         </h1>
@@ -65,7 +44,7 @@ export default function Navigation() {
               onClick={() => navigate(path)}
               style={{
                 fontSize: '0.8rem', fontWeight: 600, padding: '8px 18px', borderRadius: 10,
-                cursor: 'pointer', transition: 'all 0.3s',
+                cursor: 'pointer', transition: 'all 0.2s',
                 color: active ? 'var(--text-dark)' : 'var(--text-soft)',
                 background: active ? 'var(--bg-card)' : 'transparent',
                 boxShadow: active ? 'var(--shadow-soft)' : 'none',
@@ -89,14 +68,14 @@ export default function Navigation() {
           </svg>
           <div style={{
             position: 'absolute', top: 7, right: 7, width: 7, height: 7,
-            borderRadius: '50%', background: 'var(--coral)',
+            borderRadius: '50%', background: 'var(--accent)',
           }} />
         </button>
         <div
           onClick={() => navigate('/profile')}
           style={{
             width: 38, height: 38, borderRadius: 12,
-            background: 'linear-gradient(135deg, var(--peach), var(--coral))',
+            background: 'var(--accent)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 700, fontSize: '0.75rem', color: 'white', cursor: 'pointer',
           }}
