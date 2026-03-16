@@ -105,6 +105,71 @@ body {
   50% { opacity: 0.3; transform: scale(0.7); }
 }
 
+/* Home page entrance animations */
+.home-fade-up {
+  animation: homeFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes homeFadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.home-petal {
+  animation: homePetalIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes homePetalIn {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 0.12; transform: scale(1); }
+}
+
+.bloom-letter {
+  display: inline-block;
+  animation: bloomLetterIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes bloomLetterIn {
+  from { opacity: 0; transform: scale(0.65) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.home-cta:hover { transform: scale(1.06); }
+.home-cta { transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Floating ambient particles */
+.floating-particle {
+  opacity: 0;
+  animation-name: particleFloat;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0) scale(0.5);
+  }
+  8% {
+    opacity: var(--target-opacity);
+    transform: translateY(-10vh) translateX(calc(var(--drift) * 0.1)) scale(1);
+  }
+  85% {
+    opacity: var(--target-opacity);
+    transform: translateY(-90vh) translateX(calc(var(--drift) * 0.85)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-110vh) translateX(var(--drift)) scale(0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-fade-up, .home-petal, .bloom-letter { animation: none; opacity: 1; }
+  .home-petal { opacity: 0.12; }
+  .floating-particle { animation: none; opacity: 0; }
+}
+
 /* Shared component classes */
 .card { border-radius: var(--radius); }
 

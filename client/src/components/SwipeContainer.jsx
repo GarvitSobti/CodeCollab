@@ -131,14 +131,14 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
       <div className="swipe-label-connect" style={{
         position: 'absolute', top: 28, right: 20, padding: '10px 24px',
         borderRadius: 14, fontWeight: 800, fontSize: '1.2rem',
-        background: 'var(--accent-light)', color: 'var(--accent)',
+        background: 'var(--bg-card)', color: 'var(--accent)',
         border: '2.5px solid var(--accent)', transform: 'rotate(8deg)',
         opacity: 0, pointerEvents: 'none', zIndex: 10,
       }}>Connect</div>
       <div className="swipe-label-pass" style={{
         position: 'absolute', top: 28, left: 20, padding: '10px 24px',
         borderRadius: 14, fontWeight: 800, fontSize: '1.2rem',
-        background: 'var(--bg-warm)', color: 'var(--text-soft)',
+        background: 'var(--bg-card)', color: 'var(--text-soft)',
         border: '2.5px solid var(--text-soft)', transform: 'rotate(-8deg)',
         opacity: 0, pointerEvents: 'none', zIndex: 10,
       }}>Pass</div>
