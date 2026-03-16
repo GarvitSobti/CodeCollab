@@ -52,11 +52,11 @@ export default function Dashboard() {
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <h2 style={{ fontSize: '1rem', fontWeight: 700 }}>Members</h2>
-            <button style={{ padding: '6px 14px', borderRadius: 10, fontSize: '0.75rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.08)', background: 'var(--bg-card)', color: 'var(--text-soft)', cursor: 'pointer', fontFamily: 'inherit' }}>+ Invite</button>
+            <button style={{ padding: '6px 14px', borderRadius: 10, fontSize: '0.75rem', fontWeight: 600, border: '1.5px solid var(--border-strong)', background: 'var(--bg-card)', color: 'var(--text-soft)', cursor: 'pointer', fontFamily: 'inherit' }}>+ Invite</button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {members.map(m => (
-              <div key={m.name} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', borderRadius: 12, background: 'var(--bg-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
+              <div key={m.name} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', borderRadius: 12, background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: m.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem', color: 'white', flexShrink: 0 }}>{m.initials}</div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

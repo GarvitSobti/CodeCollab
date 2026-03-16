@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
@@ -25,6 +29,25 @@
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.06);
   --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.09);
   --radius: 20px;
+  --border: rgba(0, 0, 0, 0.04);
+  --border-strong: rgba(0, 0, 0, 0.08);
+}
+
+.dark {
+  --bg: #161625;
+  --bg-warm: #1c1c30;
+  --bg-card: #222238;
+  --accent-light: rgba(224, 93, 80, 0.15);
+  --accent-mid: rgba(224, 93, 80, 0.25);
+  --text-dark: #eae7e1;
+  --text-body: #a8a6b8;
+  --text-soft: #6e6e8a;
+  --text-faint: #44445a;
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.1);
 }
 
 body {
@@ -33,6 +56,7 @@ body {
   color: var(--text-dark);
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Brand flower logo */
@@ -81,10 +105,17 @@ body {
   50% { opacity: 0.3; transform: scale(0.7); }
 }
 
+/* Shared component classes */
+.card { border-radius: var(--radius); }
+
 /* Nav link hover & focus states */
 .nav-link:hover:not([aria-current="page"]) {
   color: var(--text-body);
   background: rgba(0, 0, 0, 0.03);
+}
+
+.dark .nav-link:hover:not([aria-current="page"]) {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-link:focus-visible,
@@ -94,14 +125,22 @@ body {
 }
 
 .nav-icon-btn:hover {
-  border-color: rgba(0, 0, 0, 0.12) !important;
+  border-color: var(--border-strong) !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 860px) {
   .brand-name { display: none; }
-  .nav-links .nav-link { padding: 6px 10px !important; font-size: 0.72rem !important; }
+  .nav-links .nav-link { padding: 6px 12px !important; font-size: 0.74rem !important; }
 }
 
-@media (max-width: 520px) {
-  .nav-links .nav-link { padding: 5px 7px !important; font-size: 0.62rem !important; }
+@media (max-width: 640px) {
+  .nav-links .nav-link { padding: 5px 8px !important; font-size: 0.65rem !important; }
+  .nav-links .nav-link-profile { display: none; }
+  .nav-right { gap: 6px !important; }
+  .nav-right .nav-icon-btn { width: 34px !important; height: 34px !important; border-radius: 10px !important; }
+}
+
+@media (max-width: 480px) {
+  .nav-links .nav-link { padding: 4px 6px !important; font-size: 0.58rem !important; }
+  .nav-right { gap: 4px !important; }
 }

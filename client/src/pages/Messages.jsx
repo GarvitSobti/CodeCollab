@@ -61,9 +61,9 @@ export default function Messages() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, minHeight: 600 }}>
           {/* Conversation list */}
-          <div style={{ borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: 18, borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-              <input placeholder="Search conversations..." style={{ width: '100%', padding: '10px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.06)', fontFamily: 'inherit', fontSize: '0.8rem', color: 'var(--text-dark)', outline: 'none' }} />
+          <div style={{ borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid var(--border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: 18, borderBottom: '1px solid var(--border)' }}>
+              <input placeholder="Search conversations..." style={{ width: '100%', padding: '10px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)', fontFamily: 'inherit', fontSize: '0.8rem', color: 'var(--text-dark)', outline: 'none' }} />
             </div>
             <div style={{ flex: 1, overflowY: 'auto' }}>
               {conversations.map((c, i) => (
@@ -89,8 +89,8 @@ export default function Messages() {
           </div>
 
           {/* Thread */}
-          <div style={{ borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+          <div style={{ borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 24px', borderBottom: '1px solid var(--border)' }}>
               <div style={{ width: 42, height: 42, borderRadius: 13, background: conversations[active].gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.85rem', color: 'white' }}>{conversations[active].initials}</div>
               <div>
                 <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>{conversations[active].name}</h3>
@@ -105,8 +105,8 @@ export default function Messages() {
                 </div>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: 10, padding: '18px 24px', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-              <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Type a message..." style={{ flex: 1, padding: '12px 18px', borderRadius: 14, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.06)', fontFamily: 'inherit', fontSize: '0.82rem', color: 'var(--text-dark)', outline: 'none' }} />
+            <div style={{ display: 'flex', gap: 10, padding: '18px 24px', borderTop: '1px solid var(--border)' }}>
+              <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Type a message..." style={{ flex: 1, padding: '12px 18px', borderRadius: 14, background: 'var(--bg)', border: '1px solid var(--border)', fontFamily: 'inherit', fontSize: '0.82rem', color: 'var(--text-dark)', outline: 'none' }} />
               <button onClick={send} style={{ width: 44, height: 44, borderRadius: 14, border: 'none', background: 'var(--accent)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               </button>

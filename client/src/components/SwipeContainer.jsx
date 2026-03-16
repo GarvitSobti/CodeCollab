@@ -121,8 +121,8 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
       style={{
         position: 'absolute', width: '100%', height: '100%',
         borderRadius: 20, background: 'var(--bg-card)',
-        boxShadow: '0 8px 40px rgba(0, 0, 0, 0.1)',
-        border: '1px solid rgba(0,0,0,0.06)',
+        boxShadow: 'var(--shadow-heavy)',
+        border: '1px solid var(--border)',
         overflow: 'hidden', cursor: 'grab', userSelect: 'none',
         willChange: 'transform', touchAction: 'none',
         display: 'flex', flexDirection: 'column',
@@ -138,14 +138,14 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
       <div className="swipe-label-pass" style={{
         position: 'absolute', top: 28, left: 20, padding: '10px 24px',
         borderRadius: 14, fontWeight: 800, fontSize: '1.2rem',
-        background: 'rgba(0,0,0,0.04)', color: 'var(--text-soft)',
+        background: 'var(--bg-warm)', color: 'var(--text-soft)',
         border: '2.5px solid var(--text-soft)', transform: 'rotate(-8deg)',
         opacity: 0, pointerEvents: 'none', zIndex: 10,
       }}>Pass</div>
 
       {/* Banner */}
       <div style={{ height: bannerHeight, minHeight: 120, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-        <div style={{ width: '100%', height: '100%', background: profile.bannerGrad }} />
+        <div style={{ width: '100%', height: '100%', background: profile.gradient, opacity: 0.55 }} />
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
           background: 'linear-gradient(to top, var(--bg-card), transparent)',
@@ -153,8 +153,8 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
         <div style={{
           position: 'absolute', top: 16, right: 16, padding: '6px 14px',
           borderRadius: 10, fontSize: '0.8rem', fontWeight: 700,
-          fontFamily: "'Fira Code', monospace", background: 'rgba(255,255,255,0.92)',
-          color: 'var(--accent)',
+          fontFamily: "'Fira Code', monospace", background: 'var(--bg-card)',
+          color: 'var(--accent)', border: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', gap: 6,
         }}>
           <div style={{
@@ -268,8 +268,8 @@ export default function SwipeContainer() {
                 <div style={{
                   width: '100%', height: '100%', borderRadius: 20,
                   background: 'var(--bg-card)',
-                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
-                  border: '1px solid rgba(0,0,0,0.04)',
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid var(--border)',
                 }} />
               )}
             </div>
@@ -281,13 +281,13 @@ export default function SwipeContainer() {
         <button
           onClick={advance}
           style={{
-            width: 54, height: 54, borderRadius: '50%', border: '2px solid rgba(0,0,0,0.06)',
+            width: 54, height: 54, borderRadius: '50%', border: '2px solid var(--border)',
             background: 'var(--bg-card)', cursor: 'pointer', display: 'flex',
             alignItems: 'center', justifyContent: 'center', color: 'var(--text-soft)',
             boxShadow: 'var(--shadow-soft)', transition: 'all 0.35s cubic-bezier(0.23,1,0.32,1)',
           }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--text-soft)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>

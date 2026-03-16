@@ -36,7 +36,7 @@ export default function Hackathons() {
               style={{
                 padding: '8px 18px', borderRadius: 12, fontSize: '0.78rem', fontWeight: 600,
                 cursor: 'pointer', transition: 'background 0.2s, color 0.2s',
-                border: activeFilter === f ? 'none' : '1.5px solid rgba(0,0,0,0.08)',
+                border: activeFilter === f ? 'none' : '1.5px solid var(--border-strong)',
                 background: activeFilter === f ? 'var(--accent)' : 'var(--bg-card)',
                 color: activeFilter === f ? 'white' : 'var(--text-soft)',
                 fontFamily: 'inherit',
@@ -47,7 +47,7 @@ export default function Hackathons() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {hackathons.map(h => (
-            <div key={h.name} style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '18px 22px', borderRadius: 16, background: 'var(--bg-card)', border: '1px solid rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s ease' }}
+            <div key={h.name} style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '18px 22px', borderRadius: 16, background: 'var(--bg-card)', border: '1px solid var(--border)', transition: 'box-shadow 0.2s ease' }}
               onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-card)'}
               onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
             >

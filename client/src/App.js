@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -12,6 +13,7 @@ import Profile from './pages/Profile';
 
 function App() {
   return (
+    <ThemeProvider>
     <Router>
       <div className="App">
         <Routes>
@@ -26,6 +28,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </ThemeProvider>
   );
 }
 

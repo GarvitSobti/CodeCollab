@@ -25,7 +25,7 @@ export default function Profile() {
         <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: 24 }}>
 
           {/* Sidebar */}
-          <div style={{ borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+          <div style={{ borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid var(--border)', overflow: 'hidden' }}>
             <div style={{ height: 120, background: 'linear-gradient(135deg,#ffe0d6,#ffd4cc,#e8d4ff,#d6eaff)', position: 'relative' }}>
               <div style={{ position: 'absolute', bottom: -36, left: '50%', transform: 'translateX(-50%)' }}>
                 <div style={{ width: 72, height: 72, borderRadius: 20, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.6rem', color: 'white', border: '4px solid var(--bg-card)', boxShadow: 'var(--shadow-soft)' }}>EH</div>
@@ -36,23 +36,23 @@ export default function Profile() {
               <p style={{ fontSize: '0.8rem', color: 'var(--text-soft)', marginBottom: 4 }}>SMU · Information Systems · Year 3</p>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-body)', lineHeight: 1.6, marginBottom: 8 }}>Full-stack developer passionate about building products that connect people. Hackathon enthusiast since freshman year.</p>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-soft)', marginBottom: 20 }}>7 hackathons · 4.9 rating · 23 reviews</p>
-              <button style={{ width: '100%', padding: 12, borderRadius: 14, border: '1.5px solid rgba(0,0,0,0.08)', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-dark)', cursor: 'pointer' }}>Edit Profile</button>
+              <button style={{ width: '100%', padding: 12, borderRadius: 14, border: '1.5px solid var(--border-strong)', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-dark)', cursor: 'pointer' }}>Edit Profile</button>
             </div>
           </div>
 
           {/* Main */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* Skills */}
-            <div style={{ padding: 24, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
+            <div style={{ padding: 24, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid var(--border)' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 14 }}>Skills</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {skills.map(s => <span key={s} style={{ padding: '6px 16px', borderRadius: 12, fontSize: '0.72rem', fontWeight: 600, fontFamily: "'Fira Code', monospace", background: 'var(--bg-warm)', color: 'var(--text-body)' }}>{s}</span>)}
-                <button style={{ padding: '6px 16px', borderRadius: 12, fontSize: '0.72rem', fontWeight: 600, border: '2px dashed rgba(0,0,0,0.1)', background: 'transparent', color: 'var(--text-soft)', cursor: 'pointer', fontFamily: 'inherit' }}>+ Add</button>
+                <button style={{ padding: '6px 16px', borderRadius: 12, fontSize: '0.72rem', fontWeight: 600, border: '2px dashed var(--border-strong)', background: 'transparent', color: 'var(--text-soft)', cursor: 'pointer', fontFamily: 'inherit' }}>+ Add</button>
               </div>
             </div>
 
             {/* Reviews */}
-            <div style={{ padding: 24, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
+            <div style={{ padding: 24, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid var(--border)' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 14 }}>Peer Reviews</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {reviews.map(r => (
@@ -74,11 +74,11 @@ export default function Profile() {
             </div>
 
             {/* Activity */}
-            <div style={{ padding: 24, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
+            <div style={{ padding: 24, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid var(--border)' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 14 }}>Recent Activity</h3>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {activity.map((a, i) => (
-                  <div key={a.title} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < activity.length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}>
+                  <div key={a.title} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < activity.length - 1 ? '1px solid var(--border)' : 'none' }}>
                     <span style={{ fontSize: '1rem', lineHeight: 1 }}>{a.icon}</span>
                     <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-dark)' }}>{a.title}</span>
                     <span style={{ fontSize: '0.68rem', color: 'var(--text-soft)', marginLeft: 'auto', flexShrink: 0 }}>{a.sub}</span>
