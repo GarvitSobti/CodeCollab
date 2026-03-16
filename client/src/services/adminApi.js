@@ -30,6 +30,27 @@ export const adminApi = {
     return data;
   },
 
+  async uploadSponsorLogo(file) {
+    const toBase64 = (selectedFile) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        const data = result.includes(',') ? result.split(',')[1] : result;
+        resolve(data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(selectedFile);
+    });
+
+    const base64Data = await toBase64(file);
+    const { data } = await http.post('/hackathons/upload/sponsor-logo', {
+      fileName: file?.name,
+      mimeType: file?.type,
+      base64Data
+    });
+    return data;
+  },
+
   async getAuditLogs() {
     const { data } = await http.get('/analytics/audit/logs');
     return data;
@@ -70,8 +91,11 @@ export const adminApi = {
     return data;
   },
 
-  async getRegistrationsAnalytics(hackathonId) {
-    const { data } = await http.get(`/analytics/${hackathonId}/registrations`);
+  async getRegistrationsAnalytics(hackathonId, filters = {}) {
+    const params = {};
+    if (filters.startDate) params.startDate = filters.startDate;
+    if (filters.endDate) params.endDate = filters.endDate;
+    const { data } = await http.get(`/analytics/${hackathonId}/registrations`, { params });
     return data;
   },
 

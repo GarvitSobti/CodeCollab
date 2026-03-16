@@ -1,5 +1,19 @@
 const { getHackathonById, getAnalyticsForHackathon, listAuditLogs } = require('../services/adminDataStore');
 
+function applyDateRange(items, startDate, endDate) {
+  if (!startDate && !endDate) return items;
+  const start = startDate ? new Date(startDate) : null;
+  const end = endDate ? new Date(endDate) : null;
+
+  return items.filter((item) => {
+    const current = new Date(item.date);
+    if (Number.isNaN(current.getTime())) return false;
+    if (start && current < start) return false;
+    if (end && current > end) return false;
+    return true;
+  });
+}
+
 function getScopedHackathon(req) {
   const hackathon = getHackathonById(req.params.hackathonId);
   if (!hackathon || hackathon.companyId !== req.admin.companyId) return null;
@@ -13,7 +27,13 @@ function registrations(req, res) {
   }
 
   const data = getAnalyticsForHackathon(hackathon.id);
-  const totals = data.registrationsByDay.reduce(
+  const overTime = applyDateRange(
+    data.registrationsByDay,
+    String(req.query.startDate || ''),
+    String(req.query.endDate || '')
+  );
+
+  const totals = overTime.reduce(
     (acc, day) => {
       acc.views += day.views;
       acc.clicks += day.clicks;
@@ -31,9 +51,10 @@ function registrations(req, res) {
   return res.json({
     success: true,
     data: {
-      overTime: data.registrationsByDay,
+      overTime,
       totals,
-      dropOff
+      dropOff,
+      lastUpdatedAt: new Date().toISOString()
     }
   });
 }
@@ -44,7 +65,13 @@ function demographics(req, res) {
     return res.status(404).json({ success: false, message: 'Hackathon not found' });
   }
   const data = getAnalyticsForHackathon(hackathon.id);
-  return res.json({ success: true, data: data.demographics });
+  return res.json({
+    success: true,
+    data: {
+      ...data.demographics,
+      geographicDistribution: data.demographics?.geographicDistribution || []
+    }
+  });
 }
 
 function skills(req, res) {

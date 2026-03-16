@@ -28,6 +28,8 @@ export default function AdminHackathonForm() {
 
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState('');
 
   useEffect(() => {
     if (!isEdit) return;
@@ -47,7 +49,7 @@ export default function AdminHackathonForm() {
         categoriesText: (hackathon.categories || []).join(', '),
         registrationRequirementsText: (hackathon.registrationRequirements || []).join(', '),
         prizesText: (hackathon.prizes || []).map((item) => `${item.title}:${item.amount}`).join(', '),
-        sponsorsText: (hackathon.sponsors || []).map((item) => `${item.name}|${item.link}`).join(', '),
+        sponsorsText: (hackathon.sponsors || []).map((item) => `${item.name}|${item.link}|${item.logoUrl || ''}`).join(', '),
         faqText: (hackathon.faq || []).map((item) => `${item.question}?${item.answer}`).join(' || '),
         status: hackathon.status || 'DRAFT'
       });
@@ -56,6 +58,36 @@ export default function AdminHackathonForm() {
 
   const handleChange = (field, value) => {
     setForm((previous) => ({ ...previous, [field]: value }));
+  };
+
+  const handleSponsorLogoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    setUploadMessage('Uploading sponsor logo...');
+    try {
+      const response = await adminApi.uploadSponsorLogo(file);
+      const uploadedPath = response?.data?.path || '';
+      if (uploadedPath) {
+        const absolutePath = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${uploadedPath}`;
+        setForm((previous) => {
+          const current = (previous.sponsorsText || '').trim();
+          const updated = current
+            ? `${current}, Sponsor Name|https://sponsor.link|${absolutePath}`
+            : `Sponsor Name|https://sponsor.link|${absolutePath}`;
+          return { ...previous, sponsorsText: updated };
+        });
+        setUploadMessage('Logo uploaded. Update sponsor name/link as needed.');
+      } else {
+        setUploadMessage('Upload completed but no path returned.');
+      }
+    } catch (error) {
+      setUploadMessage(error?.response?.data?.message || 'Failed to upload sponsor logo.');
+    } finally {
+      setUploadingLogo(false);
+      event.target.value = '';
+    }
   };
 
   const onSubmit = async (event) => {
@@ -88,8 +120,8 @@ export default function AdminHackathonForm() {
           .map((item) => item.trim())
           .filter(Boolean)
           .map((item) => {
-            const [name, link] = item.split('|').map((value) => value.trim());
-            return { name, link, logoUrl: '' };
+            const [name, link, logoUrl] = item.split('|').map((value) => value.trim());
+            return { name, link, logoUrl: logoUrl || '' };
           }),
         faq: form.faqText
           .split('||')
@@ -234,12 +266,16 @@ export default function AdminHackathonForm() {
 
           <label style={{ ...labelStyle, marginTop: 8 }}>Sponsors</label>
           <input
-            placeholder="e.g. CloudNova|https://cloudnova.example, MediStack|https://medistack.example"
+            placeholder="e.g. CloudNova|https://cloudnova.example|https://logo.url/file.png"
             value={form.sponsorsText}
             onChange={(event) => handleChange('sponsorsText', event.target.value)}
             style={inputStyle}
           />
-          <p style={helperStyle}>Format each sponsor as name|link.</p>
+          <p style={helperStyle}>Format each sponsor as name|link|logoUrl.</p>
+          <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleSponsorLogoUpload} disabled={uploadingLogo} />
+            <span style={helperStyle}>{uploadingLogo ? 'Uploading...' : uploadMessage || 'Secure upload: png/jpeg/webp up to 2MB.'}</span>
+          </div>
 
           <label style={{ ...labelStyle, marginTop: 8 }}>FAQ</label>
           <textarea

@@ -17,26 +17,37 @@ export default function AdminAnalytics() {
   const [compareId, setCompareId] = useState('');
   const [compareRegistrations, setCompareRegistrations] = useState(null);
   const [compareEngagement, setCompareEngagement] = useState(null);
+  const [filters, setFilters] = useState({ startDate: '', endDate: '' });
+  const [pdpaAcknowledged, setPdpaAcknowledged] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState('');
+
+  const fetchAnalytics = (hackathonId, selectedFilters) => Promise.all([
+    adminApi.getRegistrationsAnalytics(hackathonId, selectedFilters),
+    adminApi.getDemographicsAnalytics(hackathonId),
+    adminApi.getSkillsAnalytics(hackathonId),
+    adminApi.getEngagementAnalytics(hackathonId),
+    adminApi.getTalentAnalytics(hackathonId)
+  ]).then(([r, d, s, e, t]) => {
+    setRegistrations(r.data);
+    setDemographics(d.data);
+    setSkills(s.data);
+    setEngagement(e.data);
+    setTalent(t.data);
+    setLastRefreshedAt(new Date().toLocaleTimeString());
+  });
 
   useEffect(() => {
     adminApi.listHackathons().then((response) => {
       setHackathons((response.data || []).filter((item) => item.id !== id));
     });
 
-    Promise.all([
-      adminApi.getRegistrationsAnalytics(id),
-      adminApi.getDemographicsAnalytics(id),
-      adminApi.getSkillsAnalytics(id),
-      adminApi.getEngagementAnalytics(id),
-      adminApi.getTalentAnalytics(id)
-    ]).then(([r, d, s, e, t]) => {
-      setRegistrations(r.data);
-      setDemographics(d.data);
-      setSkills(s.data);
-      setEngagement(e.data);
-      setTalent(t.data);
-    });
-  }, [id]);
+    fetchAnalytics(id, filters);
+    const intervalId = window.setInterval(() => {
+      fetchAnalytics(id, filters);
+    }, 30000);
+
+    return () => window.clearInterval(intervalId);
+  }, [id, filters.startDate, filters.endDate]);
 
   useEffect(() => {
     if (!compareId) {
@@ -46,13 +57,13 @@ export default function AdminAnalytics() {
     }
 
     Promise.all([
-      adminApi.getRegistrationsAnalytics(compareId),
+      adminApi.getRegistrationsAnalytics(compareId, filters),
       adminApi.getEngagementAnalytics(compareId)
     ]).then(([registrationsResponse, engagementResponse]) => {
       setCompareRegistrations(registrationsResponse.data);
       setCompareEngagement(engagementResponse.data);
     });
-  }, [compareId]);
+  }, [compareId, filters.startDate, filters.endDate]);
 
   const topMetrics = useMemo(() => {
     if (!registrations || !engagement) return [];
@@ -78,15 +89,41 @@ export default function AdminAnalytics() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <h2 style={{ fontSize: '1.35rem' }}>Analytics</h2>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input
+            type="date"
+            value={filters.startDate}
+            onChange={(event) => setFilters((previous) => ({ ...previous, startDate: event.target.value }))}
+            style={{ ...buttonLinkStyle, minWidth: 140 }}
+          />
+          <input
+            type="date"
+            value={filters.endDate}
+            onChange={(event) => setFilters((previous) => ({ ...previous, endDate: event.target.value }))}
+            style={{ ...buttonLinkStyle, minWidth: 140 }}
+          />
           <select value={compareId} onChange={(event) => setCompareId(event.target.value)} style={{ ...buttonLinkStyle, minWidth: 220 }}>
             <option value="">Compare with another hackathon</option>
             {hackathons.map((hackathon) => (
               <option key={hackathon.id} value={hackathon.id}>{hackathon.eventName}</option>
             ))}
           </select>
-          <a href={adminApi.exportParticipantsUrl(id, 'csv')} target="_blank" rel="noreferrer" style={buttonLinkStyle}>Export CSV</a>
-          <a href={adminApi.exportParticipantsUrl(id, 'pdf')} target="_blank" rel="noreferrer" style={buttonLinkStyle}>Export PDF</a>
+          {pdpaAcknowledged ? (
+            <>
+              <a href={adminApi.exportParticipantsUrl(id, 'csv')} target="_blank" rel="noreferrer" style={buttonLinkStyle}>Export CSV</a>
+              <a href={adminApi.exportParticipantsUrl(id, 'pdf')} target="_blank" rel="noreferrer" style={buttonLinkStyle}>Export PDF</a>
+            </>
+          ) : (
+            <span style={{ ...buttonLinkStyle, opacity: 0.6 }}>Acknowledge PDPA to export</span>
+          )}
         </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.76rem', color: 'var(--text-body)' }}>
+          <input type="checkbox" checked={pdpaAcknowledged} onChange={(event) => setPdpaAcknowledged(event.target.checked)} />
+          I confirm participant exports are for PDPA-compliant usage.
+        </label>
+        <span style={{ fontSize: '0.72rem', color: 'var(--text-soft)' }}>Auto-refresh: 30s · Last update: {lastRefreshedAt || '-'}</span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0,1fr))', gap: 10, marginBottom: 14 }}>
@@ -122,6 +159,13 @@ export default function AdminAnalytics() {
         <section style={panelStyle}>
           <h3 style={titleStyle}>Common Skills</h3>
           <SimpleBarChart data={skills.commonSkills} valueKey="value" labelKey="skill" color="#66bb6a" />
+        </section>
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <section style={panelStyle}>
+          <h3 style={titleStyle}>Geographic Distribution</h3>
+          <SimpleBarChart data={demographics.geographicDistribution} valueKey="value" labelKey="name" color="#9fa8da" />
         </section>
       </div>
 

@@ -124,6 +124,12 @@ const participantSnapshotByHackathon = {
         { name: 'SUTD', value: 12 },
         { name: 'Others', value: 6 }
       ],
+      geographicDistribution: [
+        { name: 'Singapore', value: 83 },
+        { name: 'Malaysia', value: 7 },
+        { name: 'Indonesia', value: 5 },
+        { name: 'Others', value: 5 }
+      ],
       yearBreakdown: [
         { label: 'Year 1', value: 18 },
         { label: 'Year 2', value: 31 },
@@ -189,6 +195,12 @@ const participantSnapshotByHackathon = {
         { name: 'SMU', value: 26 },
         { name: 'SUTD', value: 18 },
         { name: 'Others', value: 10 }
+      ],
+      geographicDistribution: [
+        { name: 'Singapore', value: 76 },
+        { name: 'Malaysia', value: 9 },
+        { name: 'India', value: 7 },
+        { name: 'Others', value: 8 }
       ],
       yearBreakdown: [
         { label: 'Year 1', value: 14 },
@@ -351,6 +363,7 @@ function getAnalyticsForHackathon(hackathonId) {
     registrationsByDay: [],
     demographics: {
       universityDistribution: [],
+      geographicDistribution: [],
       yearBreakdown: [],
       majorBreakdown: [],
       teamVsIndividual: []

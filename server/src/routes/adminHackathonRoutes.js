@@ -9,6 +9,7 @@ const router = express.Router();
 router.use(adminAuthMiddleware);
 
 router.get('/', adminHackathonController.list);
+router.post('/upload/sponsor-logo', allowRoles(ROLES.SUPER_ADMIN, ROLES.EDITOR), adminHackathonController.uploadSponsorLogo);
 router.post('/', allowRoles(ROLES.SUPER_ADMIN, ROLES.EDITOR), adminHackathonController.create);
 router.put('/:id', allowRoles(ROLES.SUPER_ADMIN, ROLES.EDITOR), adminHackathonController.update);
 router.post('/:id/publish', allowRoles(ROLES.SUPER_ADMIN, ROLES.EDITOR), adminHackathonController.publish);

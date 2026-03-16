@@ -9,6 +9,17 @@ const {
   deleteHackathon,
   pushAuditLog
 } = require('../services/adminDataStore');
+const fs = require('fs');
+const path = require('path');
+
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+const ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+
+function sanitizeFileName(value) {
+  return String(value || 'logo')
+    .replace(/[^a-zA-Z0-9_.-]/g, '-')
+    .toLowerCase();
+}
 
 async function list(req, res) {
   const data = listHackathonsByCompany(req.admin.companyId);
@@ -138,6 +149,52 @@ async function remove(req, res) {
   return res.json({ success: true });
 }
 
+async function uploadSponsorLogo(req, res) {
+  const { fileName, mimeType, base64Data } = req.body || {};
+
+  if (!mimeType || !base64Data) {
+    return res.status(400).json({ success: false, message: 'mimeType and base64Data are required' });
+  }
+
+  if (!ALLOWED_MIME_TYPES.has(String(mimeType))) {
+    return res.status(400).json({ success: false, message: 'Only png, jpeg, and webp files are allowed' });
+  }
+
+  const buffer = Buffer.from(String(base64Data), 'base64');
+  if (!buffer.length || buffer.length > MAX_UPLOAD_BYTES) {
+    return res.status(400).json({ success: false, message: 'File must be non-empty and <= 2MB' });
+  }
+
+  const extension = mimeType === 'image/png' ? 'png' : (mimeType === 'image/webp' ? 'webp' : 'jpg');
+  const safeName = sanitizeFileName(fileName);
+  const uploadDir = path.join(__dirname, '..', '..', 'uploads', 'sponsor-logos', req.admin.companyId);
+  fs.mkdirSync(uploadDir, { recursive: true });
+
+  const storedName = `${Date.now()}-${safeName}.${extension}`;
+  const targetPath = path.join(uploadDir, storedName);
+  fs.writeFileSync(targetPath, buffer);
+
+  const relativePath = `/uploads/sponsor-logos/${req.admin.companyId}/${storedName}`;
+
+  pushAuditLog({
+    companyId: req.admin.companyId,
+    adminId: req.admin.id,
+    action: 'SPONSOR_LOGO_UPLOADED',
+    entityType: 'SPONSOR_LOGO',
+    entityId: storedName,
+    after: { path: relativePath, mimeType, size: buffer.length }
+  });
+
+  return res.status(201).json({
+    success: true,
+    data: {
+      path: relativePath,
+      mimeType,
+      size: buffer.length
+    }
+  });
+}
+
 module.exports = {
   list,
   create,
@@ -145,5 +202,6 @@ module.exports = {
   publish,
   clone,
   archive,
-  remove
+  remove,
+  uploadSponsorLogo
 };
