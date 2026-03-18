@@ -207,7 +207,19 @@ export default function MessageList({
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const bottomEl = bottomRef.current;
+    if (!bottomEl) return;
+
+    const rect = bottomEl.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+    // Only auto-scroll when the user is already near the bottom.
+    const threshold = 150; // px
+    const isNearBottom = rect.bottom - viewportHeight < threshold;
+
+    if (isNearBottom) {
+      bottomEl.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages, typingUsers]);
 
   const groupedMessages = groupMessagesByDate(messages);
