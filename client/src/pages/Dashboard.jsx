@@ -1,11 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import { useChatContext } from '../contexts/ChatContext';
 
 const members = [
-  { initials: 'JT', name: 'Jamie Tan', uni: 'NUS · CS Year 2', role: 'Frontend Lead', roleColor: { bg: 'rgba(255,107,107,0.1)', c: 'var(--coral)' }, gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', skills: ['React', 'TypeScript', 'Figma'], progress: 87 },
-  { initials: 'WM', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', role: 'ML Engineer', roleColor: { bg: 'rgba(66,165,245,0.1)', c: 'var(--sky)' }, gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', skills: ['Python', 'TensorFlow', 'AWS'], progress: 91 },
-  { initials: 'EH', name: 'Emily Huang', uni: 'SMU · IS Year 3', role: 'Full-Stack', roleColor: { bg: 'rgba(255,138,101,0.1)', c: 'var(--peach)' }, gradient: 'linear-gradient(135deg,#ff8a65,#ff6b6b)', skills: ['Node.js', 'React', 'PostgreSQL'], progress: 78 },
-  { initials: 'PS', name: 'Priya Sharma', uni: 'SMU · IS Year 2', role: 'Backend Dev', roleColor: { bg: 'rgba(179,157,219,0.1)', c: 'var(--lavender)' }, gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', skills: ['Node.js', 'Docker', 'PostgreSQL'], progress: 82 },
+  { id: 'jamie', initials: 'JT', name: 'Jamie Tan', uni: 'NUS · CS Year 2', role: 'Frontend Lead', roleColor: { bg: 'rgba(255,107,107,0.1)', c: 'var(--coral)' }, gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', skills: ['React', 'TypeScript', 'Figma'], progress: 87 },
+  { id: 'weiming', initials: 'WM', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', role: 'ML Engineer', roleColor: { bg: 'rgba(66,165,245,0.1)', c: 'var(--sky)' }, gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', skills: ['Python', 'TensorFlow', 'AWS'], progress: 91 },
+  { id: 'emily', initials: 'EH', name: 'Emily Huang', uni: 'SMU · IS Year 3', role: 'Full-Stack', roleColor: { bg: 'rgba(255,138,101,0.1)', c: 'var(--peach)' }, gradient: 'linear-gradient(135deg,#ff8a65,#ff6b6b)', skills: ['Node.js', 'React', 'PostgreSQL'], progress: 78 },
+  { id: 'priya', initials: 'PS', name: 'Priya Sharma', uni: 'SMU · IS Year 2', role: 'Backend Dev', roleColor: { bg: 'rgba(179,157,219,0.1)', c: 'var(--lavender)' }, gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', skills: ['Node.js', 'Docker', 'PostgreSQL'], progress: 82 },
 ];
 
 const chatMessages = [
@@ -23,6 +25,14 @@ const sprint = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const { openOrCreateDM } = useChatContext();
+
+  const handleDM = async (member) => {
+    await openOrCreateDM(member.id);
+    navigate('/messages');
+  };
+
   return (
     <div style={{ minHeight: '100vh' }}>
       <div className="mesh-bg">
@@ -84,16 +94,33 @@ export default function Dashboard() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 32 }}>
           {members.map(m => (
-            <div key={m.name} style={{ padding: 22, borderRadius: 20, background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)', transition: 'all 0.3s' }}
+            <div key={m.name} style={{ padding: 22, borderRadius: 20, background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)', transition: 'all 0.3s', position: 'relative' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-heavy)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-card)'; }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
                 <div style={{ width: 48, height: 48, borderRadius: 14, background: m.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1rem', color: 'white' }}>{m.initials}</div>
-                <div>
+                <div style={{ flex: 1 }}>
                   <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>{m.name}</h4>
                   <p style={{ fontSize: '0.72rem', color: 'var(--text-soft)' }}>{m.uni}</p>
                 </div>
+                {/* DM button */}
+                <button
+                  onClick={() => handleDM(m)}
+                  title={`Message ${m.name.split(' ')[0]}`}
+                  style={{
+                    width: 32, height: 32, borderRadius: 10, border: '1.5px solid rgba(0,0,0,0.07)',
+                    background: 'var(--bg)', cursor: 'pointer', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--text-soft)', transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg,var(--peach),var(--coral))'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'white'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                </button>
               </div>
               <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: 9, fontSize: '0.65rem', fontWeight: 700, marginBottom: 12, background: m.roleColor.bg, color: m.roleColor.c }}>{m.role}</span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
@@ -114,7 +141,22 @@ export default function Dashboard() {
 
         {/* Team chat */}
         <div style={{ padding: 28, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
-          <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 20 }}>💬 Team Chat</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>💬 Team Chat</div>
+            <button
+              onClick={() => navigate('/messages')}
+              style={{
+                fontSize: '0.72rem', fontWeight: 600, color: 'var(--peach)',
+                border: 'none', background: 'none', cursor: 'pointer', padding: 0,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}
+            >
+              Open in Messages
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {chatMessages.map((m, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, flexDirection: m.self ? 'row-reverse' : 'row' }}>

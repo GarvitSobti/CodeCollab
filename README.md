@@ -64,7 +64,7 @@ npm run dev
 ```
 
 - Frontend: http://localhost:3000
-- Backend: http://localhost:5001
+- Backend: http://localhost:5000
 
 See [SETUP_GUIDE.md](SETUP_GUIDE.md) for a full walkthrough including Firebase setup and database config.
 

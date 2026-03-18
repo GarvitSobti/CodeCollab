@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useChatContext } from '../contexts/ChatContext';
 
 const profiles = [
-  { name: 'Jamie Tan', uni: 'NUS · CS Year 2', skills: ['React', 'TypeScript', 'Figma'], hackathons: 5, rating: 4.8, reviews: 12, match: 92, quote: 'Loves building pixel-perfect UIs. Always ships ahead of schedule.', gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#ffe0d6,#ffd4cc,#ffeee8)', initials: 'JT', skillColors: [{bg:'rgba(255,107,107,0.1)',c:'#ff6b6b'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(179,157,219,0.1)',c:'#b39ddb'}] },
-  { name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', skills: ['Python', 'TensorFlow', 'AWS'], hackathons: 8, rating: 4.9, reviews: 21, match: 88, quote: 'ML wizard who makes complex models feel simple. Great team player.', gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', bannerGrad: 'linear-gradient(135deg,#d6eaff,#c8e0ff,#e0f0ff)', initials: 'WM', skillColors: [{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(102,187,106,0.1)',c:'#66bb6a'}] },
-  { name: 'Priya Sharma', uni: 'SMU · IS Year 2', skills: ['Node.js', 'PostgreSQL', 'Docker'], hackathons: 3, rating: 4.7, reviews: 8, match: 95, quote: 'Backend powerhouse. Set up our entire API in one night at HackNUS.', gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', bannerGrad: 'linear-gradient(135deg,#ece0ff,#e0d4f5,#f0e8ff)', initials: 'PS', skillColors: [{bg:'rgba(179,157,219,0.1)',c:'#b39ddb'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(255,138,101,0.1)',c:'#ff8a65'}] },
-  { name: 'Alex Ng', uni: 'SUTD · EPD Year 3', skills: ['Flutter', 'Firebase', 'UI/UX'], hackathons: 6, rating: 4.6, reviews: 15, match: 84, quote: 'Cross-platform maestro. His mobile apps always win the design award.', gradient: 'linear-gradient(135deg,#66bb6a,#43a047)', bannerGrad: 'linear-gradient(135deg,#dcf5dd,#c8eeca,#e8f8e8)', initials: 'AN', skillColors: [{bg:'rgba(102,187,106,0.1)',c:'#66bb6a'},{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(240,98,146,0.1)',c:'#f06292'}] },
-  { name: 'Sarah Lim', uni: 'NUS · CS Year 4', skills: ['Rust', 'Go', 'Systems'], hackathons: 11, rating: 5.0, reviews: 28, match: 90, quote: 'Senior dev energy. Mentored our whole team and we placed 1st.', gradient: 'linear-gradient(135deg,#ffca28,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#fff5d6,#ffedcc,#fff8e0)', initials: 'SL', skillColors: [{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(255,107,107,0.1)',c:'#ff6b6b'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'}] },
+  { id: 'jamie', name: 'Jamie Tan', uni: 'NUS · CS Year 2', skills: ['React', 'TypeScript', 'Figma'], hackathons: 5, rating: 4.8, reviews: 12, match: 92, quote: 'Loves building pixel-perfect UIs. Always ships ahead of schedule.', gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#ffe0d6,#ffd4cc,#ffeee8)', initials: 'JT', skillColors: [{bg:'rgba(255,107,107,0.1)',c:'#ff6b6b'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(179,157,219,0.1)',c:'#b39ddb'}] },
+  { id: 'weiming', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', skills: ['Python', 'TensorFlow', 'AWS'], hackathons: 8, rating: 4.9, reviews: 21, match: 88, quote: 'ML wizard who makes complex models feel simple. Great team player.', gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', bannerGrad: 'linear-gradient(135deg,#d6eaff,#c8e0ff,#e0f0ff)', initials: 'WM', skillColors: [{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(102,187,106,0.1)',c:'#66bb6a'}] },
+  { id: 'priya', name: 'Priya Sharma', uni: 'SMU · IS Year 2', skills: ['Node.js', 'PostgreSQL', 'Docker'], hackathons: 3, rating: 4.7, reviews: 8, match: 95, quote: 'Backend powerhouse. Set up our entire API in one night at HackNUS.', gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', bannerGrad: 'linear-gradient(135deg,#ece0ff,#e0d4f5,#f0e8ff)', initials: 'PS', skillColors: [{bg:'rgba(179,157,219,0.1)',c:'#b39ddb'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(255,138,101,0.1)',c:'#ff8a65'}] },
+  { id: 'alex', name: 'Alex Ng', uni: 'SUTD · EPD Year 3', skills: ['Flutter', 'Firebase', 'UI/UX'], hackathons: 6, rating: 4.6, reviews: 15, match: 84, quote: 'Cross-platform maestro. His mobile apps always win the design award.', gradient: 'linear-gradient(135deg,#66bb6a,#43a047)', bannerGrad: 'linear-gradient(135deg,#dcf5dd,#c8eeca,#e8f8e8)', initials: 'AN', skillColors: [{bg:'rgba(102,187,106,0.1)',c:'#66bb6a'},{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(240,98,146,0.1)',c:'#f06292'}] },
+  { id: 'sarah', name: 'Sarah Lim', uni: 'NUS · CS Year 4', skills: ['Rust', 'Go', 'Systems'], hackathons: 11, rating: 5.0, reviews: 28, match: 90, quote: 'Senior dev energy. Mentored our whole team and we placed 1st.', gradient: 'linear-gradient(135deg,#ffca28,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#fff5d6,#ffedcc,#fff8e0)', initials: 'SL', skillColors: [{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(255,107,107,0.1)',c:'#ff6b6b'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'}] },
 ];
 
 function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
@@ -214,10 +216,109 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
   );
 }
 
+// ─── Match Modal ──────────────────────────────────────────────────────────────
+function MatchModal({ profile, onMessage, onClose }) {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 1000,
+      background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      animation: 'fadeIn 0.25s ease',
+    }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: 'var(--bg-card)', borderRadius: 'var(--radius)',
+          padding: '40px 36px', textAlign: 'center', maxWidth: 360, width: '90%',
+          boxShadow: 'var(--shadow-heavy)', animation: 'scaleIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275)',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ fontSize: '3rem', marginBottom: 8 }}>🎉</div>
+        <h2 style={{ fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 6 }}>
+          It's a Match!
+        </h2>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-body)', marginBottom: 24, lineHeight: 1.6 }}>
+          You and <strong>{profile.name}</strong> both want to collaborate.<br />
+          Say hello and start building together!
+        </p>
+
+        {/* Avatars */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+          <div style={{
+            width: 60, height: 60, borderRadius: 18,
+            background: 'linear-gradient(135deg, var(--peach), var(--coral))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 800, fontSize: '1.1rem', color: 'white',
+            border: '3px solid var(--bg-card)', boxShadow: 'var(--shadow-soft)',
+          }}>YO</div>
+          <div style={{ fontSize: '1.4rem' }}>💬</div>
+          <div style={{
+            width: 60, height: 60, borderRadius: 18,
+            background: profile.gradient,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 800, fontSize: '1.1rem', color: 'white',
+            border: '3px solid var(--bg-card)', boxShadow: 'var(--shadow-soft)',
+          }}>{profile.initials}</div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <button
+            onClick={onMessage}
+            style={{
+              padding: '13px 0', borderRadius: 14, border: 'none', cursor: 'pointer',
+              background: 'linear-gradient(135deg, var(--peach), var(--coral))',
+              color: 'white', fontFamily: 'inherit', fontSize: '0.88rem', fontWeight: 700,
+              boxShadow: '0 4px 14px rgba(255,107,107,0.3)',
+              transition: 'transform 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            💬 Message {profile.name.split(' ')[0]}
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '12px 0', borderRadius: 14, border: '1.5px solid rgba(0,0,0,0.08)',
+              cursor: 'pointer', background: 'var(--bg)', color: 'var(--text-soft)',
+              fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 600,
+            }}
+          >
+            Keep Swiping
+          </button>
+        </div>
+      </div>
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      `}</style>
+    </div>
+  );
+}
+
 export default function SwipeContainer() {
   const [idx, setIdx] = useState(0);
+  const [matchedProfile, setMatchedProfile] = useState(null);
+  const navigate = useNavigate();
+  const { openOrCreateDM } = useChatContext();
 
   const advance = () => setIdx(i => (i + 1) >= profiles.length ? 0 : i + 1);
+
+  const handleSwipeRight = () => {
+    const currentProfile = profiles[idx];
+    advance();
+    // Show match modal (simulate mutual match)
+    setMatchedProfile(currentProfile);
+  };
+
+  const handleMessage = async () => {
+    if (!matchedProfile) return;
+    await openOrCreateDM(matchedProfile.id);
+    setMatchedProfile(null);
+    navigate('/messages');
+  };
 
   const visible = profiles.slice(idx, idx + 3).length < 3
     ? [...profiles.slice(idx), ...profiles.slice(0, 3 - profiles.slice(idx).length)]
@@ -225,6 +326,13 @@ export default function SwipeContainer() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      {matchedProfile && (
+        <MatchModal
+          profile={matchedProfile}
+          onMessage={handleMessage}
+          onClose={() => setMatchedProfile(null)}
+        />
+      )}
       <div style={{ position: 'relative', width: 380, height: 520, marginBottom: 28 }}>
         {[...visible].reverse().map((p, i) => {
           const isTop = i === visible.length - 1;
@@ -243,7 +351,7 @@ export default function SwipeContainer() {
                 <ProfileCard
                   profile={p}
                   onSwipeLeft={advance}
-                  onSwipeRight={advance}
+                  onSwipeRight={handleSwipeRight}
                 />
               )}
               {!isTop && (
@@ -289,7 +397,7 @@ export default function SwipeContainer() {
           </svg>
         </button>
         <button
-          onClick={advance}
+          onClick={handleSwipeRight}
           style={{
             width: 64, height: 64, borderRadius: '50%', border: 'none',
             background: 'linear-gradient(135deg, var(--mint), #43a047)',

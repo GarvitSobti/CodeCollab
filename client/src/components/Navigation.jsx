@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useChatContext } from '../contexts/ChatContext';
 
 const navLinks = [
   { label: 'Discover', path: '/discover' },
@@ -17,6 +18,7 @@ export default function Navigation() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { totalUnread } = useChatContext();
 
   const displayName = user?.displayName || user?.email || 'User';
   const initials = displayName
@@ -73,20 +75,33 @@ export default function Navigation() {
         display: 'flex', gap: 4, background: 'var(--bg-warm)', padding: 4, borderRadius: 14,
       }}>
         {navLinks.map(({ label, path }) => {
-          const active = location.pathname === path;
+          const active = location.pathname.startsWith(path);
+          const isMessages = path === '/messages';
           return (
             <span
               key={path}
               onClick={() => navigate(path)}
               style={{
                 fontSize: '0.8rem', fontWeight: 600, padding: '8px 18px', borderRadius: 10,
-                cursor: 'pointer', transition: 'all 0.3s',
+                cursor: 'pointer', transition: 'all 0.3s', position: 'relative',
                 color: active ? 'var(--text-dark)' : 'var(--text-soft)',
                 background: active ? 'var(--bg-card)' : 'transparent',
                 boxShadow: active ? 'var(--shadow-soft)' : 'none',
+                display: 'flex', alignItems: 'center', gap: 5,
               }}
             >
               {label}
+              {isMessages && totalUnread > 0 && (
+                <span style={{
+                  minWidth: 16, height: 16, borderRadius: 8, padding: '0 4px',
+                  background: 'linear-gradient(135deg, var(--peach), var(--coral))',
+                  color: 'white', fontSize: '0.55rem', fontWeight: 700,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  lineHeight: 1,
+                }}>
+                  {totalUnread > 9 ? '9+' : totalUnread}
+                </span>
+              )}
             </span>
           );
         })}
