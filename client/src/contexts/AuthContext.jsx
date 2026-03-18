@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -51,6 +52,7 @@ export const AuthProvider = ({ children }) => {
     signInWithGithub: () => signInWithPopup(auth, githubProvider),
     signInWithEmailPassword: (email, password) => signInWithEmailAndPassword(auth, email, password),
     registerWithEmailPassword: (email, password) => createUserWithEmailAndPassword(auth, email, password),
+    fetchProvidersByEmail: (email) => fetchSignInMethodsForEmail(auth, email),
     logout: () => signOut(auth),
   }), [firebaseUser, loading]);
 

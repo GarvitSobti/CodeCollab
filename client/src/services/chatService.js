@@ -1,28 +1,30 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 class ChatService {
   constructor() {
     this.socket = null;
-    this.userId = null;
     this.handlers = {};
+    this.activeConversationId = null;
   }
 
-  connect(userId) {
-    if (this.socket?.connected) return;
+  connect(token) {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
 
-    this.userId = userId;
     this.socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
+      auth: { token },
+      autoConnect: true,
       reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
     });
 
     this.socket.on('connect', () => {
       this._emit('connection-status', 'connected');
-      if (userId) {
-        this.socket.emit('user-online', { userId });
+      if (this.activeConversationId) {
+        this.joinConversation(this.activeConversationId);
       }
     });
 
@@ -34,29 +36,13 @@ class ChatService {
       this._emit('connection-status', 'disconnected');
     });
 
-    this.socket.on('reconnecting', () => {
-      this._emit('connection-status', 'connecting');
-    });
-
-    this.socket.on('new-message', (data) => {
-      this._emit('new-message', data);
-    });
-
-    this.socket.on('user-typing', (data) => {
-      this._emit('user-typing', data);
-    });
-
-    this.socket.on('messages-read', (data) => {
-      this._emit('messages-read', data);
-    });
-
-    this.socket.on('user-online', (data) => {
-      this._emit('user-online', data);
-    });
-
-    this.socket.on('user-offline', (data) => {
-      this._emit('user-offline', data);
-    });
+    this.socket.on('message:new', (payload) => this._emit('message:new', payload));
+    this.socket.on('message:read', (payload) => this._emit('message:read', payload));
+    this.socket.on('typing:update', (payload) => this._emit('typing:update', payload));
+    this.socket.on('reaction:update', (payload) => this._emit('reaction:update', payload));
+    this.socket.on('presence:update', (payload) => this._emit('presence:update', payload));
+    this.socket.on('conversation:updated', (payload) => this._emit('conversation:updated', payload));
+    this.socket.on('chat:error', (payload) => this._emit('chat:error', payload));
   }
 
   disconnect() {
@@ -64,51 +50,57 @@ class ChatService {
       this.socket.disconnect();
       this.socket = null;
     }
+    this.activeConversationId = null;
   }
 
-  joinRoom(roomId) {
-    if (!this.socket) return;
-    this.socket.emit('join-room', { roomId, userId: this.userId });
+  joinConversation(conversationId) {
+    this.activeConversationId = conversationId;
+    this.socket?.emit('conversation:join', { conversationId });
   }
 
-  leaveRoom(roomId) {
-    if (!this.socket) return;
-    this.socket.emit('leave-room', { roomId, userId: this.userId });
+  leaveConversation(conversationId) {
+    if (this.activeConversationId === conversationId) {
+      this.activeConversationId = null;
+    }
+    this.socket?.emit('conversation:leave', { conversationId });
   }
 
-  sendMessage(roomId, message) {
-    if (!this.socket?.connected) return false;
-    this.socket.emit('send-message', { roomId, message, userId: this.userId });
-    return true;
+  startTyping(conversationId) {
+    this.socket?.emit('typing:start', { conversationId });
   }
 
-  emitTyping(roomId, isTyping) {
-    if (!this.socket?.connected) return;
-    this.socket.emit('typing', { roomId, userId: this.userId, isTyping });
+  stopTyping(conversationId) {
+    this.socket?.emit('typing:stop', { conversationId });
   }
 
-  markRead(roomId) {
-    if (!this.socket?.connected) return;
-    this.socket.emit('mark-read', { roomId, userId: this.userId });
+  markRead(conversationId) {
+    this.socket?.emit('message:read', { conversationId });
+  }
+
+  toggleReaction(messageId, emoji) {
+    this.socket?.emit('reaction:toggle', { messageId, emoji });
+  }
+
+  heartbeat() {
+    this.socket?.emit('presence:heartbeat');
   }
 
   on(event, handler) {
-    if (!this.handlers[event]) this.handlers[event] = [];
+    if (!this.handlers[event]) {
+      this.handlers[event] = [];
+    }
     this.handlers[event].push(handler);
   }
 
   off(event, handler) {
-    if (!this.handlers[event]) return;
-    this.handlers[event] = this.handlers[event].filter(h => h !== handler);
+    if (!this.handlers[event]) {
+      return;
+    }
+    this.handlers[event] = this.handlers[event].filter((candidate) => candidate !== handler);
   }
 
-  _emit(event, data) {
-    if (!this.handlers[event]) return;
-    this.handlers[event].forEach(h => h(data));
-  }
-
-  isConnected() {
-    return this.socket?.connected || false;
+  _emit(event, payload) {
+    (this.handlers[event] || []).forEach((handler) => handler(payload));
   }
 }
 

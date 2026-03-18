@@ -4,10 +4,10 @@ import Navigation from '../components/Navigation';
 import { useChatContext } from '../contexts/ChatContext';
 
 const members = [
-  { initials: 'JT', name: 'Jamie Tan', uni: 'NUS · CS Year 2', role: 'Frontend Lead', roleColor: { bg: 'rgba(255,107,107,0.1)', c: 'var(--coral)' }, gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', skills: ['React', 'TypeScript', 'Figma'], progress: 87 },
-  { initials: 'WM', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', role: 'ML Engineer', roleColor: { bg: 'rgba(66,165,245,0.1)', c: 'var(--sky)' }, gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', skills: ['Python', 'TensorFlow', 'AWS'], progress: 91 },
-  { initials: 'EH', name: 'Emily Huang', uni: 'SMU · IS Year 3', role: 'Full-Stack', roleColor: { bg: 'rgba(255,138,101,0.1)', c: 'var(--peach)' }, gradient: 'linear-gradient(135deg,#ff8a65,#ff6b6b)', skills: ['Node.js', 'React', 'PostgreSQL'], progress: 78 },
-  { initials: 'PS', name: 'Priya Sharma', uni: 'SMU · IS Year 2', role: 'Backend Dev', roleColor: { bg: 'rgba(179,157,219,0.1)', c: 'var(--lavender)' }, gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', skills: ['Node.js', 'Docker', 'PostgreSQL'], progress: 82 },
+  { id: 'jamie', initials: 'JT', name: 'Jamie Tan', uni: 'NUS · CS Year 2', role: 'Frontend Lead', roleColor: { bg: 'rgba(255,107,107,0.1)', c: 'var(--coral)' }, gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', skills: ['React', 'TypeScript', 'Figma'], progress: 87 },
+  { id: 'weiming', initials: 'WM', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', role: 'ML Engineer', roleColor: { bg: 'rgba(66,165,245,0.1)', c: 'var(--sky)' }, gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', skills: ['Python', 'TensorFlow', 'AWS'], progress: 91 },
+  { id: 'emily', initials: 'EH', name: 'Emily Huang', uni: 'SMU · IS Year 3', role: 'Full-Stack', roleColor: { bg: 'rgba(255,138,101,0.1)', c: 'var(--peach)' }, gradient: 'linear-gradient(135deg,#ff8a65,#ff6b6b)', skills: ['Node.js', 'React', 'PostgreSQL'], progress: 78 },
+  { id: 'priya', initials: 'PS', name: 'Priya Sharma', uni: 'SMU · IS Year 2', role: 'Backend Dev', roleColor: { bg: 'rgba(179,157,219,0.1)', c: 'var(--lavender)' }, gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', skills: ['Node.js', 'Docker', 'PostgreSQL'], progress: 82 },
 ];
 
 const chatMessages = [
@@ -24,26 +24,12 @@ const sprint = [
   { emoji: '⏳', title: 'Pitch Deck', sub: 'Assigned to You · Pending', bg: 'rgba(66,165,245,0.12)' },
 ];
 
-const memberIds = {
-  'Jamie Tan': 'jamie',
-  'Wei Ming Chen': 'weiming',
-  'Emily Huang': 'emily',
-  'Priya Sharma': 'priya',
-};
-
 export default function Dashboard() {
   const navigate = useNavigate();
   const { openOrCreateDM } = useChatContext();
 
-  const handleDM = (member) => {
-    const id = memberIds[member.name] || member.name.toLowerCase().replace(/\s+/g, '-');
-    openOrCreateDM({
-      id,
-      name: member.name,
-      initials: member.initials,
-      gradient: member.gradient,
-      online: false,
-    });
+  const handleDM = async (member) => {
+    await openOrCreateDM(member.id);
     navigate('/messages');
   };
 

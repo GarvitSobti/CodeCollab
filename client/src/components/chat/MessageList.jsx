@@ -1,95 +1,150 @@
 import React, { useEffect, useRef } from 'react';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function getDateLabel(timeStr) {
-  // For mock data we just use Today; in production you'd compare real dates
-  return 'Today';
+function getDateLabel(isoDate) {
+  const date = new Date(isoDate);
+  return date.toLocaleDateString('en-SG', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 function groupMessagesByDate(messages) {
   const groups = [];
   let currentLabel = null;
-  messages.forEach(msg => {
-    const label = getDateLabel(msg.time);
+
+  messages.forEach((message) => {
+    const label = getDateLabel(message.sentAt);
     if (label !== currentLabel) {
       currentLabel = label;
       groups.push({ type: 'date', label });
     }
-    groups.push({ type: 'message', ...msg });
+    groups.push({ type: 'message', ...message });
   });
+
   return groups;
 }
 
-// ─── Read Receipt Icon ────────────────────────────────────────────────────────
-function ReadTick({ read }) {
-  const color = read ? '#42a5f5' : 'rgba(255,255,255,0.5)';
+function ReactionPill({ reaction, currentUserId, onReact }) {
+  const selected = reaction.userIds?.includes(currentUserId);
   return (
-    <svg width="14" height="9" viewBox="0 0 14 9" fill="none" style={{ marginLeft: 4, flexShrink: 0 }}>
-      <path d="M1 4.5L4 7.5L9 1.5" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      {read && <path d="M5 4.5L8 7.5L13 1.5" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>}
-    </svg>
+    <button
+      type="button"
+      onClick={() => onReact?.(reaction.emoji)}
+      style={{
+        border: '1px solid rgba(0,0,0,0.08)',
+        background: selected ? 'rgba(255,138,101,0.12)' : 'rgba(0,0,0,0.03)',
+        color: selected ? 'var(--coral)' : 'var(--text-soft)',
+        borderRadius: 999,
+        padding: '4px 8px',
+        fontSize: '0.66rem',
+        cursor: 'pointer',
+      }}
+    >
+      {reaction.emoji} {reaction.count}
+    </button>
   );
 }
 
-// ─── Typing Indicator ─────────────────────────────────────────────────────────
-function TypingBubble({ names, chatType }) {
-  const label = chatType === 'group' && names.length > 0
-    ? `${names.join(', ')} ${names.length === 1 ? 'is' : 'are'} typing`
-    : 'typing';
+function Attachment({ message }) {
+  if (!message.attachmentUrl) {
+    return null;
+  }
+
+  const fullUrl = message.attachmentUrl.startsWith('http')
+    ? message.attachmentUrl
+    : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${message.attachmentUrl}`;
+
+  if (message.messageType === 'image') {
+    return (
+      <a href={fullUrl} target="_blank" rel="noreferrer">
+        <img
+          src={fullUrl}
+          alt={message.attachmentName || 'Uploaded'}
+          style={{ width: '100%', maxWidth: 240, borderRadius: 14, marginTop: message.body ? 10 : 0 }}
+        />
+      </a>
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 3,
-        padding: '10px 16px', borderRadius: 16, borderTopLeftRadius: 4,
-        background: 'var(--bg)', maxWidth: 80,
-      }}>
-        {[0, 1, 2].map(i => (
-          <span key={i} style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: 'var(--text-soft)',
-            animation: `typingDot 1.2s ease-in-out ${i * 0.2}s infinite`,
-          }} />
-        ))}
-      </div>
-      <span style={{ fontSize: '0.65rem', color: 'var(--text-soft)', fontStyle: 'italic' }}>{label}</span>
-      <style>{`
-        @keyframes typingDot {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-          30% { transform: translateY(-4px); opacity: 1; }
-        }
-      `}</style>
-    </div>
+    <a
+      href={fullUrl}
+      target="_blank"
+      rel="noreferrer"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '10px 12px',
+        borderRadius: 12,
+        background: 'rgba(255,255,255,0.16)',
+        color: 'inherit',
+        textDecoration: 'none',
+        marginTop: message.body ? 10 : 0,
+      }}
+    >
+      <span>📎</span>
+      <span style={{ fontSize: '0.72rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{message.attachmentName}</span>
+    </a>
   );
 }
 
-// ─── Single Message Bubble ────────────────────────────────────────────────────
-function MessageBubble({ msg, participant, chatType, isSelf }) {
+function LinkPreview({ preview, isSelf }) {
+  if (!preview) {
+    return null;
+  }
+
+  return (
+    <a
+      href={preview.url}
+      target="_blank"
+      rel="noreferrer"
+      style={{
+        display: 'block',
+        marginTop: 10,
+        padding: 12,
+        borderRadius: 12,
+        textDecoration: 'none',
+        background: isSelf ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.04)',
+        color: 'inherit',
+      }}
+    >
+      <div style={{ fontSize: '0.72rem', fontWeight: 700, marginBottom: 4 }}>{preview.title}</div>
+      <div style={{ fontSize: '0.66rem', opacity: 0.85, marginBottom: 6 }}>{preview.description}</div>
+      <div style={{ fontSize: '0.62rem', opacity: 0.72 }}>{preview.hostname}</div>
+    </a>
+  );
+}
+
+function MessageBubble({ message, participant, isSelf, currentUserId, onReact }) {
   return (
     <div style={{
       display: 'flex',
       flexDirection: isSelf ? 'row-reverse' : 'row',
       alignItems: 'flex-end',
       gap: 8,
-      marginBottom: 4,
+      marginBottom: 8,
     }}>
       {!isSelf && (
         <div style={{
-          width: 28, height: 28, borderRadius: 9, flexShrink: 0,
+          width: 28,
+          height: 28,
+          borderRadius: 9,
+          flexShrink: 0,
           background: participant?.gradient || 'var(--bg)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '0.55rem', fontWeight: 800, color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '0.55rem',
+          fontWeight: 800,
+          color: 'white',
         }}>
           {participant?.initials || '?'}
         </div>
       )}
 
-      <div style={{ maxWidth: '68%' }}>
-        {!isSelf && chatType === 'group' && (
-          <div style={{ fontSize: '0.62rem', color: 'var(--text-soft)', marginBottom: 3, paddingLeft: 2, fontWeight: 600 }}>
-            {participant?.name || 'Unknown'}
-          </div>
-        )}
+      <div style={{ maxWidth: '72%' }}>
         <div style={{
           padding: '10px 14px',
           borderRadius: 16,
@@ -102,51 +157,80 @@ function MessageBubble({ msg, participant, chatType, isSelf }) {
             : 'var(--bg)',
           color: isSelf ? 'white' : 'var(--text-body)',
           wordBreak: 'break-word',
+          opacity: message.isPending ? 0.72 : 1,
+          border: message.isFailed ? '1px solid #d64545' : 'none',
         }}>
-          {msg.text}
+          {message.body && <div>{message.body}</div>}
+          <Attachment message={message} />
+          <LinkPreview preview={message.linkPreview} isSelf={isSelf} />
         </div>
+
+        {message.reactions?.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
+            {message.reactions.map((reaction) => (
+              <ReactionPill
+                key={`${message.id}-${reaction.emoji}`}
+                reaction={reaction}
+                currentUserId={currentUserId}
+                onReact={() => onReact?.(message.id, reaction.emoji)}
+              />
+            ))}
+          </div>
+        )}
+
         <div style={{
           display: 'flex',
-          alignItems: 'center',
           justifyContent: isSelf ? 'flex-end' : 'flex-start',
-          gap: 2,
-          marginTop: 3,
-          paddingLeft: isSelf ? 0 : 2,
-          paddingRight: isSelf ? 2 : 0,
+          gap: 6,
+          marginTop: 4,
+          fontSize: '0.6rem',
+          color: 'var(--text-faint)',
         }}>
-          <span style={{ fontSize: '0.6rem', color: 'var(--text-faint)' }}>{msg.time}</span>
-          {isSelf && <ReadTick read={msg.read} />}
+          <span>{new Date(message.sentAt).toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' })}</span>
+          {isSelf && <span>{message.read ? 'Read' : message.isPending ? 'Sending…' : message.isFailed ? 'Failed' : 'Sent'}</span>}
         </div>
       </div>
     </div>
   );
 }
 
-// ─── MessageList ──────────────────────────────────────────────────────────────
-export default function MessageList({ messages = [], participants = [], currentUserId, typingUsers = [], chatType = 'dm' }) {
+export default function MessageList({
+  messages = [],
+  participants = [],
+  currentUserId,
+  typingUsers = [],
+  onLoadOlder,
+  hasMore = false,
+  loading = false,
+  onReact,
+}) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, typingUsers]);
 
-  const grouped = groupMessagesByDate(messages);
-
-  // Build participant lookup by id
+  const groupedMessages = groupMessagesByDate(messages);
   const participantMap = {};
-  participants.forEach(p => { participantMap[p.id] = p; });
+  participants.forEach((participant) => {
+    participantMap[participant.id] = participant;
+  });
 
-  if (messages.length === 0 && typingUsers.length === 0) {
+  if (!messages.length && !typingUsers.length) {
     return (
       <div style={{
-        flex: 1, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        gap: 12, color: 'var(--text-soft)',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12,
+        color: 'var(--text-soft)',
       }}>
         <div style={{ fontSize: '2.5rem' }}>👋</div>
         <p style={{ fontSize: '0.85rem', fontWeight: 500 }}>No messages yet. Say hi!</p>
         <p style={{ fontSize: '0.72rem', color: 'var(--text-faint)', textAlign: 'center', maxWidth: 220 }}>
-          Start the conversation and find your perfect hackathon teammate.
+          Start the conversation and see whether your next teammate is the right fit.
         </p>
       </div>
     );
@@ -154,18 +238,46 @@ export default function MessageList({ messages = [], participants = [], currentU
 
   return (
     <div style={{
-      flex: 1, overflowY: 'auto', padding: '20px 24px',
-      display: 'flex', flexDirection: 'column', gap: 2, minHeight: 0,
+      flex: 1,
+      overflowY: 'auto',
+      padding: '20px 24px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2,
+      minHeight: 0,
     }}>
-      {grouped.map((item, idx) => {
+      {hasMore && (
+        <button
+          type="button"
+          onClick={onLoadOlder}
+          disabled={loading}
+          style={{
+            alignSelf: 'center',
+            border: '1px solid rgba(0,0,0,0.08)',
+            background: 'var(--bg-card)',
+            borderRadius: 999,
+            padding: '8px 14px',
+            fontSize: '0.72rem',
+            color: 'var(--text-soft)',
+            cursor: 'pointer',
+            marginBottom: 12,
+          }}
+        >
+          {loading ? 'Loading…' : 'Load older messages'}
+        </button>
+      )}
+
+      {groupedMessages.map((item, index) => {
         if (item.type === 'date') {
           return (
-            <div key={`date-${idx}`} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
+            <div key={`date-${index}`} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
               margin: '12px 0 8px',
             }}>
               <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.06)' }} />
-              <span style={{ fontSize: '0.62rem', color: 'var(--text-faint)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.62rem', color: 'var(--text-faint)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                 {item.label}
               </span>
               <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.06)' }} />
@@ -174,24 +286,24 @@ export default function MessageList({ messages = [], participants = [], currentU
         }
 
         const isSelf = item.senderId === currentUserId;
-        const participant = participantMap[item.senderId];
+        const participant = participantMap[item.senderId] || item.sender;
 
         return (
           <MessageBubble
-            key={item.id || idx}
-            msg={item}
+            key={item.id || item.clientMessageId || index}
+            message={item}
             participant={participant}
-            chatType={chatType}
             isSelf={isSelf}
+            currentUserId={currentUserId}
+            onReact={onReact}
           />
         );
       })}
 
       {typingUsers.length > 0 && (
-        <TypingBubble
-          names={typingUsers.map(uid => participantMap[uid]?.name || uid)}
-          chatType={chatType}
-        />
+        <div style={{ fontSize: '0.68rem', color: 'var(--text-soft)', fontStyle: 'italic', paddingLeft: 8 }}>
+          {typingUsers.map((userId) => participantMap[userId]?.name || userId).join(', ')} typing…
+        </div>
       )}
 
       <div ref={bottomRef} />

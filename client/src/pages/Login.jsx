@@ -13,7 +13,6 @@ export default function Login() {
     registerWithEmailPassword,
     signInWithGoogle,
     signInWithGithub,
-    logout,
     fetchProvidersByEmail,
   } = useAuth();
 
@@ -61,7 +60,7 @@ export default function Login() {
         await handleDuplicateAccountError(email);
       } else {
         const message = error?.message || 'Authentication failed';
-        setErrorMessage(message.replace('Firebase: ', '').replace(/\[[0-9;]*m/g, ''));
+        setErrorMessage(message.replace('Firebase: ', ''));
       }
     } finally {
       setIsSubmitting(false);
@@ -77,7 +76,7 @@ export default function Login() {
       navigate(redirectTo, { replace: true });
     } catch (error) {
       const message = error?.message || 'Authentication failed';
-      setErrorMessage(message.replace('Firebase: ', '').replace(/\[[0-9;]*m/g, ''));
+      setErrorMessage(message.replace('Firebase: ', ''));
     } finally {
       setIsSubmitting(false);
     }
