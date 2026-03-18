@@ -72,9 +72,10 @@ export default function Messages() {
   const activeMessages = messages[activeConversationId] || [];
   const activeTyping = typingUsers[activeConversationId] || [];
 
-  const filteredConversations = conversations.filter((conversation) => (
-    conversation.participant?.name?.toLowerCase().includes(search.toLowerCase())
-  ));
+  const filteredConversations = conversations.filter((conversation) => {
+    const participantName = conversation.participant?.name ?? '';
+    return participantName.toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
     <div style={{ minHeight: '100vh' }}>

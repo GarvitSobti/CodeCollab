@@ -63,7 +63,6 @@ app.use(cors({
 app.use(express.json({ limit: '6mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 app.set('io', io);
 
@@ -77,6 +76,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/v1/messages', messageRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admin/hackathons', adminHackathonRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);

@@ -72,6 +72,7 @@ export const ChatProvider = ({ children }) => {
   const nextCursorByConversation = useRef({});
   const activeConversationRef = useRef(null);
   const typingTimeouts = useRef({});
+  const optimisticAttachmentUrls = useRef(new Set());
 
   const hydratePresence = useCallback((nextConversations) => {
     setPresenceByUserId((current) => {
@@ -217,6 +218,7 @@ export const ChatProvider = ({ children }) => {
     chatService.on('reaction:update', onReaction);
     chatService.on('presence:update', onPresence);
     chatService.on('conversation:updated', onConversationUpdated);
+    const attachmentUrls = optimisticAttachmentUrls.current;
 
     return () => {
       mounted = false;
@@ -228,6 +230,8 @@ export const ChatProvider = ({ children }) => {
       chatService.off('presence:update', onPresence);
       chatService.off('conversation:updated', onConversationUpdated);
       chatService.disconnect();
+      attachmentUrls.forEach((url) => URL.revokeObjectURL(url));
+      attachmentUrls.clear();
     };
   }, [currentUser, isAuthenticated, loadConversations, loading]);
 
@@ -276,6 +280,10 @@ export const ChatProvider = ({ children }) => {
 
   const sendMessage = useCallback(async (conversationId, payload) => {
     const clientMessageId = `local-${Date.now()}`;
+    const optimisticAttachmentUrl = payload.file ? URL.createObjectURL(payload.file) : null;
+    if (optimisticAttachmentUrl) {
+      optimisticAttachmentUrls.current.add(optimisticAttachmentUrl);
+    }
     const optimisticMessage = {
       id: clientMessageId,
       clientMessageId,
@@ -286,7 +294,7 @@ export const ChatProvider = ({ children }) => {
       attachmentName: payload.file?.name || null,
       attachmentMimeType: payload.file?.type || null,
       attachmentSize: payload.file?.size || null,
-      attachmentUrl: payload.file ? URL.createObjectURL(payload.file) : null,
+      attachmentUrl: optimisticAttachmentUrl,
       linkPreview: null,
       reactions: [],
       sentAt: new Date().toISOString(),
@@ -319,6 +327,10 @@ export const ChatProvider = ({ children }) => {
         lastMessage: persisted,
         lastActivityAt: persisted.sentAt,
       }));
+      if (optimisticAttachmentUrl) {
+        URL.revokeObjectURL(optimisticAttachmentUrl);
+        optimisticAttachmentUrls.current.delete(optimisticAttachmentUrl);
+      }
     } catch (error) {
       setMessagesByConversation((current) => ({
         ...current,

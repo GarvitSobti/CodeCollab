@@ -85,7 +85,12 @@ function toMessagePayload(message, currentUserId, recipientReadAt = null) {
 }
 
 async function ensureCurrentUser(authUser) {
-  await ensureDemoMatchesForUser(authUser.uid);
+  const shouldSeedDemoMatches = process.env.NODE_ENV !== 'production'
+    && process.env.CHAT_DEMO_SEED !== 'false';
+
+  if (shouldSeedDemoMatches) {
+    await ensureDemoMatchesForUser(authUser.uid);
+  }
 
   const [user] = await User.upsert({
     id: authUser.uid,
@@ -271,6 +276,10 @@ async function listConversations(userId) {
 
 async function listMessages(userId, conversationId, { cursor, limit = 30 }) {
   await requireConversationMembership(conversationId, userId);
+  const parsedLimit = Number.parseInt(limit, 10);
+  const safeLimit = Number.isFinite(parsedLimit)
+    ? Math.min(Math.max(parsedLimit, 1), 50)
+    : 30;
   const participants = await ConversationParticipant.findAll({
     where: { conversationId },
   });
@@ -278,7 +287,13 @@ async function listMessages(userId, conversationId, { cursor, limit = 30 }) {
 
   const where = { conversationId };
   if (cursor) {
-    where.sentAt = { [Op.lt]: new Date(cursor) };
+    const parsedCursor = new Date(cursor);
+    if (Number.isNaN(parsedCursor.getTime())) {
+      const err = new Error('Invalid message cursor');
+      err.status = 400;
+      throw err;
+    }
+    where.sentAt = { [Op.lt]: parsedCursor };
   }
 
   const messages = await Message.findAll({
@@ -288,11 +303,11 @@ async function listMessages(userId, conversationId, { cursor, limit = 30 }) {
       { model: MessageReaction, as: 'reactions' },
     ],
     order: [['sentAt', 'DESC']],
-    limit: Number(limit),
+    limit: safeLimit,
   });
 
   const orderedMessages = [...messages].reverse();
-  const nextCursor = messages.length === Number(limit)
+  const nextCursor = messages.length === safeLimit
     ? messages[messages.length - 1].sentAt
     : null;
 
@@ -342,7 +357,7 @@ async function createMessage({
     senderId,
     body: trimmedBody || null,
     messageType,
-    attachmentUrl: file ? `/uploads/${file.filename}` : null,
+    attachmentUrl: file ? `/api/messages/uploads/${file.filename}` : null,
     attachmentName: file?.originalname || null,
     attachmentMimeType: file?.mimetype || null,
     attachmentSize: file?.size || null,
@@ -368,6 +383,26 @@ async function createMessage({
   });
 
   return getMessageById(message.id, senderId);
+}
+
+async function getAttachmentForUser(userId, filename) {
+  const attachmentUrl = `/api/messages/uploads/${filename}`;
+  const message = await Message.findOne({
+    where: { attachmentUrl },
+  });
+
+  if (!message) {
+    const err = new Error('Attachment not found');
+    err.status = 404;
+    throw err;
+  }
+
+  await requireConversationMembership(message.conversationId, userId);
+
+  return {
+    absolutePath: path.join(uploadDir, filename),
+    message,
+  };
 }
 
 async function getMessageById(messageId, currentUserId) {
@@ -446,6 +481,7 @@ module.exports = {
   toggleReaction,
   requireConversationMembership,
   getConversationSummary,
+  getAttachmentForUser,
   toUserSummary,
   uploadDir,
 };

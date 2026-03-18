@@ -1,14 +1,17 @@
 const express = require('express');
+const fs = require('fs/promises');
 const multer = require('multer');
 const path = require('path');
 const authMiddleware = require('../middleware/authMiddleware');
 const {
   createMessage,
   ensureCurrentUser,
+  getAttachmentForUser,
   getConversationSummary,
   listConversations,
   listMessages,
   markConversationRead,
+  requireConversationMembership,
   openOrCreateDmConversation,
   toggleReaction,
   uploadDir,
@@ -53,6 +56,15 @@ const upload = multer({
 
 router.use(authMiddleware);
 
+async function validateConversationMembership(req, res, next) {
+  try {
+    await requireConversationMembership(req.params.conversationId, req.auth.uid);
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
 router.get('/conversations', async (req, res, next) => {
   try {
     await ensureCurrentUser(req.auth);
@@ -66,6 +78,16 @@ router.get('/conversations', async (req, res, next) => {
 router.post('/conversations/dm/open', async (req, res, next) => {
   try {
     const { participantUserId } = req.body;
+
+    if (!participantUserId || typeof participantUserId !== 'string') {
+      return res.status(400).json({
+        error: {
+          message: 'participantUserId is required',
+          status: 400,
+        },
+      });
+    }
+
     await ensureCurrentUser(req.auth);
     const conversation = await openOrCreateDmConversation(req.auth.uid, participantUserId);
     const summary = await getConversationSummary(req.auth.uid, conversation.id);
@@ -87,7 +109,16 @@ router.get('/conversations/:conversationId/messages', async (req, res, next) => 
   }
 });
 
-router.post('/conversations/:conversationId/messages', upload.single('attachment'), async (req, res, next) => {
+router.get('/uploads/:filename', async (req, res, next) => {
+  try {
+    const attachment = await getAttachmentForUser(req.auth.uid, req.params.filename);
+    res.sendFile(attachment.absolutePath);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/conversations/:conversationId/messages', validateConversationMembership, upload.single('attachment'), async (req, res, next) => {
   try {
     const message = await createMessage({
       conversationId: req.params.conversationId,
@@ -108,6 +139,9 @@ router.post('/conversations/:conversationId/messages', upload.single('attachment
 
     res.status(201).json({ message });
   } catch (error) {
+    if (req.file?.path) {
+      await fs.unlink(req.file.path).catch(() => {});
+    }
     next(error);
   }
 });
