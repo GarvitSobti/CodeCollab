@@ -34,7 +34,7 @@ function PublicOnlyRoute({ children }) {
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ChatProvider>
           <div className="App">
             <Routes>
