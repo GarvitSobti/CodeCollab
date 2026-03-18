@@ -1,107 +1,125 @@
-/**
- * Socket.io chat event handlers.
- * Uses an in-memory store for demo purposes — swap with DB calls in production.
- */
+const {
+  createMessage,
+  ensureCurrentUser,
+  markConversationRead,
+  requireConversationMembership,
+  toggleReaction,
+} = require('../services/chatService');
+const { verifySocketUser } = require('../utils/socketAuth');
 
-// In-memory stores
-const messageStore = {};   // { roomId: Message[] }
-const presenceMap = {};    // { userId: socketId }
-const socketUserMap = {};  // { socketId: userId }
-const socketRooms = {};    // { socketId: Set<roomId> }
+const typingTimers = new Map();
+const presenceSockets = new Map();
 
-function getOrCreateRoom(roomId) {
-  if (!messageStore[roomId]) messageStore[roomId] = [];
-  return messageStore[roomId];
+function emitPresence(io, userId, isOnline) {
+  io.emit('presence:update', { userId, isOnline });
 }
 
-function registerChatHandlers(io) {
+async function registerChatHandlers(io) {
+  io.use(async (socket, next) => {
+    try {
+      socket.user = await verifySocketUser(socket);
+      await ensureCurrentUser(socket.user);
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+
   io.on('connection', (socket) => {
-    console.log(`[chat] client connected: ${socket.id}`);
+    const userId = socket.user.uid;
+    const currentCount = presenceSockets.get(userId) || 0;
+    presenceSockets.set(userId, currentCount + 1);
+    emitPresence(io, userId, true);
 
-    // ── User comes online ──────────────────────────────────────────────────
-    socket.on('user-online', ({ userId }) => {
-      presenceMap[userId] = socket.id;
-      socketUserMap[socket.id] = userId;
-      socketRooms[socket.id] = new Set();
-      // Broadcast to all clients
-      socket.broadcast.emit('user-online', { userId });
-      console.log(`[chat] ${userId} is online`);
-    });
-
-    // ── Join a room ────────────────────────────────────────────────────────
-    socket.on('join-room', ({ roomId, userId }) => {
-      socket.join(roomId);
-      if (socketRooms[socket.id]) socketRooms[socket.id].add(roomId);
-      console.log(`[chat] ${userId || socket.id} joined room ${roomId}`);
-    });
-
-    // ── Leave a room ───────────────────────────────────────────────────────
-    socket.on('leave-room', ({ roomId, userId }) => {
-      socket.leave(roomId);
-      if (socketRooms[socket.id]) socketRooms[socket.id].delete(roomId);
-      console.log(`[chat] ${userId || socket.id} left room ${roomId}`);
-    });
-
-    // ── Send a message ─────────────────────────────────────────────────────
-    socket.on('send-message', ({ roomId, message, userId }) => {
-      if (!roomId || !message?.text) return;
-
-      const stored = {
-        id: message.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        text: message.text,
-        senderId: userId || message.senderId || 'unknown',
-        time: message.time || new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' }),
-        read: false,
-        timestamp: Date.now(),
-      };
-
-      getOrCreateRoom(roomId).push(stored);
-
-      // Emit to everyone in the room (including sender's other tabs)
-      io.to(roomId).emit('new-message', { roomId, message: stored });
-      console.log(`[chat] message in room ${roomId} from ${stored.senderId}`);
-    });
-
-    // ── Typing indicator ──────────────────────────────────────────────────
-    socket.on('typing', ({ roomId, userId, isTyping }) => {
-      if (!roomId || !userId) return;
-      // Broadcast to room excluding sender
-      socket.to(roomId).emit('user-typing', { roomId, userId, isTyping });
-    });
-
-    // ── Mark messages as read ─────────────────────────────────────────────
-    socket.on('mark-read', ({ roomId, userId }) => {
-      if (!roomId || !userId) return;
-      const room = messageStore[roomId];
-      if (room) {
-        room.forEach(m => { if (m.senderId !== userId) m.read = true; });
+    socket.on('conversation:join', async ({ conversationId }) => {
+      try {
+        await requireConversationMembership(conversationId, userId);
+        socket.join(conversationId);
+      } catch (error) {
+        socket.emit('chat:error', { message: error.message, conversationId });
       }
-      socket.to(roomId).emit('messages-read', { roomId, userId });
     });
 
-    // ── Disconnect ────────────────────────────────────────────────────────
+    socket.on('conversation:leave', ({ conversationId }) => {
+      socket.leave(conversationId);
+    });
+
+    socket.on('message:send', async (payload) => {
+      try {
+        const message = await createMessage({
+          conversationId: payload.conversationId,
+          senderId: userId,
+          body: payload.body,
+          clientMessageId: payload.clientMessageId,
+          file: null,
+        });
+
+        io.to(payload.conversationId).emit('message:new', {
+          conversationId: payload.conversationId,
+          message,
+        });
+        io.to(payload.conversationId).emit('conversation:updated', {
+          conversationId: payload.conversationId,
+        });
+      } catch (error) {
+        socket.emit('chat:error', { message: error.message, conversationId: payload.conversationId });
+      }
+    });
+
+    socket.on('message:read', async ({ conversationId }) => {
+      try {
+        const payload = await markConversationRead(userId, conversationId);
+        io.to(conversationId).emit('message:read', payload);
+      } catch (error) {
+        socket.emit('chat:error', { message: error.message, conversationId });
+      }
+    });
+
+    socket.on('typing:start', async ({ conversationId }) => {
+      try {
+        await requireConversationMembership(conversationId, userId);
+        socket.to(conversationId).emit('typing:update', { conversationId, userId, isTyping: true });
+        const timerKey = `${conversationId}:${userId}`;
+        clearTimeout(typingTimers.get(timerKey));
+        typingTimers.set(timerKey, setTimeout(() => {
+          socket.to(conversationId).emit('typing:update', { conversationId, userId, isTyping: false });
+          typingTimers.delete(timerKey);
+        }, 3000));
+      } catch (error) {
+        socket.emit('chat:error', { message: error.message, conversationId });
+      }
+    });
+
+    socket.on('typing:stop', ({ conversationId }) => {
+      socket.to(conversationId).emit('typing:update', { conversationId, userId, isTyping: false });
+      const timerKey = `${conversationId}:${userId}`;
+      clearTimeout(typingTimers.get(timerKey));
+      typingTimers.delete(timerKey);
+    });
+
+    socket.on('reaction:toggle', async ({ messageId, emoji }) => {
+      try {
+        const payload = await toggleReaction({ userId, messageId, emoji });
+        io.to(payload.conversationId).emit('reaction:update', payload);
+      } catch (error) {
+        socket.emit('chat:error', { message: error.message, messageId });
+      }
+    });
+
+    socket.on('presence:heartbeat', () => {
+      emitPresence(io, userId, true);
+    });
+
     socket.on('disconnect', () => {
-      const userId = socketUserMap[socket.id];
-      if (userId) {
-        delete presenceMap[userId];
-        socket.broadcast.emit('user-offline', { userId });
-        console.log(`[chat] ${userId} went offline`);
+      const nextCount = Math.max((presenceSockets.get(userId) || 1) - 1, 0);
+      if (nextCount === 0) {
+        presenceSockets.delete(userId);
+        emitPresence(io, userId, false);
+      } else {
+        presenceSockets.set(userId, nextCount);
       }
-      delete socketUserMap[socket.id];
-      delete socketRooms[socket.id];
     });
   });
 }
 
-// Expose message store for REST routes
-function getMessages(roomId) {
-  return messageStore[roomId] || [];
-}
-
-function addMessage(roomId, message) {
-  const room = getOrCreateRoom(roomId);
-  room.push(message);
-  return message;
-}
-
-module.exports = { registerChatHandlers, getMessages, addMessage };
+module.exports = { registerChatHandlers };

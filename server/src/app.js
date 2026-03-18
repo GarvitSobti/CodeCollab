@@ -5,9 +5,11 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const http = require('http');
 const socketIo = require('socket.io');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const { registerChatHandlers } = require('./socket/chatHandlers');
+const { syncDatabase } = require('./models');
 
 const app = express();
 const server = http.createServer(app);
@@ -27,6 +29,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 app.set('io', io);
 
@@ -63,9 +66,16 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+syncDatabase()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Failed to initialize database', error);
+    process.exit(1);
+  });
 
 module.exports = { app, server, io };

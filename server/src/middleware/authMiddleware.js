@@ -36,6 +36,15 @@ async function authMiddleware(req, res, next) {
 
     return next();
   } catch (error) {
+    if (error?.message === 'Firebase Admin credentials are not configured on the server') {
+      return res.status(503).json({
+        error: {
+          message: 'Firebase Admin credentials are not configured on the server',
+          status: 503,
+        },
+      });
+    }
+
     return res.status(401).json({
       error: {
         message: 'Invalid or expired Firebase ID token',
