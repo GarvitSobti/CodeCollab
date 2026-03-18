@@ -46,6 +46,20 @@ export default function Home() {
           <h1 style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>CodeCollab</h1>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button
+            onClick={() => navigate('/admin/login')}
+            style={{
+              padding: 0,
+              border: 'none',
+              background: 'transparent',
+              color: 'var(--text-faint)',
+              fontSize: '0.76rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            For organizers
+          </button>
           <button onClick={() => navigate('/login')} style={{ padding: '8px 20px', borderRadius: 12, fontSize: '0.82rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.1)', background: 'transparent', color: 'var(--text-body)', cursor: 'pointer' }}>
             Sign In
           </button>
@@ -74,6 +88,22 @@ export default function Home() {
             </button>
             <button onClick={() => navigate('/discover')} style={{ padding: '14px 32px', borderRadius: 14, fontSize: '0.95rem', fontWeight: 700, border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--bg-card)', color: 'var(--text-dark)', cursor: 'pointer' }}>
               Browse Profiles
+            </button>
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={() => navigate('/admin/login')}
+              style={{
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--text-faint)',
+                fontSize: '0.76rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Running a hackathon? Open the organizer portal.
             </button>
           </div>
         </div>
