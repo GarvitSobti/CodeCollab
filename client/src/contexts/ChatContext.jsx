@@ -58,6 +58,7 @@ export const useChatContext = () => {
 export const ChatProvider = ({ children }) => {
   const { user, isAuthenticated, loading } = useAuth();
   const currentUser = useMemo(() => mapAuthUser(user), [user]);
+  const canUseChat = Boolean(isAuthenticated && currentUser?.id);
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [messagesByConversation, setMessagesByConversation] = useState({});
@@ -87,19 +88,27 @@ export const ChatProvider = ({ children }) => {
   }, []);
 
   const loadConversations = useCallback(async () => {
+    if (!canUseChat) {
+      setConversations([]);
+      setActiveConversationId(null);
+      return;
+    }
+
     setLoadingConversations(true);
     try {
       const nextConversations = await fetchConversations();
       setConversations(nextConversations);
       hydratePresence(nextConversations);
       setActiveConversationId((current) => current || nextConversations[0]?.id || null);
+    } catch {
+      // Ignore network/auth errors here; consumer UIs can rely on loading and empty states.
     } finally {
       setLoadingConversations(false);
     }
-  }, [hydratePresence]);
+  }, [canUseChat, hydratePresence]);
 
   const loadConversationMessages = useCallback(async (conversationId, { append = false } = {}) => {
-    if (!conversationId) {
+    if (!conversationId || !canUseChat) {
       return;
     }
 
@@ -117,13 +126,16 @@ export const ChatProvider = ({ children }) => {
     } finally {
       setLoadingMessagesByConversation((current) => ({ ...current, [conversationId]: false }));
     }
-  }, []);
+  }, [canUseChat]);
 
   useEffect(() => {
-    if (loading || !isAuthenticated || !currentUser) {
+    if (loading || !canUseChat) {
       setConversations([]);
       setActiveConversationId(null);
       setMessagesByConversation({});
+      setTypingUsersByConversation({});
+      setPresenceByUserId({});
+      setConnectionStatus('disconnected');
       chatService.disconnect();
       return undefined;
     }
@@ -137,7 +149,11 @@ export const ChatProvider = ({ children }) => {
       }
 
       chatService.connect(token);
-      await loadConversations();
+      try {
+        await loadConversations();
+      } catch {
+        // Keep provider mounted even if backend is temporarily unavailable.
+      }
     }
 
     boot();
@@ -233,9 +249,13 @@ export const ChatProvider = ({ children }) => {
       attachmentUrls.forEach((url) => URL.revokeObjectURL(url));
       attachmentUrls.clear();
     };
-  }, [currentUser, isAuthenticated, loadConversations, loading]);
+  }, [canUseChat, currentUser, loadConversations, loading]);
 
   useEffect(() => {
+    if (!canUseChat) {
+      return;
+    }
+
     if (!activeConversationId || activeConversationRef.current === activeConversationId) {
       return;
     }
@@ -249,7 +269,7 @@ export const ChatProvider = ({ children }) => {
     loadConversationMessages(activeConversationId);
     markConversationRead(activeConversationId).catch(() => {});
     chatService.markRead(activeConversationId);
-  }, [activeConversationId, loadConversationMessages]);
+  }, [activeConversationId, canUseChat, loadConversationMessages]);
 
   useEffect(() => {
     if (!chatService.socket) {
