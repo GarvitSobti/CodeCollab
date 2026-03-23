@@ -108,4 +108,20 @@ body {
 
 @media (max-width: 768px) {
   .nav-links { display: none !important; }
+
+  .teams-dashboard-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .teams-sidebar-scroll {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(230px, 1fr));
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 4px;
+  }
+
+  .team-overview-grid {
+    grid-template-columns: 1fr !important;
+  }
 }

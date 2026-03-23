@@ -1,4 +1,5 @@
 import { auth } from '../config/firebase';
+import User from '../models/User';
 
 function getInitials(name = '') {
   const initials = name
@@ -16,14 +17,14 @@ export function mapAuthUser(firebaseUser) {
     return null;
   }
 
-  return {
+  return new User({
     id: firebaseUser.uid,
     name: firebaseUser.displayName || firebaseUser.email || 'CodeCollab User',
     email: firebaseUser.email || '',
     avatarUrl: firebaseUser.photoURL || null,
     role: 'student',
     initials: getInitials(firebaseUser.displayName || firebaseUser.email || 'CodeCollab User'),
-  };
+  });
 }
 
 export async function getAuthToken() {

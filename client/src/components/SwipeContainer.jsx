@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChatContext } from '../contexts/ChatContext';
+import User from '../models/User';
 
-const profiles = [
+const rawProfiles = [
   { id: 'jamie', name: 'Jamie Tan', uni: 'NUS · CS Year 2', skills: ['React', 'TypeScript', 'Figma'], hackathons: 5, rating: 4.8, reviews: 12, match: 92, quote: 'Loves building pixel-perfect UIs. Always ships ahead of schedule.', gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#ffe0d6,#ffd4cc,#ffeee8)', initials: 'JT', skillColors: [{bg:'rgba(255,107,107,0.1)',c:'#ff6b6b'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(179,157,219,0.1)',c:'#b39ddb'}] },
   { id: 'weiming', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', skills: ['Python', 'TensorFlow', 'AWS'], hackathons: 8, rating: 4.9, reviews: 21, match: 88, quote: 'ML wizard who makes complex models feel simple. Great team player.', gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', bannerGrad: 'linear-gradient(135deg,#d6eaff,#c8e0ff,#e0f0ff)', initials: 'WM', skillColors: [{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(102,187,106,0.1)',c:'#66bb6a'}] },
   { id: 'priya', name: 'Priya Sharma', uni: 'SMU · IS Year 2', skills: ['Node.js', 'PostgreSQL', 'Docker'], hackathons: 3, rating: 4.7, reviews: 8, match: 95, quote: 'Backend powerhouse. Set up our entire API in one night at HackNUS.', gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', bannerGrad: 'linear-gradient(135deg,#ece0ff,#e0d4f5,#f0e8ff)', initials: 'PS', skillColors: [{bg:'rgba(179,157,219,0.1)',c:'#b39ddb'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'},{bg:'rgba(255,138,101,0.1)',c:'#ff8a65'}] },
   { id: 'alex', name: 'Alex Ng', uni: 'SUTD · EPD Year 3', skills: ['Flutter', 'Firebase', 'UI/UX'], hackathons: 6, rating: 4.6, reviews: 15, match: 84, quote: 'Cross-platform maestro. His mobile apps always win the design award.', gradient: 'linear-gradient(135deg,#66bb6a,#43a047)', bannerGrad: 'linear-gradient(135deg,#dcf5dd,#c8eeca,#e8f8e8)', initials: 'AN', skillColors: [{bg:'rgba(102,187,106,0.1)',c:'#66bb6a'},{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(240,98,146,0.1)',c:'#f06292'}] },
   { id: 'sarah', name: 'Sarah Lim', uni: 'NUS · CS Year 4', skills: ['Rust', 'Go', 'Systems'], hackathons: 11, rating: 5.0, reviews: 28, match: 90, quote: 'Senior dev energy. Mentored our whole team and we placed 1st.', gradient: 'linear-gradient(135deg,#ffca28,#ff8a65)', bannerGrad: 'linear-gradient(135deg,#fff5d6,#ffedcc,#fff8e0)', initials: 'SL', skillColors: [{bg:'rgba(255,202,40,0.1)',c:'#f9a825'},{bg:'rgba(255,107,107,0.1)',c:'#ff6b6b'},{bg:'rgba(66,165,245,0.1)',c:'#42a5f5'}] },
 ];
+
+const profiles = rawProfiles.map((profile) => new User(profile));
 
 function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
   const cardRef = useRef(null);
