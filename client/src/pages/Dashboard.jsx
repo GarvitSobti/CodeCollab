@@ -22,12 +22,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ minHeight: '100vh' }}>
-      <div className="mesh-bg">
-        <div className="mesh-blob blob-1" /><div className="mesh-blob blob-2" />
-        <div className="mesh-blob blob-3" /><div className="mesh-blob blob-4" />
-      </div>
-      <div className="noise" />
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Navigation />
 
       <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
@@ -35,6 +30,7 @@ export default function Dashboard() {
           <TeamsSidebar teams={teamsData} selectedTeamId={selectedTeamId} onSelectTeam={setSelectedTeamId} />
           <TeamWorkspace team={selectedTeam} onOpenMessages={() => navigate('/messages')} onDM={handleDM} />
         </div>
+
       </div>
     </div>
   );

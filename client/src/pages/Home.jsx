@@ -1,95 +1,133 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import BrandFlower from '../components/BrandFlower';
 
-const petalColors = ['var(--peach)', 'var(--coral)', 'var(--lavender)', 'var(--mint)', 'var(--sky)'];
-const petalAngles = [270, 342, 54, 126, 198];
-
-const features = [
-  { icon: '🎯', title: 'Smart Matching', desc: 'Get matched with teammates based on skills, interests, and availability.' },
-  { icon: '✨', title: 'Swipe to Connect', desc: 'Tinder-style interface makes finding teammates fun and intuitive.' },
-  { icon: '🚀', title: 'Discover Hackathons', desc: 'Browse and join hackathons from universities across Singapore.' },
-  { icon: '💬', title: 'Real-time Chat', desc: 'Connect instantly with your matches and build your dream team.' },
+const bloomColors = [
+  'var(--peach)',     // b
+  'var(--accent)',    // l
+  'var(--lavender)',  // o
+  'var(--mint)',      // o
+  'var(--sky)',       // m
 ];
+
+const steps = [
+  { label: 'Swipe', desc: 'Browse students with complementary skills — your next teammate is one flick away.', color: 'var(--peach)' },
+  { label: 'Match', desc: 'When the interest is mutual, you\'re instantly connected and ready to chat.', color: 'var(--lavender)' },
+  { label: 'Build', desc: 'Form your dream team, join a hackathon, and ship something real — together.', color: 'var(--mint)' },
+];
+
+const ease = [0.16, 1, 0.3, 1];
 
 export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: '100vh' }}>
-      <div className="mesh-bg">
-        <div className="mesh-blob blob-1" />
-        <div className="mesh-blob blob-2" />
-        <div className="mesh-blob blob-3" />
-        <div className="mesh-blob blob-4" />
-        <div className="mesh-blob blob-5" />
-      </div>
-      <div className="noise" />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
-      {/* Nav */}
+      {/* ─── Nav ─── */}
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: 72, zIndex: 100,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px',
-        background: 'rgba(250,247,242,0.85)', backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.05)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 clamp(16px, 4vw, 40px)', background: 'var(--bg)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <div style={{ width: 36, height: 36, position: 'relative' }}>
-            {petalColors.map((bg, i) => {
-              const r = 10;
-              const angle = (petalAngles[i] * Math.PI) / 180;
-              const x = 50 + r * Math.cos(angle);
-              const y = 50 + r * Math.sin(angle);
-              return <div key={i} style={{ position: 'absolute', width: 12, height: 12, borderRadius: '50%', background: bg, top: `${y}%`, left: `${x}%`, transform: 'translate(-50%,-50%)' }} />;
-            })}
-            <div style={{ position: 'absolute', width: 9, height: 9, borderRadius: '50%', background: 'var(--honey)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 2 }} />
-          </div>
-          <h1 style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>CodeCollab</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <BrandFlower />
+          <span style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>CodeCollab</span>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <button
             onClick={() => navigate('/admin/login')}
             style={{
-              padding: 0,
-              border: 'none',
-              background: 'transparent',
-              color: 'var(--text-faint)',
-              fontSize: '0.76rem',
-              fontWeight: 600,
-              cursor: 'pointer'
+              padding: '8px 18px', borderRadius: 12, fontSize: '0.76rem', fontWeight: 600,
+              border: 'none', background: 'transparent', color: 'var(--text-faint)',
+              cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
             For organizers
           </button>
-          <button onClick={() => navigate('/login')} style={{ padding: '8px 20px', borderRadius: 12, fontSize: '0.82rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.1)', background: 'transparent', color: 'var(--text-body)', cursor: 'pointer' }}>
+          <motion.button
+            onClick={() => navigate('/login')}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            style={{ padding: '8px 18px', borderRadius: 12, fontSize: '0.82rem', fontWeight: 600, border: '1.5px solid var(--border-strong)', background: 'transparent', color: 'var(--text-body)', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
             Sign In
-          </button>
-          <button onClick={() => navigate('/login')} style={{ padding: '9px 22px', borderRadius: 12, fontSize: '0.82rem', fontWeight: 700, border: 'none', background: 'linear-gradient(135deg, var(--peach), var(--coral))', color: 'white', cursor: 'pointer', boxShadow: '0 4px 16px rgba(255,138,101,0.3)' }}>
-            Get Started →
-          </button>
+          </motion.button>
+          <motion.button
+            onClick={() => navigate('/login')}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.97 }}
+            style={{ padding: '9px 22px', borderRadius: 12, fontSize: '0.82rem', fontWeight: 700, border: 'none', background: 'var(--accent)', color: 'white', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Get Started
+          </motion.button>
         </div>
       </nav>
 
-      {/* Hero */}
-      <div style={{ position: 'relative', zIndex: 2, padding: '160px 40px 80px', maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
-        <div className="stagger">
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 16px', borderRadius: 20, background: 'linear-gradient(135deg, rgba(255,138,101,0.15), rgba(179,157,219,0.15))', fontSize: '0.75rem', fontWeight: 600, color: 'var(--peach)', marginBottom: 20 }}>
-            🌸 500+ students already matched
-          </div>
-          <h1 style={{ fontSize: '4rem', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: 20 }}>
-            Find people who<br />
-            <span className="flowing-text">make ideas bloom</span>
-          </h1>
-          <p style={{ fontSize: '1.1rem', color: 'var(--text-body)', maxWidth: 500, margin: '0 auto 36px', lineHeight: 1.7 }}>
-            Connect with talented students, discover hackathons you'll love, and build teams that bring out the best in everyone.
-          </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => navigate('/login')} style={{ padding: '14px 32px', borderRadius: 14, fontSize: '0.95rem', fontWeight: 700, border: 'none', background: 'linear-gradient(135deg, var(--peach), var(--coral))', color: 'white', cursor: 'pointer', boxShadow: '0 6px 24px rgba(255,138,101,0.35)' }}>
-              Start Swiping →
-            </button>
-            <button onClick={() => navigate('/discover')} style={{ padding: '14px 32px', borderRadius: 14, fontSize: '0.95rem', fontWeight: 700, border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--bg-card)', color: 'var(--text-dark)', cursor: 'pointer' }}>
-              Browse Profiles
-            </button>
-          </div>
+      {/* ─── Hero ─── */}
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '72px 40px 0', position: 'relative', overflow: 'hidden' }}>
+
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 800 }}>
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.08, ease }}
+            style={{
+              fontSize: 'clamp(2.2rem, 6vw, 4rem)', fontWeight: 800,
+              letterSpacing: '-0.04em', lineHeight: 1.1,
+              color: 'var(--text-dark)', marginBottom: 32,
+            }}
+          >
+            Find people who<br />make ideas{' '}
+            <span style={{ display: 'inline-block', fontSize: 'clamp(2.6rem, 7vw, 4.8rem)', lineHeight: 0.95, letterSpacing: '-0.05em' }}>
+              {'bloom'.split('').map((letter, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.65, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 + i * 0.07, ease }}
+                  whileHover={{
+                    scale: 1.3,
+                    y: -6,
+                    transition: { type: 'spring', stiffness: 500, damping: 12 },
+                  }}
+                  style={{ display: 'inline-block', color: bloomColors[i], cursor: 'default' }}
+                >
+                  {letter}
+                </motion.span>
+              ))}
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.16, ease }}
+            style={{
+              fontSize: '1.05rem', color: 'var(--text-body)',
+              maxWidth: 420, margin: '0 auto 44px', lineHeight: 1.7,
+            }}
+          >
+            Swipe to match with talented students, form teams, and compete in hackathons across Singapore.
+          </motion.p>
+
+          <motion.button
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.06, boxShadow: '0 14px 44px rgba(224, 93, 80, 0.3)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            onClick={() => navigate('/login')}
+            style={{
+              padding: '16px 44px', borderRadius: 14, fontSize: '1rem', fontWeight: 700,
+              border: 'none', background: 'var(--accent)', color: 'white',
+              cursor: 'pointer', boxShadow: 'var(--shadow-heavy)', fontFamily: 'inherit',
+            }}
+          >
+            Get Started
+          </motion.button>
+
           <div style={{ marginTop: 16 }}>
             <button
               onClick={() => navigate('/admin/login')}
@@ -100,7 +138,8 @@ export default function Home() {
                 color: 'var(--text-faint)',
                 fontSize: '0.76rem',
                 fontWeight: 600,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                fontFamily: 'inherit',
               }}
             >
               Running a hackathon? Open the organizer portal.
@@ -108,45 +147,86 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="stagger d2" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, maxWidth: 560, margin: '60px auto 0' }}>
-          {[{ val: '500+', lbl: 'Active Students', c: 'var(--coral)' }, { val: '1000+', lbl: 'Matches Made', c: 'var(--mint)' }, { val: '50+', lbl: 'Hackathons', c: 'var(--sky)' }].map(s => (
-            <div key={s.lbl} style={{ padding: '20px 16px', borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 800, display: 'block', color: s.c }}>{s.val}</span>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-soft)', marginTop: 4 }}>{s.lbl}</span>
-            </div>
-          ))}
-        </div>
+        {/* Scroll hint */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
+          style={{
+            position: 'absolute', bottom: 32, left: '50%',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+            zIndex: 2, transform: 'translateX(-50%)',
+          }}
+        >
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-faint)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            Scroll
+          </span>
+          <motion.svg
+            width="18" height="10" viewBox="0 0 18 10"
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <path d="M2 2 L9 8 L16 2" stroke="var(--text-faint)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          </motion.svg>
+        </motion.div>
+      </div>
 
-        {/* Features */}
-        <div className="stagger d3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16, marginTop: 80 }}>
-          {features.map(f => (
-            <div key={f.title} style={{ padding: 28, borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)', textAlign: 'left', transition: 'all 0.3s' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-heavy)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-card)'; }}
-            >
-              <div style={{ fontSize: '2rem', marginBottom: 14 }}>{f.icon}</div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 8 }}>{f.title}</h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-body)', lineHeight: 1.6 }}>{f.desc}</p>
-            </div>
-          ))}
-        </div>
+      {/* ─── How it works ─── */}
+      <div style={{ padding: '60px clamp(24px, 8vw, 100px) 100px', maxWidth: 640, margin: '0 auto', width: '100%' }}>
+        {steps.map((step, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.65, delay: i * 0.12, ease }}
+            style={{ marginBottom: i < steps.length - 1 ? 56 : 0 }}
+          >
+            <h3 style={{
+              fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)', fontWeight: 800,
+              letterSpacing: '-0.03em', color: 'var(--text-dark)',
+              marginBottom: 6,
+            }}>
+              {step.label}<span style={{ color: step.color }}>.</span>
+            </h3>
+            <p style={{
+              fontSize: '0.95rem', color: 'var(--text-soft)', lineHeight: 1.65,
+            }}>
+              {step.desc}
+            </p>
+          </motion.div>
+        ))}
+      </div>
 
-        {/* CTA */}
-        <div className="stagger d4" style={{ marginTop: 80, padding: '48px 40px', borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 12 }}>
-            Ready to find your <span className="flowing-text">dream team</span>?
-          </h2>
-          <p style={{ fontSize: '0.95rem', color: 'var(--text-body)', marginBottom: 28 }}>Join hundreds of students already building amazing projects together.</p>
-          <button onClick={() => navigate('/login')} style={{ padding: '13px 32px', borderRadius: 14, fontSize: '0.95rem', fontWeight: 700, border: 'none', background: 'linear-gradient(135deg, var(--peach), var(--coral))', color: 'white', cursor: 'pointer', boxShadow: '0 6px 24px rgba(255,138,101,0.3)' }}>
-            Get Started for Free →
-          </button>
-        </div>
+      {/* ─── Bottom CTA ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 0.6, ease }}
+        style={{ textAlign: 'center', padding: '20px 24px 80px' }}
+      >
+        <p style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: 20, letterSpacing: '-0.02em' }}>
+          Ready to find your team?
+        </p>
+        <motion.button
+          onClick={() => navigate('/login')}
+          whileHover={{ scale: 1.06, boxShadow: '0 14px 44px rgba(224, 93, 80, 0.3)' }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          style={{
+            padding: '14px 36px', borderRadius: 14, fontSize: '0.95rem', fontWeight: 700,
+            border: 'none', background: 'var(--accent)', color: 'white',
+            cursor: 'pointer', boxShadow: 'var(--shadow-heavy)', fontFamily: 'inherit',
+          }}
+        >
+          Start Matching
+        </motion.button>
+      </motion.div>
 
-        {/* Footer */}
-        <div style={{ marginTop: 60, paddingTop: 32, borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: '0.78rem', color: 'var(--text-faint)' }}>
-          © 2026 CodeCollab. Built with love for Singapore's hackathon community.
-        </div>
+      {/* ─── Footer ─── */}
+      <div style={{ padding: '24px 40px', fontSize: '0.75rem', color: 'var(--text-faint)', textAlign: 'center' }}>
+        2026 CodeCollab
       </div>
     </div>
   );
