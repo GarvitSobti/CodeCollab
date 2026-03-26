@@ -36,7 +36,7 @@ const SwipeCard = ({ user, onSwipe }) => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br from-coral to-peach flex items-center justify-center">
               <span className="text-8xl text-white font-bold">{user.name?.charAt(0)}</span>
             </div>
           )}
@@ -79,13 +79,13 @@ const SwipeCard = ({ user, onSwipe }) => {
 
         {/* Swipe indicators */}
         <motion.div
-          className="absolute top-6 right-6 bg-success-500 text-white font-bold text-xl px-5 py-2.5 rounded-xl shadow-smooth-lg rotate-12"
+          className="absolute top-6 right-6 bg-mint text-white font-bold text-xl px-5 py-2.5 rounded-xl shadow-smooth-lg rotate-12"
           style={{ opacity: useTransform(x, [0, 100], [0, 1]) }}
         >
           ✓ LIKE
         </motion.div>
         <motion.div
-          className="absolute top-6 left-6 bg-danger-500 text-white font-bold text-xl px-5 py-2.5 rounded-xl shadow-smooth-lg -rotate-12"
+          className="absolute top-6 left-6 bg-accent text-white font-bold text-xl px-5 py-2.5 rounded-xl shadow-smooth-lg -rotate-12"
           style={{ opacity: useTransform(x, [-100, 0], [1, 0]) }}
         >
           ✕ PASS

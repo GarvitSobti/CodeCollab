@@ -115,101 +115,107 @@ function ProfileCard({ profile, onSwipeLeft, onSwipeRight }) {
     };
   }, [onSwipeLeft, onSwipeRight]);
 
+  const bannerHeight = '30%';
+
   return (
     <div
       ref={cardRef}
       style={{
         position: 'absolute', width: '100%', height: '100%',
-        borderRadius: 'var(--radius)', background: 'var(--bg-card)',
-        boxShadow: 'var(--shadow-heavy)', border: '1px solid rgba(0,0,0,0.04)',
+        borderRadius: 20, background: 'var(--bg-card)',
+        boxShadow: 'var(--shadow-heavy)',
+        border: '1px solid var(--border)',
         overflow: 'hidden', cursor: 'grab', userSelect: 'none',
         willChange: 'transform', touchAction: 'none',
+        display: 'flex', flexDirection: 'column',
       }}
     >
       <div className="swipe-label-connect" style={{
         position: 'absolute', top: 28, right: 20, padding: '10px 24px',
         borderRadius: 14, fontWeight: 800, fontSize: '1.2rem',
-        background: 'rgba(102,187,106,0.12)', color: 'var(--mint)',
-        border: '2.5px solid var(--mint)', transform: 'rotate(8deg)',
+        background: 'var(--bg-card)', color: 'var(--accent)',
+        border: '2.5px solid var(--accent)', transform: 'rotate(8deg)',
         opacity: 0, pointerEvents: 'none', zIndex: 10,
-      }}>Connect ✨</div>
+      }}>Connect</div>
       <div className="swipe-label-pass" style={{
         position: 'absolute', top: 28, left: 20, padding: '10px 24px',
         borderRadius: 14, fontWeight: 800, fontSize: '1.2rem',
-        background: 'rgba(255,107,107,0.12)', color: 'var(--coral)',
-        border: '2.5px solid var(--coral)', transform: 'rotate(-8deg)',
+        background: 'var(--bg-card)', color: 'var(--text-soft)',
+        border: '2.5px solid var(--text-soft)', transform: 'rotate(-8deg)',
         opacity: 0, pointerEvents: 'none', zIndex: 10,
       }}>Pass</div>
 
-      <div style={{ height: 140, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ width: '100%', height: '100%', background: profile.bannerGrad }} />
+      {/* Banner */}
+      <div style={{ height: bannerHeight, minHeight: 120, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{ width: '100%', height: '100%', background: profile.gradient, opacity: 0.55 }} />
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 70,
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
           background: 'linear-gradient(to top, var(--bg-card), transparent)',
         }} />
         <div style={{
-          position: 'absolute', top: 14, right: 14, padding: '5px 12px',
-          borderRadius: 10, fontSize: '0.7rem', fontWeight: 700,
-          fontFamily: "'Fira Code', monospace", background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(8px)', color: 'var(--mint)',
-          display: 'flex', alignItems: 'center', gap: 5,
+          position: 'absolute', top: 16, right: 16, padding: '6px 14px',
+          borderRadius: 10, fontSize: '0.8rem', fontWeight: 700,
+          fontFamily: "'Fira Code', monospace", background: 'var(--bg-card)',
+          color: 'var(--accent)', border: '1px solid var(--border)',
+          display: 'flex', alignItems: 'center', gap: 6,
         }}>
           <div style={{
-            width: 6, height: 6, borderRadius: '50%', background: 'var(--mint)',
+            width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)',
             animation: 'pulseDot 1.8s infinite',
           }} />
           {profile.match}% match
         </div>
       </div>
 
-      <div style={{ padding: '16px 22px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+      {/* Content */}
+      <div style={{ padding: '20px 28px 28px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
           <div style={{
-            width: 52, height: 52, borderRadius: 15, background: profile.gradient,
+            width: 60, height: 60, borderRadius: 16, background: profile.gradient,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 800, fontSize: '1.15rem', color: 'white', flexShrink: 0,
+            fontWeight: 800, fontSize: '1.3rem', color: 'white', flexShrink: 0,
           }}>{profile.initials}</div>
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.02em' }}>{profile.name}</h3>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-soft)', marginTop: 1 }}>{profile.uni}</p>
+            <h3 style={{ fontSize: '1.35rem', fontWeight: 700, letterSpacing: '-0.02em' }}>{profile.name}</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-soft)', marginTop: 2 }}>{profile.uni}</p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 14 }}>
-          {profile.skills.map((s, i) => (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+          {profile.skills.map((s) => (
             <span key={s} style={{
-              padding: '4px 11px', borderRadius: 9, fontSize: '0.65rem',
+              padding: '5px 14px', borderRadius: 10, fontSize: '0.75rem',
               fontWeight: 600, fontFamily: "'Fira Code', monospace",
-              background: profile.skillColors[i].bg, color: profile.skillColors[i].c,
+              background: 'var(--bg-warm)', color: 'var(--text-body)',
             }}>{s}</span>
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
           {[
             { val: profile.hackathons, lbl: 'Hackathons' },
-            { val: `★ ${profile.rating}`, lbl: 'Rating', color: '#f9a825' },
+            { val: profile.rating, lbl: 'Rating' },
             { val: profile.reviews, lbl: 'Reviews' },
-          ].map(({ val, lbl, color }) => (
+          ].map(({ val, lbl }) => (
             <div key={lbl} style={{
-              textAlign: 'center', padding: '10px 6px', borderRadius: 12, background: 'var(--bg)',
+              textAlign: 'center', padding: '14px 8px', borderRadius: 14, background: 'var(--bg)',
             }}>
-              <span style={{ fontSize: '1rem', fontWeight: 700, display: 'block', color: color || 'inherit' }}>{val}</span>
-              <span style={{ fontSize: '0.55rem', color: 'var(--text-soft)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{lbl}</span>
+              <span style={{ fontSize: '1.15rem', fontWeight: 700, display: 'block' }}>{val}</span>
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-soft)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{lbl}</span>
             </div>
           ))}
         </div>
 
         <div style={{
-          padding: '12px 14px', borderRadius: 12, background: 'var(--bg)',
-          fontSize: '0.75rem', color: 'var(--text-body)', fontStyle: 'italic', lineHeight: 1.55,
-          position: 'relative',
+          padding: '16px 18px', borderRadius: 14, background: 'var(--bg)',
+          fontSize: '0.85rem', color: 'var(--text-body)', fontStyle: 'italic', lineHeight: 1.6,
+          position: 'relative', flex: 1, display: 'flex', alignItems: 'center',
         }}>
           <span style={{
-            position: 'absolute', top: -4, left: 10, fontSize: '1.8rem',
-            fontStyle: 'normal', fontWeight: 800, color: 'var(--lavender)', opacity: 0.5,
+            position: 'absolute', top: -2, left: 12, fontSize: '2rem',
+            fontStyle: 'normal', fontWeight: 800, color: 'var(--accent)', opacity: 0.2,
           }}>"</span>
-          {profile.quote}
+          <span style={{ paddingLeft: 4 }}>{profile.quote}</span>
         </div>
       </div>
     </div>
@@ -276,12 +282,12 @@ function MatchModal({ profile, onMessage, onClose }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
           >
-            💬 Message {profile.name.split(' ')[0]}
+            Message {profile.name.split(' ')[0]}
           </button>
           <button
             onClick={onClose}
             style={{
-              padding: '12px 0', borderRadius: 14, border: '1.5px solid rgba(0,0,0,0.08)',
+              padding: '12px 0', borderRadius: 14, border: '1.5px solid var(--border)',
               cursor: 'pointer', background: 'var(--bg)', color: 'var(--text-soft)',
               fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 600,
             }}
@@ -309,7 +315,6 @@ export default function SwipeContainer() {
   const handleSwipeRight = () => {
     const currentProfile = profiles[idx];
     advance();
-    // Show match modal (simulate mutual match)
     setMatchedProfile(currentProfile);
   };
 
@@ -325,7 +330,13 @@ export default function SwipeContainer() {
     : profiles.slice(idx, idx + 3);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      width: '100%',
+      height: '100%',
+      maxHeight: 'calc(100vh - 72px)',
+      padding: '20px 20px 24px',
+    }}>
       {matchedProfile && (
         <MatchModal
           profile={matchedProfile}
@@ -333,12 +344,18 @@ export default function SwipeContainer() {
           onClose={() => setMatchedProfile(null)}
         />
       )}
-      <div style={{ position: 'relative', width: 380, height: 520, marginBottom: 28 }}>
+      <div style={{
+        position: 'relative',
+        width: 'min(500px, 92vw)',
+        flex: 1,
+        maxHeight: 700,
+        marginBottom: 24,
+      }}>
         {[...visible].reverse().map((p, i) => {
           const isTop = i === visible.length - 1;
-          const scale = 1 - (visible.length - 1 - i) * 0.05;
-          const translateY = (visible.length - 1 - i) * 12;
-          const opacity = i === 0 ? 0.2 : i === 1 ? 0.5 : 1;
+          const scale = 1 - (visible.length - 1 - i) * 0.04;
+          const translateY = (visible.length - 1 - i) * 10;
+          const opacity = i === 0 ? 0.15 : i === 1 ? 0.4 : 1;
           return (
             <div key={p.name + i} style={{
               position: 'absolute', width: '100%', height: '100%',
@@ -356,9 +373,10 @@ export default function SwipeContainer() {
               )}
               {!isTop && (
                 <div style={{
-                  width: '100%', height: '100%', borderRadius: 'var(--radius)',
-                  background: 'var(--bg-card)', boxShadow: 'var(--shadow-card)',
-                  border: '1px solid rgba(0,0,0,0.04)',
+                  width: '100%', height: '100%', borderRadius: 20,
+                  background: 'var(--bg-card)',
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid var(--border)',
                 }} />
               )}
             </div>
@@ -366,17 +384,17 @@ export default function SwipeContainer() {
         })}
       </div>
 
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexShrink: 0 }}>
         <button
           onClick={advance}
           style={{
-            width: 54, height: 54, borderRadius: '50%', border: '2px solid rgba(0,0,0,0.06)',
+            width: 54, height: 54, borderRadius: '50%', border: '2px solid var(--border)',
             background: 'var(--bg-card)', cursor: 'pointer', display: 'flex',
             alignItems: 'center', justifyContent: 'center', color: 'var(--text-soft)',
             boxShadow: 'var(--shadow-soft)', transition: 'all 0.35s cubic-bezier(0.23,1,0.32,1)',
           }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--coral)'; e.currentTarget.style.color = 'var(--coral)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--text-soft)'; e.currentTarget.style.color = 'var(--text-dark)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -384,13 +402,13 @@ export default function SwipeContainer() {
         </button>
         <button
           style={{
-            width: 54, height: 54, borderRadius: '50%', border: '2px solid rgba(0,0,0,0.06)',
+            width: 54, height: 54, borderRadius: '50%', border: '2px solid var(--border)',
             background: 'var(--bg-card)', cursor: 'pointer', display: 'flex',
             alignItems: 'center', justifyContent: 'center', color: 'var(--text-soft)',
-            boxShadow: 'var(--shadow-soft)',
+            boxShadow: 'var(--shadow-soft)', transition: 'all 0.35s cubic-bezier(0.23,1,0.32,1)',
           }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--honey)'; e.currentTarget.style.color = 'var(--honey)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
         >
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -400,12 +418,12 @@ export default function SwipeContainer() {
           onClick={handleSwipeRight}
           style={{
             width: 64, height: 64, borderRadius: '50%', border: 'none',
-            background: 'linear-gradient(135deg, var(--mint), #43a047)',
+            background: 'var(--accent)',
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'white', boxShadow: '0 6px 24px rgba(102,187,106,0.35)',
+            color: 'white', boxShadow: 'var(--shadow-card)',
             transition: 'all 0.35s cubic-bezier(0.23,1,0.32,1)',
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.15)'; }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
         >
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
