@@ -1,11 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import { useChatContext } from '../contexts/ChatContext';
 
 const members = [
-  { initials: 'JT', name: 'Jamie Tan', uni: 'NUS · CS Year 2', role: 'Frontend Lead', gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', skills: ['React', 'TypeScript', 'Figma'] },
-  { initials: 'WM', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', role: 'ML Engineer', gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', skills: ['Python', 'TensorFlow', 'AWS'] },
-  { initials: 'EH', name: 'Emily Huang', uni: 'SMU · IS Year 3', role: 'Full-Stack', gradient: 'linear-gradient(135deg,#ff8a65,#ff6b6b)', skills: ['Node.js', 'React', 'PostgreSQL'] },
-  { initials: 'PS', name: 'Priya Sharma', uni: 'SMU · IS Year 2', role: 'Backend Dev', gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', skills: ['Node.js', 'Docker', 'PostgreSQL'] },
+  { id: 'jamie', initials: 'JT', name: 'Jamie Tan', uni: 'NUS · CS Year 2', role: 'Frontend Lead', gradient: 'linear-gradient(135deg,#ff6b6b,#ff8a65)', skills: ['React', 'TypeScript', 'Figma'] },
+  { id: 'weiming', initials: 'WM', name: 'Wei Ming Chen', uni: 'NTU · CE Year 3', role: 'ML Engineer', gradient: 'linear-gradient(135deg,#42a5f5,#1e88e5)', skills: ['Python', 'TensorFlow', 'AWS'] },
+  { id: 'emily', initials: 'EH', name: 'Emily Huang', uni: 'SMU · IS Year 3', role: 'Full-Stack', gradient: 'linear-gradient(135deg,#ff8a65,#ff6b6b)', skills: ['Node.js', 'React', 'PostgreSQL'] },
+  { id: 'priya', initials: 'PS', name: 'Priya Sharma', uni: 'SMU · IS Year 2', role: 'Backend Dev', gradient: 'linear-gradient(135deg,#b39ddb,#7e57c2)', skills: ['Node.js', 'Docker', 'PostgreSQL'] },
 ];
 
 const sprint = [
@@ -16,6 +18,14 @@ const sprint = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const { openOrCreateDM } = useChatContext();
+
+  const handleDM = async (member) => {
+    await openOrCreateDM(member.id);
+    navigate('/messages');
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Navigation />
@@ -65,10 +75,26 @@ export default function Dashboard() {
                   </div>
                   <span style={{ fontSize: '0.72rem', color: 'var(--text-soft)' }}>{m.uni}</span>
                 </div>
-                <div style={{ display: 'flex', gap: 4, marginLeft: 'auto', flexShrink: 0 }}>
+                <div style={{ display: 'flex', gap: 4, marginLeft: 'auto', flexShrink: 0, alignItems: 'center' }}>
                   {m.skills.map(s => (
                     <span key={s} style={{ padding: '3px 8px', borderRadius: 6, fontSize: '0.6rem', fontWeight: 600, fontFamily: "'Fira Code', monospace", background: 'var(--bg)', color: 'var(--text-soft)' }}>{s}</span>
                   ))}
+                  <button
+                    onClick={() => handleDM(m)}
+                    title={`Message ${m.name.split(' ')[0]}`}
+                    style={{
+                      width: 32, height: 32, borderRadius: 10, border: '1.5px solid var(--border)',
+                      background: 'var(--bg)', cursor: 'pointer', flexShrink: 0, marginLeft: 8,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'var(--text-soft)', transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'white'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
             ))}

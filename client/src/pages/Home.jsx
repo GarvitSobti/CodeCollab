@@ -36,6 +36,16 @@ export default function Home() {
           <span style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>CodeCollab</span>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button
+            onClick={() => navigate('/admin/login')}
+            style={{
+              padding: '8px 18px', borderRadius: 12, fontSize: '0.76rem', fontWeight: 600,
+              border: 'none', background: 'transparent', color: 'var(--text-faint)',
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            For organizers
+          </button>
           <motion.button
             onClick={() => navigate('/login')}
             whileHover={{ scale: 1.04 }}
@@ -105,7 +115,6 @@ export default function Home() {
           <motion.button
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.24, ease }}
             whileHover={{ scale: 1.06, boxShadow: '0 14px 44px rgba(224, 93, 80, 0.3)' }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -118,6 +127,24 @@ export default function Home() {
           >
             Get Started
           </motion.button>
+
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={() => navigate('/admin/login')}
+              style={{
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--text-faint)',
+                fontSize: '0.76rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >
+              Running a hackathon? Open the organizer portal.
+            </button>
+          </div>
         </div>
 
         {/* Scroll hint */}

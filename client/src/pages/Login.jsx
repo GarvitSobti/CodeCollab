@@ -1,16 +1,88 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import BrandFlower from '../components/BrandFlower';
 
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const {
+    signInWithEmailPassword,
+    registerWithEmailPassword,
+    signInWithGoogle,
+    signInWithGithub,
+    fetchProvidersByEmail,
+  } = useAuth();
+
+  const PROVIDER_NAMES = { 'google.com': 'Google', 'github.com': 'GitHub', password: 'email/password' };
+  const friendlyProviders = (methods) => methods.map(m => PROVIDER_NAMES[m] || m).join(' or ');
+
+  const handleDuplicateAccountError = async (emailAddr) => {
+    if (!emailAddr) {
+      setErrorMessage('An account already exists with this email using a different sign-in method.');
+      return;
+    }
+    if (typeof fetchProvidersByEmail !== 'function') {
+      setErrorMessage('An account already exists with this email using a different sign-in method.');
+      return;
+    }
+    try {
+      const methods = await fetchProvidersByEmail(emailAddr);
+      if (methods.length) {
+        setErrorMessage(`This email is already registered via ${friendlyProviders(methods)}. Please sign in with that instead.`);
+      } else {
+        setErrorMessage('An account already exists with this email using a different sign-in method.');
+      }
+    } catch {
+      setErrorMessage('An account already exists with this email using a different sign-in method.');
+    }
+  };
+
+  const redirectTo = location.state?.from || '/discover';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/discover');
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      if (isRegistering) {
+        await registerWithEmailPassword(email, password);
+      } else {
+        await signInWithEmailPassword(email, password);
+      }
+      navigate(redirectTo, { replace: true });
+    } catch (error) {
+      if (error?.code === 'auth/account-exists-with-different-credential') {
+        await handleDuplicateAccountError(email);
+      } else {
+        const message = error?.message || 'Authentication failed';
+        setErrorMessage(message.replace('Firebase: ', ''));
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleProviderSignIn = async (providerAction) => {
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      await providerAction();
+      navigate(redirectTo, { replace: true });
+    } catch (error) {
+      const message = error?.message || 'Authentication failed';
+      setErrorMessage(message.replace('Firebase: ', ''));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -23,11 +95,30 @@ export default function Login() {
             <h1 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>CodeCollab</h1>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-soft)' }}>Find your perfect hackathon teammates</p>
+          <div style={{ marginTop: 10 }}>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/login')}
+              style={{
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--text-faint)',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Organizer sign in
+            </button>
+          </div>
         </div>
 
         {/* Card */}
-        <div style={{ padding: '36px 32px', borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-heavy)', border: '1px solid rgba(0,0,0,0.04)' }}>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 24 }}>Welcome back</h2>
+        <div style={{ padding: '36px 32px', borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-heavy)', border: '1px solid var(--border)' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 24 }}>
+            {isRegistering ? 'Create your account' : 'Welcome back'}
+          </h2>
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 16 }}>
@@ -38,9 +129,9 @@ export default function Login() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="your.email@university.edu"
                 required
-                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.08)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
                 onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.08)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
             <div style={{ marginBottom: 24 }}>
@@ -51,26 +142,34 @@ export default function Login() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.08)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
                 onFocus={e => e.target.style.borderColor = 'var(--accent)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.08)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '13px', borderRadius: 12, fontSize: '0.9rem', fontWeight: 700, border: 'none', background: 'var(--accent)', color: 'white', cursor: 'pointer', boxShadow: 'var(--shadow-card)', transition: 'opacity 0.2s' }}>
-              Sign In
+            <button type="submit" disabled={isSubmitting} style={{ width: '100%', padding: '13px', borderRadius: 12, fontSize: '0.9rem', fontWeight: 700, border: 'none', background: 'var(--accent)', color: 'white', cursor: 'pointer', boxShadow: 'var(--shadow-card)', transition: 'opacity 0.2s' }}>
+              {isSubmitting ? 'Please wait...' : (isRegistering ? 'Create Account' : 'Sign In')}
             </button>
           </form>
 
+          {errorMessage && (
+            <p style={{ marginTop: 12, fontSize: '0.76rem', color: '#d64545', fontWeight: 600 }}>
+              {errorMessage}
+            </p>
+          )}
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '24px 0' }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.06)' }} />
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
             <span style={{ fontSize: '0.72rem', color: 'var(--text-soft)', fontWeight: 500 }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.06)' }} />
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.08)', background: 'var(--bg-card)', color: 'var(--text-dark)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'border-color 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.2)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'}
+            <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-dark)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'border-color 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--text-soft)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+              onClick={() => handleProviderSignIn(signInWithGoogle)}
+              disabled={isSubmitting}
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -80,9 +179,11 @@ export default function Login() {
               </svg>
               Continue with Google
             </button>
-            <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.08)', background: '#24292f', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.2s' }}
+            <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid var(--border)', background: '#24292f', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              onClick={() => handleProviderSignIn(signInWithGithub)}
+              disabled={isSubmitting}
             >
               <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
@@ -92,9 +193,12 @@ export default function Login() {
           </div>
 
           <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-soft)', marginTop: 20 }}>
-            Don't have an account?{' '}
-            <span style={{ color: 'var(--accent)', fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/discover')}>
-              Explore the app
+            {isRegistering ? 'Already have an account?' : "Don't have an account?"}{' '}
+            <span
+              style={{ color: 'var(--accent)', fontWeight: 600, cursor: 'pointer' }}
+              onClick={() => setIsRegistering(prev => !prev)}
+            >
+              {isRegistering ? 'Sign in instead' : 'Create one with email'}
             </span>
           </p>
         </div>
