@@ -1,6 +1,6 @@
 # API Documentation
 
-Base URL: `http://localhost:5000/api` (development)
+Base URL: `http://localhost:3003/api` (development)
 
 All endpoints return JSON responses.
 

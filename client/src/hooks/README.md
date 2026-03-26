@@ -124,7 +124,7 @@ export const useSocket = () => {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:3003';
     socketRef.current = io(socketUrl, {
       auth: {
         token: localStorage.getItem('token')

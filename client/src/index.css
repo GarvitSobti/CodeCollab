@@ -198,6 +198,24 @@ body {
   .nav-links .nav-link { padding: 6px 12px !important; font-size: 0.74rem !important; }
 }
 
+@media (max-width: 768px) {
+  .teams-dashboard-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .teams-sidebar-scroll {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(230px, 1fr));
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 4px;
+  }
+
+  .team-overview-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 640px) {
   .nav-links .nav-link { padding: 5px 8px !important; font-size: 0.65rem !important; }
   .nav-links .nav-link-profile { display: none; }

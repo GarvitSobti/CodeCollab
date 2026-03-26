@@ -107,6 +107,7 @@ firestore-debug.log
 # Local development
 .local/
 .playwright-mcp/
+.claude/
 CodeCollab_Official_Team_Assignments.pdf
 /server/uploads/
 

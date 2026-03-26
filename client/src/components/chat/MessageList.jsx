@@ -53,7 +53,7 @@ function Attachment({ message }) {
 
   const fullUrl = message.attachmentUrl.startsWith('http')
     ? message.attachmentUrl
-    : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${message.attachmentUrl}`;
+    : `${process.env.REACT_APP_API_URL || 'http://localhost:3003'}${message.attachmentUrl}`;
 
   if (message.messageType === 'image') {
     return (
