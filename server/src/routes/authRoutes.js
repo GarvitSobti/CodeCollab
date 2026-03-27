@@ -26,6 +26,35 @@ async function syncUserProfile({ uid, email, name, picture }) {
   }
 }
 
+async function ensureCurrentUser(authUser) {
+  const { uid, email, name, picture } = authUser || {};
+
+  if (!uid) {
+    const error = new Error('Missing authenticated user id');
+    error.status = 401;
+    throw error;
+  }
+
+  await syncUserProfile({ uid, email, name, picture });
+
+  let user = null;
+  try {
+    user = await prisma.user.findUnique({
+      where: { firebaseUid: uid },
+    });
+  } catch (error) {
+    // Keep request flowing even if DB sync/read is temporarily unavailable.
+    console.error('Failed to fetch user via Prisma:', error);
+  }
+
+  return {
+    firebaseUid: uid,
+    email: user?.email || email,
+    name: user?.name || name,
+    avatarUrl: user?.avatarUrl || picture,
+  };
+}
+
 router.post('/register-or-sync', authMiddleware, async (req, res) => {
   try {
     const user = await ensureCurrentUser(req.auth);
@@ -48,23 +77,15 @@ router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await ensureCurrentUser(req.auth);
 
-  let user = null;
-  try {
-    user = await prisma.user.findUnique({
-      where: { firebaseUid: uid },
-    });
+    return res.status(200).json({ user });
   } catch (error) {
-    console.error('Failed to fetch user via Prisma:', error);
+    return res.status(error.status || 500).json({
+      error: {
+        message: error.message || 'Failed to load authenticated user',
+        status: error.status || 500,
+      },
+    });
   }
-
-  return res.status(200).json({
-    user: {
-      firebaseUid: uid,
-      email: user?.email || email,
-      name: user?.name || name,
-      avatarUrl: user?.avatarUrl || picture,
-    },
-  });
 });
 
 module.exports = router;

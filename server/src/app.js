@@ -16,6 +16,8 @@ const { syncDatabase } = require('./models');
 
 const app = express();
 const server = http.createServer(app);
+const shouldEnableFirebaseAuth =
+  process.env.ENABLE_FIREBASE_AUTH === 'true' || process.env.NODE_ENV === 'production';
 
 const allowedOrigins = [
   process.env.CORS_ORIGIN,
@@ -82,7 +84,6 @@ app.get('/', (req, res) => {
 // const messageRoutes = require('./routes/messageRoutes');
 
 if (shouldEnableFirebaseAuth) {
-  const authRoutes = require('./routes/authRoutes');
   const profileRoutes = require('./routes/profileRoutes');
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/profile', profileRoutes);
@@ -124,7 +125,7 @@ app.use((req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 5000;
 syncDatabase()
   .then(() => {
     server.listen(PORT, () => {
