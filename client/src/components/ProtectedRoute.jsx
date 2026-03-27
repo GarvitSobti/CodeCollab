@@ -18,8 +18,8 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (!onboardingCompleted && location.pathname !== '/profile') {
-    return <Navigate to="/profile" replace state={{ from: location.pathname }} />;
+  if (!onboardingCompleted && !location.pathname.startsWith('/register')) {
+    return <Navigate to="/register/welcome" replace state={{ from: location.pathname }} />;
   }
 
   return children;

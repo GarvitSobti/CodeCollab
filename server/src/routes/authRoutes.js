@@ -73,6 +73,42 @@ router.post('/register-or-sync', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/user-exists', async (req, res) => {
+  const email = typeof req.query?.email === 'string' ? req.query.email.trim().toLowerCase() : '';
+
+  if (!email) {
+    return res.status(400).json({
+      error: {
+        message: 'Email query parameter is required',
+        status: 400,
+      },
+    });
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email,
+          mode: 'insensitive',
+        },
+      },
+      select: { id: true },
+    });
+
+    return res.status(200).json({
+      exists: Boolean(user),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: {
+        message: 'Failed to check user existence',
+        status: 500,
+      },
+    });
+  }
+});
+
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await ensureCurrentUser(req.auth);

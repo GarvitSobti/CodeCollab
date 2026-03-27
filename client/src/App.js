@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Hackathons from './pages/Hackathons';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
+import Register from './pages/Register';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminHackathons from './pages/admin/AdminHackathons';
@@ -23,9 +24,9 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ChatProvider } from './contexts/ChatContext';
 
 function PublicOnlyRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, onboardingLoading, onboardingCompleted } = useAuth();
 
-  if (loading) {
+  if (loading || onboardingLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
         <p style={{ color: 'var(--text-soft)', fontWeight: 600 }}>Checking session...</p>
@@ -34,6 +35,9 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (isAuthenticated) {
+    if (!onboardingCompleted) {
+      return <Navigate to="/register/welcome" replace />;
+    }
     return <Navigate to="/discover" replace />;
   }
 
@@ -50,6 +54,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+                <Route path="/register" element={<Navigate to="/register/account" replace />} />
+                <Route path="/register/:step" element={<Register />} />
                 <Route path="/discover" element={<ProtectedRoute><Discover /></ProtectedRoute>} />
                 <Route path="/team" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<Navigate to="/discover" replace />} />
