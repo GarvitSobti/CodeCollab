@@ -72,6 +72,10 @@ export const AuthProvider = ({ children }) => {
     signInWithGithub: () => signInWithPopup(auth, githubProvider),
     signInWithEmailPassword: (email, password) => signInWithEmailAndPassword(auth, email, password),
     registerWithEmailPassword: (email, password) => createUserWithEmailAndPassword(auth, email, password),
+    checkUserExistsByEmail: async (email) => {
+      const response = await api.get('/api/v1/auth/user-exists', { params: { email } });
+      return Boolean(response?.data?.exists);
+    },
     fetchProvidersByEmail: (email) => fetchSignInMethodsForEmail(auth, email),
     refreshOnboardingStatus: fetchOnboardingStatus,
     logout: () => signOut(auth),

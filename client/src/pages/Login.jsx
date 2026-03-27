@@ -9,9 +9,9 @@ export default function Login() {
   const location = useLocation();
   const {
     signInWithEmailPassword,
-    registerWithEmailPassword,
     signInWithGoogle,
     signInWithGithub,
+    checkUserExistsByEmail,
     fetchProvidersByEmail,
   } = useAuth();
 
@@ -44,19 +44,25 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [showRegisterPrompt, setShowRegisterPrompt] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setShowRegisterPrompt(false);
     setIsSubmitting(true);
 
     try {
-      if (isRegistering) {
-        await registerWithEmailPassword(email, password);
-      } else {
-        await signInWithEmailPassword(email, password);
+      if (typeof checkUserExistsByEmail === 'function') {
+        const existsInDb = await checkUserExistsByEmail(email);
+        if (!existsInDb) {
+          setShowRegisterPrompt(true);
+          setErrorMessage('No account was found for this email. Please register to continue.');
+          return;
+        }
       }
+
+      await signInWithEmailPassword(email, password);
       navigate(redirectTo, { replace: true });
     } catch (error) {
       if (error?.code === 'auth/account-exists-with-different-credential') {
@@ -65,6 +71,7 @@ export default function Login() {
         const message = error?.message || 'Authentication failed';
         setErrorMessage(message.replace('Firebase: ', ''));
       }
+      setShowRegisterPrompt(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -117,7 +124,7 @@ export default function Login() {
         {/* Card */}
         <div style={{ padding: '36px 32px', borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-heavy)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 24 }}>
-            {isRegistering ? 'Create your account' : 'Welcome back'}
+            Welcome back
           </h2>
 
           <form onSubmit={handleSubmit}>
@@ -148,7 +155,7 @@ export default function Login() {
               />
             </div>
             <button type="submit" disabled={isSubmitting} style={{ width: '100%', padding: '13px', borderRadius: 12, fontSize: '0.9rem', fontWeight: 700, border: 'none', background: 'var(--accent)', color: 'white', cursor: 'pointer', boxShadow: 'var(--shadow-card)', transition: 'opacity 0.2s' }}>
-              {isSubmitting ? 'Please wait...' : (isRegistering ? 'Create Account' : 'Sign In')}
+              {isSubmitting ? 'Please wait...' : 'Sign In'}
             </button>
           </form>
 
@@ -156,6 +163,16 @@ export default function Login() {
             <p style={{ marginTop: 12, fontSize: '0.76rem', color: '#d64545', fontWeight: 600 }}>
               {errorMessage}
             </p>
+          )}
+
+          {showRegisterPrompt && (
+            <button
+              type="button"
+              onClick={() => navigate('/register/account', { state: { email } })}
+              style={{ marginTop: 10, width: '100%', padding: '11px', borderRadius: 12, fontSize: '0.82rem', fontWeight: 700, border: '1px solid var(--accent)', background: 'transparent', color: 'var(--accent)', cursor: 'pointer' }}
+            >
+              Go to Registration
+            </button>
           )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '24px 0' }}>
@@ -193,12 +210,12 @@ export default function Login() {
           </div>
 
           <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-soft)', marginTop: 20 }}>
-            {isRegistering ? 'Already have an account?' : "Don't have an account?"}{' '}
+            Don't have an account?{' '}
             <span
               style={{ color: 'var(--accent)', fontWeight: 600, cursor: 'pointer' }}
-              onClick={() => setIsRegistering(prev => !prev)}
+              onClick={() => navigate('/register/account', { state: { email } })}
             >
-              {isRegistering ? 'Sign in instead' : 'Create one with email'}
+              Register here
             </span>
           </p>
         </div>
