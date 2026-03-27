@@ -83,7 +83,9 @@ app.get('/', (req, res) => {
 
 if (shouldEnableFirebaseAuth) {
   const authRoutes = require('./routes/authRoutes');
+  const profileRoutes = require('./routes/profileRoutes');
   app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/profile', profileRoutes);
 } else {
   console.log('⚠️  Firebase user auth routes disabled (ENABLE_FIREBASE_AUTH=false).');
 }
