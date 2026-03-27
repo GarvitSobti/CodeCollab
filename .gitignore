@@ -5,6 +5,7 @@ node_modules/
 
 # Testing
 /coverage
+/server/coverage
 
 # Production builds
 /build
@@ -121,6 +122,10 @@ firestore-debug.log
 
 # Local development
 .local/
+.playwright-mcp/
+.claude/
+CodeCollab_Official_Team_Assignments.pdf
+/server/uploads/
 
 # PostgreSQL
 *.dump

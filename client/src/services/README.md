@@ -25,7 +25,7 @@ Each service file should export functions for specific API operations.
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3003/api',
   headers: {
     'Content-Type': 'application/json',
   },

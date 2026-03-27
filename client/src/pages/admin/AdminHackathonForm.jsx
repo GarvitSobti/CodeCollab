@@ -70,7 +70,7 @@ export default function AdminHackathonForm() {
       const response = await adminApi.uploadSponsorLogo(file);
       const uploadedPath = response?.data?.path || '';
       if (uploadedPath) {
-        const absolutePath = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${uploadedPath}`;
+        const absolutePath = `${process.env.REACT_APP_API_URL || 'http://localhost:3003'}${uploadedPath}`;
         setForm((previous) => {
           const current = (previous.sponsorsText || '').trim();
           const updated = current

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import BrandFlower from '../components/BrandFlower';
 
-const petalColors = ['var(--peach)', 'var(--coral)', 'var(--lavender)', 'var(--mint)', 'var(--sky)'];
-const petalAngles = [270, 342, 54, 126, 198];
 
 export default function Login() {
   const navigate = useNavigate();
@@ -64,7 +63,7 @@ export default function Login() {
         await handleDuplicateAccountError(email);
       } else {
         const message = error?.message || 'Authentication failed';
-        setErrorMessage(message.replace('Firebase: ', '').replace(/\[[0-9;]*m/g, ''));
+        setErrorMessage(message.replace('Firebase: ', ''));
       }
     } finally {
       setIsSubmitting(false);
@@ -80,35 +79,19 @@ export default function Login() {
       navigate(redirectTo, { replace: true });
     } catch (error) {
       const message = error?.message || 'Authentication failed';
-      setErrorMessage(message.replace('Firebase: ', '').replace(/\[[0-9;]*m/g, ''));
+      setErrorMessage(message.replace('Firebase: ', ''));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="mesh-bg">
-        <div className="mesh-blob blob-1" />
-        <div className="mesh-blob blob-2" />
-        <div className="mesh-blob blob-3" />
-      </div>
-      <div className="noise" />
-
-      <div className="stagger" style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 440, padding: '0 24px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+      <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: 440, padding: '0 24px' }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 12 }} onClick={() => navigate('/')}>
-            <div style={{ width: 40, height: 40, position: 'relative' }}>
-              {petalColors.map((bg, i) => {
-                const r = 11;
-                const angle = (petalAngles[i] * Math.PI) / 180;
-                const x = 50 + r * Math.cos(angle);
-                const y = 50 + r * Math.sin(angle);
-                return <div key={i} style={{ position: 'absolute', width: 13, height: 13, borderRadius: '50%', background: bg, top: `${y}%`, left: `${x}%`, transform: 'translate(-50%,-50%)' }} />;
-              })}
-              <div style={{ position: 'absolute', width: 10, height: 10, borderRadius: '50%', background: 'var(--honey)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 2 }} />
-            </div>
+            <BrandFlower />
             <h1 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>CodeCollab</h1>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-soft)' }}>Find your perfect hackathon teammates</p>
@@ -132,7 +115,7 @@ export default function Login() {
         </div>
 
         {/* Card */}
-        <div style={{ padding: '36px 32px', borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-heavy)', border: '1px solid rgba(0,0,0,0.04)' }}>
+        <div style={{ padding: '36px 32px', borderRadius: 'var(--radius)', background: 'var(--bg-card)', boxShadow: 'var(--shadow-heavy)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 24 }}>
             {isRegistering ? 'Create your account' : 'Welcome back'}
           </h2>
@@ -146,9 +129,9 @@ export default function Login() {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="your.email@university.edu"
                 required
-                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.08)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                onFocus={e => e.target.style.borderColor = 'var(--peach)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.08)'}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
             <div style={{ marginBottom: 24 }}>
@@ -159,12 +142,12 @@ export default function Login() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid rgba(0,0,0,0.08)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                onFocus={e => e.target.style.borderColor = 'var(--peach)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.08)'}
+                style={{ width: '100%', padding: '12px 16px', borderRadius: 12, background: 'var(--bg)', border: '1px solid var(--border)', fontFamily: 'inherit', fontSize: '0.85rem', color: 'var(--text-dark)', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
+                onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '13px', borderRadius: 12, fontSize: '0.9rem', fontWeight: 700, border: 'none', background: 'linear-gradient(135deg, var(--peach), var(--coral))', color: 'white', cursor: 'pointer', boxShadow: '0 4px 16px rgba(255,138,101,0.3)', transition: 'all 0.2s' }}>
+            <button type="submit" disabled={isSubmitting} style={{ width: '100%', padding: '13px', borderRadius: 12, fontSize: '0.9rem', fontWeight: 700, border: 'none', background: 'var(--accent)', color: 'white', cursor: 'pointer', boxShadow: 'var(--shadow-card)', transition: 'opacity 0.2s' }}>
               {isSubmitting ? 'Please wait...' : (isRegistering ? 'Create Account' : 'Sign In')}
             </button>
           </form>
@@ -176,15 +159,15 @@ export default function Login() {
           )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '24px 0' }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.06)' }} />
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
             <span style={{ fontSize: '0.72rem', color: 'var(--text-soft)', fontWeight: 500 }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.06)' }} />
+            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.08)', background: 'var(--bg-card)', color: 'var(--text-dark)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'border-color 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--coral)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'}
+            <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-dark)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'border-color 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--text-soft)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
               onClick={() => handleProviderSignIn(signInWithGoogle)}
               disabled={isSubmitting}
             >
@@ -196,7 +179,7 @@ export default function Login() {
               </svg>
               Continue with Google
             </button>
-            <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid rgba(0,0,0,0.08)', background: '#24292f', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.2s' }}
+            <button style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: '0.85rem', fontWeight: 600, border: '1.5px solid var(--border)', background: '#24292f', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'opacity 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               onClick={() => handleProviderSignIn(signInWithGithub)}
@@ -212,7 +195,7 @@ export default function Login() {
           <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-soft)', marginTop: 20 }}>
             {isRegistering ? 'Already have an account?' : "Don't have an account?"}{' '}
             <span
-              style={{ color: 'var(--peach)', fontWeight: 600, cursor: 'pointer' }}
+              style={{ color: 'var(--accent)', fontWeight: 600, cursor: 'pointer' }}
               onClick={() => setIsRegistering(prev => !prev)}
             >
               {isRegistering ? 'Sign in instead' : 'Create one with email'}

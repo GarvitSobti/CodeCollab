@@ -121,7 +121,7 @@ cp .env.example .env
 Edit `client/.env` with your Firebase public credentials:
 
 ```env
-REACT_APP_API_URL=http://localhost:5000
+REACT_APP_API_URL=http://localhost:3003
 REACT_APP_FIREBASE_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 REACT_APP_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
 REACT_APP_FIREBASE_PROJECT_ID=your-project-id
@@ -143,7 +143,7 @@ Edit `server/.env`:
 
 ```env
 # Server
-PORT=5000
+PORT=3003
 NODE_ENV=development
 
 # Database
@@ -219,7 +219,7 @@ npm run dev
 
 This starts both:
 - **Frontend**: http://localhost:3000
-- **Backend**: http://localhost:5000
+- **Backend**: http://localhost:3003
 
 ### Option 2: Run Separately
 
@@ -239,7 +239,7 @@ npm start
 
 ### Test Backend
 
-1. Open browser: http://localhost:5000
+1. Open browser: http://localhost:3003
 2. You should see: `{"message": "Welcome to CodeCollab API", ...}`
 
 ### Test Frontend
@@ -252,7 +252,7 @@ npm start
 Check server logs for:
 ```
 ✅ Database connection established successfully.
-🚀 Server running on port 5000
+🚀 Server running on port 3003
 ```
 
 ## Troubleshooting
@@ -283,17 +283,17 @@ Check server logs for:
 
 ### Port Already in Use
 
-**Error: `EADDRINUSE :::5000`**
-- Backend port 5000 is already in use
+**Error: `EADDRINUSE :::3003`**
+- Backend port 3003 is already in use
 - Kill the process or change PORT in `server/.env`
 
 ```bash
 # Windows
-netstat -ano | findstr :5000
+netstat -ano | findstr :3003
 taskkill /PID <PID> /F
 
 # Mac/Linux
-lsof -ti:5000 | xargs kill
+lsof -ti:3003 | xargs kill
 ```
 
 ### Module Not Found Errors

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -19,6 +20,7 @@ import AdminAuditLogs from './pages/admin/AdminAuditLogs';
 import AdminRouteGuard from './components/admin/AdminRouteGuard';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ChatProvider } from './contexts/ChatContext';
 
 function PublicOnlyRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -40,80 +42,85 @@ function PublicOnlyRoute({ children }) {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
-            <Route path="/discover" element={<ProtectedRoute><Discover /></ProtectedRoute>} />
-            <Route path="/team" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<Navigate to="/discover" replace />} />
-            <Route path="/hackathons" element={<ProtectedRoute><Hackathons /></ProtectedRoute>} />
-            <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+    <ThemeProvider>
+      <AuthProvider>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <ChatProvider>
+            <div className="App">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
+                <Route path="/discover" element={<ProtectedRoute><Discover /></ProtectedRoute>} />
+                <Route path="/team" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<Navigate to="/discover" replace />} />
+                <Route path="/hackathons" element={<ProtectedRoute><Hackathons /></ProtectedRoute>} />
+                <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+                <Route path="/messages/:userId" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route
-              path="/admin"
-              element={(
-                <AdminRouteGuard>
-                  <AdminDashboard />
-                </AdminRouteGuard>
-              )}
-            />
-            <Route
-              path="/admin/hackathons"
-              element={(
-                <AdminRouteGuard>
-                  <AdminHackathons />
-                </AdminRouteGuard>
-              )}
-            />
-            <Route
-              path="/admin/hackathons/new"
-              element={(
-                <AdminRouteGuard roles={['SUPER_ADMIN', 'EDITOR']}>
-                  <AdminHackathonForm />
-                </AdminRouteGuard>
-              )}
-            />
-            <Route
-              path="/admin/hackathons/:id/edit"
-              element={(
-                <AdminRouteGuard roles={['SUPER_ADMIN', 'EDITOR']}>
-                  <AdminHackathonForm />
-                </AdminRouteGuard>
-              )}
-            />
-            <Route
-              path="/admin/analytics/:id"
-              element={(
-                <AdminRouteGuard>
-                  <AdminAnalytics />
-                </AdminRouteGuard>
-              )}
-            />
-            <Route
-              path="/admin/company"
-              element={(
-                <AdminRouteGuard roles={['SUPER_ADMIN', 'EDITOR']}>
-                  <AdminCompanyProfile />
-                </AdminRouteGuard>
-              )}
-            />
-            <Route
-              path="/admin/audit-logs"
-              element={(
-                <AdminRouteGuard>
-                  <AdminAuditLogs />
-                </AdminRouteGuard>
-              )}
-            />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                  path="/admin"
+                  element={(
+                    <AdminRouteGuard>
+                      <AdminDashboard />
+                    </AdminRouteGuard>
+                  )}
+                />
+                <Route
+                  path="/admin/hackathons"
+                  element={(
+                    <AdminRouteGuard>
+                      <AdminHackathons />
+                    </AdminRouteGuard>
+                  )}
+                />
+                <Route
+                  path="/admin/hackathons/new"
+                  element={(
+                    <AdminRouteGuard roles={['SUPER_ADMIN', 'EDITOR']}>
+                      <AdminHackathonForm />
+                    </AdminRouteGuard>
+                  )}
+                />
+                <Route
+                  path="/admin/hackathons/:id/edit"
+                  element={(
+                    <AdminRouteGuard roles={['SUPER_ADMIN', 'EDITOR']}>
+                      <AdminHackathonForm />
+                    </AdminRouteGuard>
+                  )}
+                />
+                <Route
+                  path="/admin/analytics/:id"
+                  element={(
+                    <AdminRouteGuard>
+                      <AdminAnalytics />
+                    </AdminRouteGuard>
+                  )}
+                />
+                <Route
+                  path="/admin/company"
+                  element={(
+                    <AdminRouteGuard roles={['SUPER_ADMIN', 'EDITOR']}>
+                      <AdminCompanyProfile />
+                    </AdminRouteGuard>
+                  )}
+                />
+                <Route
+                  path="/admin/audit-logs"
+                  element={(
+                    <AdminRouteGuard>
+                      <AdminAuditLogs />
+                    </AdminRouteGuard>
+                  )}
+                />
+              </Routes>
+            </div>
+          </ChatProvider>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
