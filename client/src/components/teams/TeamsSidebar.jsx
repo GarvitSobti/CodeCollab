@@ -1,6 +1,13 @@
 import React from 'react';
 
-export default function TeamsSidebar({ teams, selectedTeamId, onSelectTeam }) {
+const STATUS_STYLE = {
+  FORMING: { color: 'var(--sky)', bg: 'rgba(66,165,245,0.12)', label: 'Forming' },
+  COMPLETE: { color: 'var(--mint)', bg: 'rgba(102,187,106,0.12)', label: 'Complete' },
+  COMPETING: { color: 'var(--honey)', bg: 'rgba(255,202,40,0.16)', label: 'Competing' },
+  FINISHED: { color: 'var(--text-soft)', bg: 'rgba(160,160,160,0.12)', label: 'Finished' },
+};
+
+export default function TeamsSidebar({ teams, selectedTeamId, onSelectTeam, onCreateTeam }) {
   return (
     <aside
       style={{
@@ -18,12 +25,13 @@ export default function TeamsSidebar({ teams, selectedTeamId, onSelectTeam }) {
     >
       <div style={{ marginBottom: 12 }}>
         <h2 style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 4 }}>Your Teams</h2>
-        <p style={{ fontSize: '0.78rem', color: 'var(--text-soft)', lineHeight: 1.5 }}>Select a team to open its sprint board, members, and chat snapshot.</p>
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-soft)', lineHeight: 1.5 }}>Select a team to view its members and details.</p>
       </div>
 
       <div className="teams-sidebar-scroll" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {teams.map((team) => {
           const selected = team.id === selectedTeamId;
+          const statusStyle = STATUS_STYLE[team.status] || STATUS_STYLE.FORMING;
 
           return (
             <button
@@ -45,34 +53,31 @@ export default function TeamsSidebar({ teams, selectedTeamId, onSelectTeam }) {
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                  <span style={{ fontSize: '1.05rem' }}>{team.emoji}</span>
+                  <span style={{ fontSize: '1.05rem' }}>👥</span>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{team.name}</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-soft)', marginTop: 2 }}>{team.activity}</div>
+                    <div style={{ fontSize: '0.68rem', color: 'var(--text-soft)', marginTop: 2 }}>
+                      {team.hackathon?.name || 'No hackathon'}
+                    </div>
                   </div>
                 </div>
-                {team.unread > 0 && (
-                  <span
-                    style={{
-                      minWidth: 20,
-                      height: 20,
-                      borderRadius: 10,
-                      padding: '0 6px',
-                      background: 'linear-gradient(135deg, var(--peach), var(--coral))',
-                      color: 'white',
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {team.unread}
-                  </span>
-                )}
+                <span
+                  style={{
+                    padding: '3px 10px',
+                    borderRadius: 8,
+                    fontSize: '0.6rem',
+                    fontWeight: 700,
+                    background: statusStyle.bg,
+                    color: statusStyle.color,
+                    flexShrink: 0,
+                  }}
+                >
+                  {statusStyle.label}
+                </span>
               </div>
-              <p style={{ fontSize: '0.7rem', color: 'var(--text-body)', marginTop: 8, lineHeight: 1.5 }}>{team.tagline}</p>
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-body)', marginTop: 8, lineHeight: 1.5 }}>
+                {team._count?.members || team.members?.length || 0} member{(team._count?.members || team.members?.length || 0) !== 1 ? 's' : ''}
+              </p>
             </button>
           );
         })}
@@ -80,6 +85,7 @@ export default function TeamsSidebar({ teams, selectedTeamId, onSelectTeam }) {
 
       <button
         type="button"
+        onClick={onCreateTeam}
         style={{
           marginTop: 14,
           width: '100%',

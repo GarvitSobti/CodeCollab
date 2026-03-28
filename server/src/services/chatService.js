@@ -116,16 +116,35 @@ async function requireMatch(userId, participantUserId) {
     throw new Error('Cannot open a conversation with yourself');
   }
 
+  // Allow if users have an accepted match
   const [userOneId, userTwoId] = normalizePair(userId, participantUserId);
   const match = await Match.findOne({
     where: { userOneId, userTwoId, status: 'accepted' },
   });
 
-  if (!match) {
-    const err = new Error('Direct messages are limited to matched users');
-    err.status = 403;
-    throw err;
+  if (match) return;
+
+  // Also allow if users are members of the same team (via Prisma)
+  try {
+    const prisma = require('../config/prisma');
+    const sharedTeam = await prisma.$queryRaw`
+      SELECT tm1."teamId"
+      FROM "TeamMember" tm1
+      JOIN "TeamMember" tm2 ON tm1."teamId" = tm2."teamId"
+      JOIN "User" u1 ON tm1."userId" = u1."id"
+      JOIN "User" u2 ON tm2."userId" = u2."id"
+      WHERE u1."firebaseUid" = ${userId}
+        AND u2."firebaseUid" = ${participantUserId}
+      LIMIT 1
+    `;
+    if (sharedTeam && sharedTeam.length > 0) return;
+  } catch (err) {
+    console.error('Team membership check failed:', err);
   }
+
+  const error = new Error('Direct messages are limited to matched users or teammates');
+  error.status = 403;
+  throw error;
 }
 
 async function getParticipantRecord(conversationId, userId) {

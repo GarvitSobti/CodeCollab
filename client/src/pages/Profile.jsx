@@ -3,7 +3,7 @@ import Navigation from '../components/Navigation';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
-const SECTIONS = ['Welcome Setup', 'Your Skills', 'Your Preferred Skills'];
+const SECTIONS = ['Welcome Setup', 'About You', 'Your Skills', 'Your Preferred Skills'];
 
 const PROFICIENCY_LEVELS = [
   { value: 1, label: 'Beginner', description: 'Can follow guides and complete simple tasks with help.' },
@@ -48,6 +48,9 @@ function createDefaultProfile(authUser) {
       year: '',
       major: '',
     },
+    bio: '',
+    projectExperience: [{ title: '', description: '', url: '', technologies: '' }],
+    workExperience: [{ company: '', role: '', duration: '', description: '' }],
     skills: [{ name: '', level: 1 }],
     preferredSkills: [{ name: '' }],
     assessment: defaultAssessment(),
@@ -118,6 +121,15 @@ function normalizeIncomingProfile(data, authUser) {
       ...base.verification,
       ...(data?.verification || {}),
     },
+    bio: data?.bio || base.bio,
+    projectExperience:
+      Array.isArray(data?.projectExperience) && data.projectExperience.length
+        ? data.projectExperience
+        : base.projectExperience,
+    workExperience:
+      Array.isArray(data?.workExperience) && data.workExperience.length
+        ? data.workExperience
+        : base.workExperience,
     skills: Array.isArray(data?.skills) && data.skills.length ? data.skills : base.skills,
     preferredSkills:
       Array.isArray(data?.interests) && data.interests.length
@@ -381,6 +393,106 @@ export default function Profile() {
                   </label>
                 ))}
               </div>
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 8 }}>About You</h2>
+              <p style={{ marginTop: 0, fontSize: '0.78rem', color: 'var(--text-soft)', marginBottom: 14 }}>
+                A short introduction, your project experience, and work experience.
+              </p>
+
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-soft)' }}>Short Introduction</span>
+                <textarea
+                  value={profile.bio}
+                  onChange={(e) => updateProfile((prev) => ({ ...prev, bio: e.target.value }))}
+                  placeholder="Tell potential teammates a bit about yourself..."
+                  rows={3}
+                  style={{ borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg)', fontFamily: 'inherit', fontSize: '0.8rem', resize: 'vertical' }}
+                />
+              </label>
+
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: 10 }}>Project Experience</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 }}>
+                {profile.projectExperience.map((proj, index) => (
+                  <div key={`proj-${index}`} style={{ borderRadius: 12, border: '1px solid rgba(0,0,0,0.06)', padding: 14, background: 'var(--bg)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+                      <input
+                        value={proj.title}
+                        onChange={(e) => updateProfile((prev) => ({ ...prev, projectExperience: prev.projectExperience.map((p, i) => i === index ? { ...p, title: e.target.value } : p) }))}
+                        placeholder="Project title"
+                        style={{ borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.8rem' }}
+                      />
+                      <input
+                        value={proj.technologies}
+                        onChange={(e) => updateProfile((prev) => ({ ...prev, projectExperience: prev.projectExperience.map((p, i) => i === index ? { ...p, technologies: e.target.value } : p) }))}
+                        placeholder="Technologies (e.g. React, Node.js)"
+                        style={{ borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.8rem' }}
+                      />
+                    </div>
+                    <input
+                      value={proj.url}
+                      onChange={(e) => updateProfile((prev) => ({ ...prev, projectExperience: prev.projectExperience.map((p, i) => i === index ? { ...p, url: e.target.value } : p) }))}
+                      placeholder="Project URL (optional)"
+                      style={{ width: '100%', boxSizing: 'border-box', borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.8rem', marginBottom: 8 }}
+                    />
+                    <textarea
+                      value={proj.description}
+                      onChange={(e) => updateProfile((prev) => ({ ...prev, projectExperience: prev.projectExperience.map((p, i) => i === index ? { ...p, description: e.target.value } : p) }))}
+                      placeholder="Brief description of what you built and your role"
+                      rows={2}
+                      style={{ width: '100%', boxSizing: 'border-box', borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.8rem', resize: 'vertical' }}
+                    />
+                    <div style={{ textAlign: 'right', marginTop: 6 }}>
+                      <button type="button" onClick={() => updateProfile((prev) => ({ ...prev, projectExperience: prev.projectExperience.length === 1 ? prev.projectExperience : prev.projectExperience.filter((_, i) => i !== index) }))} disabled={profile.projectExperience.length === 1} style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-soft)', background: 'none', border: 'none', cursor: profile.projectExperience.length === 1 ? 'not-allowed' : 'pointer' }}>Remove</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => updateProfile((prev) => ({ ...prev, projectExperience: [...prev.projectExperience, { title: '', description: '', url: '', technologies: '' }] }))} style={{ borderRadius: 10, border: '1px dashed rgba(0,0,0,0.15)', background: 'transparent', padding: '8px 12px', color: 'var(--text-soft)', fontWeight: 600, cursor: 'pointer', marginBottom: 16 }}>
+                + Add Project
+              </button>
+
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: 10 }}>Work Experience</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 12 }}>
+                {profile.workExperience.map((work, index) => (
+                  <div key={`work-${index}`} style={{ borderRadius: 12, border: '1px solid rgba(0,0,0,0.06)', padding: 14, background: 'var(--bg)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+                      <input
+                        value={work.company}
+                        onChange={(e) => updateProfile((prev) => ({ ...prev, workExperience: prev.workExperience.map((w, i) => i === index ? { ...w, company: e.target.value } : w) }))}
+                        placeholder="Company / Organisation"
+                        style={{ borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.8rem' }}
+                      />
+                      <input
+                        value={work.role}
+                        onChange={(e) => updateProfile((prev) => ({ ...prev, workExperience: prev.workExperience.map((w, i) => i === index ? { ...w, role: e.target.value } : w) }))}
+                        placeholder="Role / Title"
+                        style={{ borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.8rem' }}
+                      />
+                    </div>
+                    <input
+                      value={work.duration}
+                      onChange={(e) => updateProfile((prev) => ({ ...prev, workExperience: prev.workExperience.map((w, i) => i === index ? { ...w, duration: e.target.value } : w) }))}
+                      placeholder="Duration (e.g. Jun 2025 - Aug 2025)"
+                      style={{ width: '100%', boxSizing: 'border-box', borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.8rem', marginBottom: 8 }}
+                    />
+                    <textarea
+                      value={work.description}
+                      onChange={(e) => updateProfile((prev) => ({ ...prev, workExperience: prev.workExperience.map((w, i) => i === index ? { ...w, description: e.target.value } : w) }))}
+                      placeholder="Brief description of your responsibilities"
+                      rows={2}
+                      style={{ width: '100%', boxSizing: 'border-box', borderRadius: 10, border: '1px solid rgba(0,0,0,0.08)', padding: '10px 12px', background: 'var(--bg-card)', fontFamily: 'inherit', fontSize: '0.8rem', resize: 'vertical' }}
+                    />
+                    <div style={{ textAlign: 'right', marginTop: 6 }}>
+                      <button type="button" onClick={() => updateProfile((prev) => ({ ...prev, workExperience: prev.workExperience.length === 1 ? prev.workExperience : prev.workExperience.filter((_, i) => i !== index) }))} disabled={profile.workExperience.length === 1} style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-soft)', background: 'none', border: 'none', cursor: profile.workExperience.length === 1 ? 'not-allowed' : 'pointer' }}>Remove</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => updateProfile((prev) => ({ ...prev, workExperience: [...prev.workExperience, { company: '', role: '', duration: '', description: '' }] }))} style={{ borderRadius: 10, border: '1px dashed rgba(0,0,0,0.15)', background: 'transparent', padding: '8px 12px', color: 'var(--text-soft)', fontWeight: 600, cursor: 'pointer' }}>
+                + Add Work Experience
+              </button>
             </div>
 
             <div style={{ marginTop: 20 }}>
