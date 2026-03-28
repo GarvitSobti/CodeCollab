@@ -11,6 +11,7 @@ const messageRoutes = require('./routes/messageRoutes');
 const adminAuthRoutes = require('./routes/adminAuthRoutes');
 const adminHackathonRoutes = require('./routes/adminHackathonRoutes');
 const adminAnalyticsRoutes = require('./routes/adminAnalyticsRoutes');
+const hackathonRoutes = require('./routes/hackathonRoutes');
 const { registerChatHandlers } = require('./socket/chatHandlers');
 const { syncDatabase } = require('./models');
 
@@ -103,6 +104,7 @@ app.use('/api/v1/messages', messageRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admin/hackathons', adminHackathonRoutes);
 app.use('/api/admin/analytics', adminAnalyticsRoutes);
+app.use('/api/v1/hackathons', hackathonRoutes);
 
 registerChatHandlers(io);
 
