@@ -43,6 +43,28 @@ function sanitizeLinks(linksInput) {
     .filter((link) => link.url);
 }
 
+function sanitizeExperience(input) {
+  return toSafeArray(input)
+    .map((item) => ({
+      title: normalizeString(item?.title),
+      description: normalizeString(item?.description),
+      url: normalizeString(item?.url),
+      technologies: normalizeString(item?.technologies),
+    }))
+    .filter((item) => item.title);
+}
+
+function sanitizeWorkExperience(input) {
+  return toSafeArray(input)
+    .map((item) => ({
+      company: normalizeString(item?.company),
+      role: normalizeString(item?.role),
+      duration: normalizeString(item?.duration),
+      description: normalizeString(item?.description),
+    }))
+    .filter((item) => item.company || item.role);
+}
+
 function sanitizeInterests(interestsInput) {
   return toSafeArray(interestsInput)
     .map((item) => normalizeString(item))
@@ -103,6 +125,8 @@ function sanitizeProfilePayload(payload, authUser) {
       summary: normalizeString(hackathonExperience.summary),
     },
     portfolioLinks: sanitizeLinks(payload?.portfolioLinks),
+    projectExperience: sanitizeExperience(payload?.projectExperience),
+    workExperience: sanitizeWorkExperience(payload?.workExperience),
     social: {
       github: normalizeString(social.github),
       linkedin: normalizeString(social.linkedin),
@@ -292,6 +316,8 @@ function toClientProfile(user, profile) {
       summary: profile?.hackathonExperienceNotes || '',
     },
     portfolioLinks: safeJsonArray(profile?.portfolioLinks, []),
+    projectExperience: safeJsonArray(profile?.projectExperience, []),
+    workExperience: safeJsonArray(profile?.workExperience, []),
     social: {
       github: user.githubUrl || '',
       linkedin: user.linkedinUrl || '',
@@ -417,6 +443,8 @@ router.put('/me', authMiddleware, async (req, res) => {
         hackathonExperienceCount: incoming.hackathonExperience.count,
         hackathonExperienceNotes: incoming.hackathonExperience.summary || null,
         portfolioLinks: incoming.portfolioLinks,
+        projectExperience: incoming.projectExperience,
+        workExperience: incoming.workExperience,
         photoDataUrl: incoming.photoDataUrl || null,
         showEmail: incoming.privacy.showEmail,
         showPortfolio: incoming.privacy.showPortfolio,
@@ -439,6 +467,8 @@ router.put('/me', authMiddleware, async (req, res) => {
         hackathonExperienceCount: incoming.hackathonExperience.count,
         hackathonExperienceNotes: incoming.hackathonExperience.summary || null,
         portfolioLinks: incoming.portfolioLinks,
+        projectExperience: incoming.projectExperience,
+        workExperience: incoming.workExperience,
         photoDataUrl: incoming.photoDataUrl || null,
         showEmail: incoming.privacy.showEmail,
         showPortfolio: incoming.privacy.showPortfolio,

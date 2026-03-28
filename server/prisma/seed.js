@@ -141,6 +141,56 @@ async function main() {
 
   const count = await prisma.hackathon.count();
   console.log(`Done. ${count} hackathons in database.`);
+
+  // ── Seed Teams ─────────────────────────────────────────────
+  console.log('\nSeeding teams...');
+
+  const allUsers = await prisma.user.findMany({ select: { id: true, name: true } });
+  const allHackathons = await prisma.hackathon.findMany({ select: { id: true, name: true } });
+
+  if (allUsers.length < 1 || allHackathons.length < 1) {
+    console.log('  Skipped teams (need at least 1 user and 1 hackathon).');
+  } else {
+    const teamSeeds = [
+      { name: 'Team Alpha', hackathonName: 'SMU .Hack 2026', status: 'COMPETING' },
+      { name: 'Team Beta', hackathonName: 'HackNUS 2026', status: 'FORMING' },
+      { name: 'Team Gamma', hackathonName: 'NTU AI Challenge', status: 'FORMING' },
+    ];
+
+    for (const ts of teamSeeds) {
+      const existing = await prisma.team.findFirst({ where: { name: ts.name } });
+      if (existing) {
+        console.log(`  Skipped (exists): ${ts.name}`);
+        continue;
+      }
+
+      const hackathon = allHackathons.find((h) => h.name === ts.hackathonName);
+      if (!hackathon) {
+        console.log(`  Skipped (no hackathon "${ts.hackathonName}"): ${ts.name}`);
+        continue;
+      }
+
+      const leader = allUsers[0];
+      const team = await prisma.team.create({
+        data: {
+          name: ts.name,
+          hackathonId: hackathon.id,
+          createdById: leader.id,
+          status: ts.status,
+          members: {
+            create: allUsers.map((u, idx) => ({
+              userId: u.id,
+              role: idx === 0 ? 'LEADER' : 'MEMBER',
+            })),
+          },
+        },
+      });
+      console.log(`  Created: ${ts.name} (${allUsers.length} members) for ${hackathon.name}`);
+    }
+
+    const teamCount = await prisma.team.count();
+    console.log(`Done. ${teamCount} teams in database.`);
+  }
 }
 
 main()

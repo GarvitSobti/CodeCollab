@@ -8,7 +8,7 @@ import { useChatContext } from '../contexts/ChatContext';
 const navLinks = [
   { label: 'Discover', path: '/discover' },
   { label: 'Hackathons', path: '/hackathons' },
-  { label: 'My Team', path: '/team' },
+  { label: 'My Teams', path: '/team' },
   { label: 'Messages', path: '/messages' },
   { label: 'Profile', path: '/profile' },
 ];

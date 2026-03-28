@@ -37,6 +37,8 @@ model User {
   notifications       Notification[]
   notificationPrefs   NotificationPreference?
   createdTeams        Team[]             @relation("TeamCreator")
+  sentSwipes          Swipe[]            @relation("SwipeSender")
+  receivedSwipes      Swipe[]            @relation("SwipeReceiver")
   profile             UserProfile?
 }
 
@@ -51,6 +53,8 @@ model UserProfile {
   hackathonExperienceCount  Int             @default(0)
   hackathonExperienceNotes  String?
   portfolioLinks            Json?
+  projectExperience         Json?
+  workExperience            Json?
   photoDataUrl              String?
   showEmail                 Boolean         @default(false)
   showPortfolio             Boolean         @default(true)
@@ -153,6 +157,22 @@ model HackathonInterest {
   hackathon Hackathon @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
 
   @@id([userId, hackathonId])
+}
+
+// ─── Swipes (Discover) ──────────────────────────────────────
+
+model Swipe {
+  id        String   @id @default(uuid())
+  swiperId  String
+  targetId  String
+  direction String   // "left" or "right"
+  createdAt DateTime @default(now())
+
+  swiper User @relation("SwipeSender", fields: [swiperId], references: [id], onDelete: Cascade)
+  target User @relation("SwipeReceiver", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([swiperId, targetId])
+  @@index([targetId, direction])
 }
 
 // ─── Teams ──────────────────────────────────────────────────

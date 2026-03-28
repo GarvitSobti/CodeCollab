@@ -1,24 +1,62 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import TeamsSidebar from '../components/teams/TeamsSidebar';
 import TeamWorkspace from '../components/teams/TeamWorkspace';
+import CreateTeamModal from '../components/teams/CreateTeamModal';
+import InviteMemberModal from '../components/teams/InviteMemberModal';
+import PendingInvites from '../components/teams/PendingInvites';
 import { useChatContext } from '../contexts/ChatContext';
-import teamsData from '../data/teamsData';
+import api from '../services/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { openOrCreateDM } = useChatContext();
-  const [selectedTeamId, setSelectedTeamId] = useState(teamsData[0]?.id || '');
+  const [teams, setTeams] = useState([]);
+  const [selectedTeamId, setSelectedTeamId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
-  const selectedTeam = useMemo(
-    () => teamsData.find((team) => team.id === selectedTeamId) || teamsData[0],
-    [selectedTeamId],
-  );
+  const fetchTeams = useCallback(async () => {
+    try {
+      const res = await api.get('/api/v1/teams');
+      const fetched = res.data.teams || [];
+      setTeams(fetched);
+      if (fetched.length > 0 && !fetched.find((t) => t.id === selectedTeamId)) {
+        setSelectedTeamId(fetched[0].id);
+      }
+    } catch (err) {
+      console.error('Failed to load teams:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedTeamId]);
+
+  useEffect(() => {
+    fetchTeams();
+  }, [fetchTeams]);
+
+  const selectedTeam = teams.find((t) => t.id === selectedTeamId) || null;
 
   const handleDM = async (member) => {
-    await openOrCreateDM(member.id);
+    // Chat system uses Firebase UIDs, not Prisma UUIDs
+    const firebaseUid = member.user?.firebaseUid || member.firebaseUid;
+    if (!firebaseUid) {
+      console.error('No firebaseUid found for member:', member);
+      return;
+    }
+    await openOrCreateDM(firebaseUid);
     navigate('/messages');
+  };
+
+  const handleLeaveTeam = async (teamId) => {
+    try {
+      await api.post(`/api/v1/teams/${teamId}/leave`);
+      await fetchTeams();
+    } catch (err) {
+      console.error('Failed to leave team:', err);
+    }
   };
 
   return (
@@ -26,12 +64,70 @@ export default function Dashboard() {
       <Navigation />
 
       <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
-        <div className="teams-dashboard-layout" style={{ display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr)', gap: 24, alignItems: 'start' }}>
-          <TeamsSidebar teams={teamsData} selectedTeamId={selectedTeamId} onSelectTeam={setSelectedTeamId} />
-          <TeamWorkspace team={selectedTeam} onOpenMessages={() => navigate('/messages')} onDM={handleDM} />
-        </div>
+        <PendingInvites onRespond={fetchTeams} />
 
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-soft)', fontWeight: 600 }}>
+            Loading teams...
+          </div>
+        ) : teams.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{ fontSize: '3rem', marginBottom: 16 }}>👥</div>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: 8 }}>No teams yet</h2>
+            <p style={{ color: 'var(--text-soft)', fontSize: '0.95rem', marginBottom: 24 }}>
+              Create a team for a hackathon or accept an invite to get started.
+            </p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              style={{
+                padding: '12px 28px', borderRadius: 14, fontSize: '0.88rem', fontWeight: 700,
+                border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                background: 'var(--accent)', color: 'white',
+              }}
+            >
+              + Create a Team
+            </button>
+          </div>
+        ) : (
+          <div className="teams-dashboard-layout" style={{ display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr)', gap: 24, alignItems: 'start' }}>
+            <TeamsSidebar
+              teams={teams}
+              selectedTeamId={selectedTeamId}
+              onSelectTeam={setSelectedTeamId}
+              onCreateTeam={() => setShowCreateModal(true)}
+            />
+            <TeamWorkspace
+              team={selectedTeam}
+              onOpenMessages={() => navigate('/messages')}
+              onDM={handleDM}
+              onInviteMember={() => setShowInviteModal(true)}
+              onLeaveTeam={handleLeaveTeam}
+            />
+          </div>
+        )}
       </div>
+
+      {showCreateModal && (
+        <CreateTeamModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={(team) => {
+            setShowCreateModal(false);
+            fetchTeams().then(() => setSelectedTeamId(team.id));
+          }}
+        />
+      )}
+
+      {showInviteModal && selectedTeam && (
+        <InviteMemberModal
+          teamId={selectedTeam.id}
+          teamName={selectedTeam.name}
+          onClose={() => setShowInviteModal(false)}
+          onInvited={() => {
+            setShowInviteModal(false);
+            fetchTeams();
+          }}
+        />
+      )}
     </div>
   );
 }
