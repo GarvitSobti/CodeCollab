@@ -66,6 +66,8 @@ model UserProfile {
   completion                Int             @default(0)
   internalSkillScore        Int             @default(0)
   internalSkillTier         ExperienceLevel @default(BEGINNER)
+  githubScore               Int             @default(0)
+  githubScoreUpdatedAt      DateTime?
   createdAt                 DateTime        @default(now())
   updatedAt                 DateTime        @updatedAt
 

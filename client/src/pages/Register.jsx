@@ -241,9 +241,9 @@ export default function Register() {
       }
 
       const isLastProfileStep = step === 'preferred-skills';
-      await saveProfile(isLastProfileStep);
 
       if (isLastProfileStep) {
+        await saveProfile(true);
         navigate('/discover', { replace: true });
       } else {
         goToStep(STEP_ORDER[currentIndex + 1]);
@@ -411,7 +411,7 @@ export default function Register() {
                     { key: 'fullName', label: 'Full Name' },
                     { key: 'displayName', label: 'Display Name' },
                     { key: 'university', label: 'University' },
-                    { key: 'year', label: 'Year', type: 'number', min: 1, max: 10, step: 1 },
+                    { key: 'year', label: 'Year of Study', type: 'number', min: 1, max: 10, step: 1 },
                     { key: 'major', label: 'Major' },
                   ].map((field) => (
                     <label key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

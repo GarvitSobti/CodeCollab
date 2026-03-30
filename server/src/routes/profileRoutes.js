@@ -1,7 +1,15 @@
 const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const prisma = require('../config/prisma');
-const { ExperienceLevel, SkillCategory } = require('@prisma/client');
+const { SkillCategory, ExperienceLevel } = require('@prisma/client');
+const { refreshGithubScore } = require('../services/githubScoreService');
+const {
+  clamp,
+  scoreToTier,
+  scoreFromMcq,
+  scoreFromCaseResponses,
+  computeCombinedScore,
+} = require('../services/scoringService');
 
 const router = express.Router();
 
@@ -17,9 +25,6 @@ function toSafeObject(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 }
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
 
 function sanitizeSkills(skillsInput) {
   return toSafeArray(skillsInput)
@@ -169,73 +174,7 @@ function computeCompletion(profile) {
   return Math.round((completed / checks.length) * 100);
 }
 
-function scoreFromMcq(mcq) {
-  const scoringMap = {
-    rolePreference: {
-      frontend: 10,
-      backend: 12,
-      fullstack: 14,
-      ai: 13,
-      product: 9,
-    },
-    strongestArea: {
-      ui: 8,
-      api: 11,
-      data: 12,
-      ml: 12,
-      devops: 13,
-      unknown: 5,
-    },
-    comfortAmbiguity: {
-      low: 4,
-      medium: 8,
-      high: 12,
-    },
-    debuggingApproach: {
-      guess: 3,
-      logs: 8,
-      isolate: 12,
-      hypothesis: 14,
-    },
-    teamworkStyle: {
-      follow: 6,
-      contributor: 9,
-      coordinator: 12,
-      lead: 13,
-    },
-  };
-
-  return (
-    (scoringMap.rolePreference[mcq.rolePreference] || 0) +
-    (scoringMap.strongestArea[mcq.strongestArea] || 0) +
-    (scoringMap.comfortAmbiguity[mcq.comfortAmbiguity] || 0) +
-    (scoringMap.debuggingApproach[mcq.debuggingApproach] || 0) +
-    (scoringMap.teamworkStyle[mcq.teamworkStyle] || 0)
-  );
-}
-
-function scoreFromCaseResponses(caseBased) {
-  const caseScoreMap = {
-    mvpTradeoff: {
-      build_fast_ignore_risk: 4,
-      define_scope_and_milestones: 13,
-      overengineer: 6,
-      wait_for_perfect_plan: 5,
-    },
-    prodIncident: {
-      rollback_and_triage: 13,
-      patch_without_rootcause: 6,
-      wait_for_someone_else: 4,
-      random_trial_error: 5,
-    },
-  };
-
-  return (
-    (caseScoreMap.mvpTradeoff[caseBased.mvpTradeoff] || 0) +
-    (caseScoreMap.prodIncident[caseBased.prodIncident] || 0)
-  );
-}
-
+// Pillar 1 — self-assessment score (0–100). Synchronous; uses only profile payload data.
 function computeSkillScore(profile) {
   const assessment = profile.assessment || sanitizeAssessment({});
 
@@ -252,36 +191,20 @@ function computeSkillScore(profile) {
     assessment.sliders.learningVelocity
   ) / 5;
 
-  const skillBase = ((avgSkillLevel - 1) / 4) * 22;
-  const sliderBase = ((sliderAvg - 1) / 4) * 24;
-  const mcqScore = scoreFromMcq(assessment.mcq);
-  const caseScore = scoreFromCaseResponses(assessment.caseBased);
-  const hackathonBonus = Math.min(profile.hackathonExperience.count * 1.2, 10);
-  const githubBonus = profile.social.github ? 6 : 0;
-  const portfolioBonus = Math.min(profile.portfolioLinks.length * 2, 6);
-  const verificationBonus =
-    (profile.verification.githubVerified ? 2 : 0) +
-    (profile.verification.linkedinVerified ? 1 : 0) +
-    (profile.verification.universityVerified ? 2 : 0);
+  // Max MCQ raw ≈ 56, max case raw = 26
+  const skillBase  = ((avgSkillLevel - 1) / 4) * 25; // 0–25
+  const sliderBase = ((sliderAvg - 1) / 4) * 25;     // 0–25
+  const mcqScore   = scoreFromMcq(assessment.mcq);    // 0–56  → weighted 0–25
+  const caseScore  = scoreFromCaseResponses(assessment.caseBased); // 0–26 → weighted 0–25
 
   const total = Math.round(
     skillBase +
     sliderBase +
-    mcqScore * 0.45 +
-    caseScore * 0.55 +
-    hackathonBonus +
-    githubBonus +
-    portfolioBonus +
-    verificationBonus
+    (mcqScore  / 56) * 25 +
+    (caseScore / 26) * 25,
   );
 
   return clamp(total, 0, 100);
-}
-
-function scoreToTier(score) {
-  if (score < 40) return ExperienceLevel.BEGINNER;
-  if (score < 70) return ExperienceLevel.INTERMEDIATE;
-  return ExperienceLevel.ADVANCED;
 }
 
 function tierToLabel(tier) {
@@ -352,18 +275,30 @@ async function getOrCreateUserWithProfile(authUser) {
   });
 
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        firebaseUid: authUser.uid,
-        email: emailFallback,
-        name: nameFallback,
-        avatarUrl: authUser.picture || null,
-        profile: {
-          create: {},
+    try {
+      user = await prisma.user.create({
+        data: {
+          firebaseUid: authUser.uid,
+          email: emailFallback,
+          name: nameFallback,
+          avatarUrl: authUser.picture || null,
+          profile: {
+            create: {},
+          },
         },
-      },
-      include: { profile: true },
-    });
+        include: { profile: true },
+      });
+    } catch (e) {
+      if (e.code === 'P2002') {
+        // Race condition: another concurrent request already created this user
+        user = await prisma.user.findUnique({
+          where: { firebaseUid: authUser.uid },
+          include: { profile: true },
+        });
+      } else {
+        throw e;
+      }
+    }
   }
 
   if (!user.profile) {
@@ -414,10 +349,14 @@ router.put('/me', authMiddleware, async (req, res) => {
     const authUser = req.auth;
     const incoming = sanitizeProfilePayload(req.body, authUser);
     const completion = computeCompletion(incoming);
-    const internalSkillScore = computeSkillScore(incoming);
-    const internalSkillTier = scoreToTier(internalSkillScore);
 
     const user = await getOrCreateUserWithProfile(authUser);
+
+    // Use stored githubScore from existing profile (refreshed in background below)
+    const storedGithubScore = user.profile?.githubScore ?? 0;
+    const selfScore = computeSkillScore(incoming);
+    const internalSkillScore = await computeCombinedScore(user.id, selfScore, storedGithubScore);
+    const internalSkillTier = scoreToTier(internalSkillScore);
 
     await prisma.user.update({
       where: { id: user.id },
@@ -484,6 +423,21 @@ router.put('/me', authMiddleware, async (req, res) => {
     });
 
     await syncUserSkills(user.id, incoming.skills);
+
+    // Fire-and-forget GitHub score refresh whenever a GitHub URL is present.
+    // Runs after the response is sent so it never blocks the client.
+    if (incoming.social.github) {
+      refreshGithubScore(user.id, incoming.social.github).then(async () => {
+        // After GitHub score is updated, recompute the combined score.
+        const updatedProfile = await prisma.userProfile.findUnique({ where: { userId: user.id } });
+        if (!updatedProfile) return;
+        const newCombined = await computeCombinedScore(user.id, selfScore, updatedProfile.githubScore);
+        await prisma.userProfile.update({
+          where: { userId: user.id },
+          data: { internalSkillScore: newCombined, internalSkillTier: scoreToTier(newCombined) },
+        });
+      }).catch(() => {});
+    }
 
     const refreshed = await prisma.user.findUnique({
       where: { id: user.id },
