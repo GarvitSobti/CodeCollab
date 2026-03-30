@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Hackathons from './pages/Hackathons';
 import Messages from './pages/Messages';
 import Profile from './pages/Profile';
+import Billing from './pages/Billing';
 import Register from './pages/Register';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -63,6 +64,7 @@ function App() {
                 <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                 <Route path="/messages/:userId" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
 
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route
