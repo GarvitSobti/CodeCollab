@@ -82,19 +82,26 @@ export const ChatProvider = ({ children }) => {
         if (conversation.participant?.id && typeof merged[conversation.participant.id] === 'undefined') {
           merged[conversation.participant.id] = false;
         }
+        (conversation.participants || []).forEach((p) => {
+          if (p?.id && typeof merged[p.id] === 'undefined') {
+            merged[p.id] = false;
+          }
+        });
       });
       return merged;
     });
   }, []);
 
-  const loadConversations = useCallback(async () => {
+  const loadConversations = useCallback(async ({ silent = false } = {}) => {
     if (!canUseChat) {
       setConversations([]);
       setActiveConversationId(null);
       return;
     }
 
-    setLoadingConversations(true);
+    if (!silent) {
+      setLoadingConversations(true);
+    }
     try {
       const nextConversations = await fetchConversations();
       setConversations(nextConversations);
@@ -223,7 +230,7 @@ export const ChatProvider = ({ children }) => {
       }
 
       if (conversationId) {
-        loadConversations().catch(() => {});
+        loadConversations({ silent: true }).catch(() => {});
       }
     };
 
@@ -403,6 +410,11 @@ export const ChatProvider = ({ children }) => {
           gradient: conversation.participant.accentColor || conversation.participant.gradient,
         }
       : null,
+    participants: (conversation.participants || []).map((p) => ({
+      ...p,
+      online: presenceByUserId[p.id] || false,
+      gradient: p.accentColor || p.gradient,
+    })),
   })), [conversations, presenceByUserId]);
 
   const totalUnread = hydratedConversations.reduce((sum, conversation) => sum + (conversation.unreadCount || 0), 0);

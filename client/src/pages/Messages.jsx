@@ -73,8 +73,12 @@ export default function Messages() {
   const activeTyping = typingUsers[activeConversationId] || [];
 
   const filteredConversations = conversations.filter((conversation) => {
+    const q = search.toLowerCase();
+    if (conversation.type === 'team') {
+      return (conversation.name || '').toLowerCase().includes(q);
+    }
     const participantName = conversation.participant?.name ?? '';
-    return participantName.toLowerCase().includes(search.toLowerCase());
+    return participantName.toLowerCase().includes(q);
   });
 
   return (
@@ -139,12 +143,34 @@ export default function Messages() {
               ) : (
                 filteredConversations.map((conversation) => {
                   const isActive = conversation.id === activeConversationId;
+                  const isTeam = conversation.type === 'team';
                   const participant = conversation.participant || {};
-                  const lastMessageLabel = (typingUsers[conversation.id] || []).length > 0
-                    ? 'typing...'
-                    : conversation.lastMessage?.attachmentName
-                      ? `📎 ${conversation.lastMessage.attachmentName}`
-                      : conversation.lastMessage?.body || 'No messages yet';
+
+                  const teamInitials = isTeam
+                    ? (conversation.name || 'T').split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase()
+                    : null;
+
+                  const typingList = typingUsers[conversation.id] || [];
+                  let lastMessageLabel;
+                  if (typingList.length > 0) {
+                    lastMessageLabel = 'typing...';
+                  } else if (conversation.lastMessage?.attachmentName) {
+                    lastMessageLabel = `📎 ${conversation.lastMessage.attachmentName}`;
+                  } else if (conversation.lastMessage?.body) {
+                    const senderPrefix = isTeam && conversation.lastMessage.sender && !conversation.lastMessage.isOwnMessage
+                      ? `${conversation.lastMessage.sender.name?.split(' ')[0]}: `
+                      : '';
+                    lastMessageLabel = `${senderPrefix}${conversation.lastMessage.body}`;
+                  } else {
+                    lastMessageLabel = 'No messages yet';
+                  }
+
+                  const displayName = isTeam ? (conversation.name || 'Team Chat') : (participant.name || 'Unknown');
+                  const avatarGradient = isTeam
+                    ? 'linear-gradient(135deg,#667eea,#764ba2)'
+                    : (participant.gradient || 'linear-gradient(135deg,#ff8a65,#ff6b6b)');
+                  const avatarInitials = isTeam ? teamInitials : (participant.initials || '?');
+                  const memberCount = isTeam ? (conversation.participants || []).length + 1 : 0;
 
                   return (
                     <div
@@ -165,8 +191,8 @@ export default function Messages() {
                         <div style={{
                           width: 42,
                           height: 42,
-                          borderRadius: 13,
-                          background: participant.gradient || 'linear-gradient(135deg,#ff8a65,#ff6b6b)',
+                          borderRadius: isTeam ? 12 : 13,
+                          background: avatarGradient,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -174,24 +200,51 @@ export default function Messages() {
                           fontSize: '0.78rem',
                           color: 'white',
                         }}>
-                          {participant.initials || '?'}
+                          {avatarInitials}
                         </div>
-                        <div style={{
-                          position: 'absolute',
-                          bottom: -1,
-                          right: -1,
-                          width: 10,
-                          height: 10,
-                          borderRadius: '50%',
-                          background: participant.online ? '#5a9a5e' : 'var(--text-faint)',
-                          border: '2px solid var(--bg-card)',
-                        }} />
+                        {isTeam ? (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: -2,
+                            right: -2,
+                            width: 16,
+                            height: 16,
+                            borderRadius: '50%',
+                            background: 'var(--bg-card)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                              <circle cx="9" cy="7" r="4" />
+                              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                          </div>
+                        ) : (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: -1,
+                            right: -1,
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            background: participant.online ? '#5a9a5e' : 'var(--text-faint)',
+                            border: '2px solid var(--bg-card)',
+                          }} />
+                        )}
                       </div>
 
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 2 }}>
-                          <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: 0 }}>{participant.name || 'Unknown'}</h4>
-                          <span style={{ fontSize: '0.6rem', color: 'var(--text-faint)' }}>{formatRelativeTime(conversation.lastActivityAt)}</span>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, minWidth: 0, flex: 1 }}>
+                            <h4 style={{ fontSize: '0.84rem', fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</h4>
+                            {isTeam && (
+                              <span style={{ fontSize: '0.58rem', color: 'var(--text-faint)', flexShrink: 0 }}>{memberCount}</span>
+                            )}
+                          </div>
+                          <span style={{ fontSize: '0.6rem', color: 'var(--text-faint)', flexShrink: 0, marginLeft: 6 }}>{formatRelativeTime(conversation.lastActivityAt)}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <p style={{
@@ -237,7 +290,10 @@ export default function Messages() {
             <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
               <ChatComponent
                 chatType={activeConversation.type || 'dm'}
-                participants={[activeConversation.participant].filter(Boolean)}
+                conversationName={activeConversation.name}
+                participants={activeConversation.type === 'team'
+                  ? (activeConversation.participants || [])
+                  : [activeConversation.participant].filter(Boolean)}
                 messages={activeMessages}
                 onSendMessage={(payload) => sendMessage(activeConversationId, payload)}
                 onTyping={(isTyping) => emitTyping(activeConversationId, isTyping)}

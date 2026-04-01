@@ -12,6 +12,14 @@ const Conversation = sequelize.define('Conversation', {
     allowNull: false,
     defaultValue: 'dm',
   },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  teamId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   createdByUserId: {
     type: DataTypes.STRING,
     allowNull: false,

@@ -25,6 +25,27 @@ MessageReaction.belongsTo(User, { foreignKey: 'userId', targetKey: 'id', as: 'us
 async function syncDatabase() {
   await sequelize.authenticate();
   await sequelize.sync();
+
+  // Add team chat columns to conversations table if missing
+  await sequelize.query(`
+    ALTER TABLE conversations ADD COLUMN IF NOT EXISTS name VARCHAR(255);
+  `).catch(() => {});
+  await sequelize.query(`
+    ALTER TABLE conversations ADD COLUMN IF NOT EXISTS "teamId" VARCHAR(255);
+  `).catch(() => {});
+  await sequelize.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS conversations_team_id_unique ON conversations ("teamId");
+  `).catch(() => {});
+
+  // Clean up duplicate unique constraints left by prior alter:true runs
+  const [dupes] = await sequelize.query(`
+    SELECT conname, conrelid::regclass AS tablename
+    FROM pg_constraint
+    WHERE contype = 'u' AND conname ~ '_key[0-9]+'
+  `).catch(() => [[]]);
+  for (const { conname, tablename } of dupes) {
+    await sequelize.query(`ALTER TABLE ${tablename} DROP CONSTRAINT "${conname}"`).catch(() => {});
+  }
 }
 
 module.exports = {
