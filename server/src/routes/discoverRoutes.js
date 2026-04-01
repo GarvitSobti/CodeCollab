@@ -239,4 +239,31 @@ router.post('/swipe', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/v1/discover/relationship/:targetId — check match/team relationship
+router.get('/relationship/:targetId', authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUserBasic(req.auth.uid);
+    if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
+
+    const targetId = req.params.targetId;
+
+    const [userOneId, userTwoId] = normalizePair(user.id, targetId);
+    const match = await prisma.match.findFirst({
+      where: { userOneId, userTwoId, status: 'accepted' },
+    });
+
+    const sharedTeam = await prisma.teamMember.findFirst({
+      where: {
+        userId: user.id,
+        team: { members: { some: { userId: targetId } } },
+      },
+    });
+
+    return res.json({ matched: Boolean(match), onSameTeam: Boolean(sharedTeam) });
+  } catch (error) {
+    console.error('Failed to check relationship:', error);
+    return res.status(500).json({ error: { message: 'Failed to check relationship', status: 500 } });
+  }
+});
+
 module.exports = router;

@@ -55,6 +55,9 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Relationship state
+  const [canMessage, setCanMessage] = useState(false);
+
   // Team invite state
   const [teams, setTeams] = useState([]);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -66,6 +69,7 @@ export default function UserProfile() {
     let active = true;
     setLoading(true);
     setError('');
+    setCanMessage(false);
 
     api.get(`/api/v1/profile/${id}`)
       .then(({ data }) => {
@@ -75,6 +79,12 @@ export default function UserProfile() {
         if (active) setError(err.response?.data?.error?.message || 'Could not load profile.');
       })
       .finally(() => { if (active) setLoading(false); });
+
+    api.get(`/api/v1/discover/relationship/${id}`)
+      .then(({ data }) => {
+        if (active) setCanMessage(data.matched || data.onSameTeam);
+      })
+      .catch(() => {});
 
     return () => { active = false; };
   }, [id]);
@@ -283,24 +293,26 @@ export default function UserProfile() {
 
               {/* Action buttons */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={handleMessage}
-                  style={{
-                    width: '100%', padding: '11px 16px', borderRadius: 12, border: 'none',
-                    background: 'linear-gradient(135deg, var(--accent), var(--peach))',
-                    color: 'white', cursor: 'pointer', fontFamily: 'inherit',
-                    fontSize: '0.82rem', fontWeight: 700,
-                    boxShadow: '0 4px 14px rgba(224,93,80,0.3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                  </svg>
-                  Message
-                </motion.button>
+                {canMessage && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={handleMessage}
+                    style={{
+                      width: '100%', padding: '11px 16px', borderRadius: 12, border: 'none',
+                      background: 'linear-gradient(135deg, var(--accent), var(--peach))',
+                      color: 'white', cursor: 'pointer', fontFamily: 'inherit',
+                      fontSize: '0.82rem', fontWeight: 700,
+                      boxShadow: '0 4px 14px rgba(224,93,80,0.3)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    Message
+                  </motion.button>
+                )}
 
                 <button
                   onClick={() => { setInviteOpen((o) => !o); setInviteStatus('idle'); setInviteError(''); }}
