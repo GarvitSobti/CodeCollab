@@ -179,29 +179,9 @@ function PhoneFrame({ children }) {
           }} />
         </div>
 
-        {/* Status bar */}
-        <div style={{
-          height: 28, flexShrink: 0, paddingTop: 6,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '6px 20px 0',
-        }}>
-          <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-faint)' }}>9:41</span>
-          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            {/* Signal bars */}
-            {[3, 5, 7, 9].map((h, i) => (
-              <div key={i} style={{ width: 3, height: h, borderRadius: 1.5, background: i < 3 ? 'var(--text-faint)' : 'var(--border-strong)' }} />
-            ))}
-            {/* Battery */}
-            <div style={{ width: 16, height: 8, borderRadius: 2, border: '1px solid var(--text-faint)', marginLeft: 2, position: 'relative' }}>
-              <div style={{ position: 'absolute', right: -3, top: 2, width: 2, height: 4, borderRadius: 1, background: 'var(--text-faint)' }} />
-              <div style={{ width: '70%', height: '100%', borderRadius: 1, background: 'var(--text-faint)' }} />
-            </div>
-          </div>
-        </div>
-
         {/* App header inside phone */}
         <div style={{
-          padding: '8px 20px 0',
+          padding: '36px 20px 0',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexShrink: 0,
         }}>
