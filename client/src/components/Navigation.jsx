@@ -80,7 +80,7 @@ export default function Navigation() {
         display: 'flex', gap: 4, background: 'var(--bg-warm)', padding: 4, borderRadius: 14,
       }}>
         {navLinks.map(({ label, path }) => {
-          const active = location.pathname.startsWith(path);
+          const active = location.pathname.startsWith(path) || (path === '/discover' && location.pathname.startsWith('/user/'));
           const isMessages = path === '/messages';
           return (
             <button

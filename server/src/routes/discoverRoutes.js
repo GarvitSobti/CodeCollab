@@ -125,6 +125,75 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/v1/discover/users — browse all users with search
+router.get('/users', authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUserBasic(req.auth.uid);
+    if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
+
+    const { search, page = 1, limit = 24 } = req.query;
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const takeNum = Math.min(parseInt(limit) || 24, 50);
+    const skip = (pageNum - 1) * takeNum;
+
+    const where = {
+      profile: { onboardingCompleted: true, discoverable: true },
+    };
+
+    if (search && search.trim()) {
+      const term = search.trim();
+      where.OR = [
+        { name: { contains: term, mode: 'insensitive' } },
+        { university: { contains: term, mode: 'insensitive' } },
+        { bio: { contains: term, mode: 'insensitive' } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        include: {
+          profile: {
+            select: {
+              skills: true,
+              major: true,
+              interests: true,
+              academicYear: true,
+              photoDataUrl: true,
+              hackathonExperienceCount: true,
+              internalSkillTier: true,
+              internalSkillScore: true,
+            },
+          },
+        },
+        skip,
+        take: takeNum,
+        orderBy: { name: 'asc' },
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    const profiles = users.map((u) => ({
+      id: u.id,
+      firebaseUid: u.firebaseUid,
+      name: u.name,
+      avatarUrl: u.avatarUrl,
+      university: u.university,
+      bio: u.bio,
+      profile: u.profile,
+    }));
+
+    return res.json({
+      currentUserId: user.id,
+      users: profiles,
+      pagination: { page: pageNum, limit: takeNum, total, totalPages: Math.ceil(total / takeNum) },
+    });
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+    return res.status(500).json({ error: { message: 'Failed to fetch users', status: 500 } });
+  }
+});
+
 // POST /api/v1/discover/swipe — record a swipe (left or right)
 router.post('/swipe', authMiddleware, async (req, res) => {
   try {
