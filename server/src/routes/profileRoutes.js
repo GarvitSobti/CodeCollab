@@ -290,11 +290,19 @@ async function getOrCreateUserWithProfile(authUser) {
       });
     } catch (e) {
       if (e.code === 'P2002') {
-        // Race condition: another concurrent request already created this user
+        // Unique constraint conflict — try firebaseUid first, then email
         user = await prisma.user.findUnique({
           where: { firebaseUid: authUser.uid },
           include: { profile: true },
         });
+        if (!user) {
+          // Email exists with a different/null firebaseUid — link it
+          user = await prisma.user.update({
+            where: { email: emailFallback },
+            data: { firebaseUid: authUser.uid },
+            include: { profile: true },
+          });
+        }
       } else {
         throw e;
       }
