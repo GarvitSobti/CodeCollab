@@ -87,13 +87,13 @@ app.get('/', (req, res) => {
 // const reviewRoutes = require('./routes/reviewRoutes');
 // const messageRoutes = require('./routes/messageRoutes');
 
+const profileRoutes = require('./routes/profileRoutes');
 if (shouldEnableFirebaseAuth) {
-  const profileRoutes = require('./routes/profileRoutes');
   app.use('/api/v1/auth', authRoutes);
-  app.use('/api/v1/profile', profileRoutes);
 } else {
   console.log('⚠️  Firebase user auth routes disabled (ENABLE_FIREBASE_AUTH=false).');
 }
+app.use('/api/v1/profile', profileRoutes);
 
 // Use routes (uncomment when routes are created)
 // app.use('/api/users', userRoutes);
