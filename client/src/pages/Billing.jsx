@@ -10,7 +10,7 @@ const FREE_FEATURES = [
   { label: 'Basic profile & skill listing', included: true },
   { label: 'Join hackathon teams', included: true },
   { label: 'Team chat & messaging', included: true },
-  { label: 'Up to 10 swipes per day', included: true },
+  { label: 'Up to 30 swipes per day', included: true },
   { label: 'Profile boost in discovery feed', included: false },
   { label: 'See who swiped right on you', included: false },
   { label: 'Hackathon deadline alerts', included: false },
@@ -130,7 +130,7 @@ export default function Billing() {
               fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent)',
               letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 20,
             }}>
-              Freemium Plan
+              Free Plan
             </span>
           </motion.div>
 

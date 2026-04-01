@@ -244,9 +244,9 @@ const hackathons = [
     description:
       'SMU\'s flagship hackathon bringing together students to build innovative solutions for social impact. Open to all university students in Singapore.',
     url: 'https://smu.sg/dothack2026',
-    startDate: new Date('2026-03-27T09:00:00+08:00'),
-    endDate: new Date('2026-03-29T18:00:00+08:00'),
-    registrationDeadline: new Date('2026-03-20T23:59:00+08:00'),
+    startDate: new Date('2026-03-30T09:00:00+08:00'),
+    endDate: new Date('2026-04-03T18:00:00+08:00'),
+    registrationDeadline: new Date('2026-03-25T23:59:00+08:00'),
     location: 'SMU Campus, 81 Victoria Street',
     isOnline: false,
     minTeamSize: 2,
@@ -259,9 +259,9 @@ const hackathons = [
     description:
       'A 48-hour health-tech hackathon co-organised by NUS Computing and NUS Medicine. Build solutions that improve healthcare delivery in Southeast Asia.',
     url: 'https://healthhack.nus.edu.sg',
-    startDate: new Date('2026-03-26T18:00:00+08:00'),
-    endDate: new Date('2026-03-29T12:00:00+08:00'),
-    registrationDeadline: new Date('2026-03-18T23:59:00+08:00'),
+    startDate: new Date('2026-03-31T18:00:00+08:00'),
+    endDate: new Date('2026-04-02T12:00:00+08:00'),
+    registrationDeadline: new Date('2026-03-25T23:59:00+08:00'),
     location: 'NUS University Town',
     isOnline: false,
     minTeamSize: 3,
@@ -353,7 +353,11 @@ const hackathons = [
 async function main() {
   // Remove old seed data so dates are refreshed
   // Delete seed teams first to avoid FK violations on hackathon cleanup
-  const seedTeamNames = ['Team Alpha', 'Team Beta', 'Team Gamma'];
+  const seedTeamNames = [
+    'Team Alpha', 'StackOverflowers', 'MedTech Mavericks', 'PulseCheck',
+    'Team Beta', 'NullPointers', 'Team Gamma', 'Neural Ninjas',
+    'Pixel Pirates', 'GreenByte', 'ShipIt Squad',
+  ];
   const seedTeams = await prisma.team.findMany({ where: { name: { in: seedTeamNames } }, select: { id: true } });
   if (seedTeams.length > 0) {
     const seedTeamIds = seedTeams.map((t) => t.id);
@@ -445,9 +449,24 @@ async function main() {
     console.log('  Skipped teams (need at least 1 user and 1 hackathon).');
   } else {
     const teamSeeds = [
-      { name: 'Team Alpha', hackathonName: 'SMU .Hack 2026', status: 'COMPETING' },
-      { name: 'Team Beta', hackathonName: 'HackNUS 2026', status: 'FORMING' },
-      { name: 'Team Gamma', hackathonName: 'NTU AI Challenge', status: 'FORMING' },
+      // SMU .Hack 2026 — 2 teams
+      { name: 'Team Alpha', hackathonName: 'SMU .Hack 2026', status: 'COMPETING', memberSlice: [0, 4] },
+      { name: 'StackOverflowers', hackathonName: 'SMU .Hack 2026', status: 'COMPETING', memberSlice: [4, 8] },
+      // NUS HealthHack 2026 — 2 teams
+      { name: 'MedTech Mavericks', hackathonName: 'NUS HealthHack 2026', status: 'COMPETING', memberSlice: [1, 5] },
+      { name: 'PulseCheck', hackathonName: 'NUS HealthHack 2026', status: 'FORMING', memberSlice: [8, 12] },
+      // HackNUS 2026 — 2 teams
+      { name: 'Team Beta', hackathonName: 'HackNUS 2026', status: 'FORMING', memberSlice: [3, 8] },
+      { name: 'NullPointers', hackathonName: 'HackNUS 2026', status: 'FORMING', memberSlice: [0, 3] },
+      // NTU AI Challenge — 2 teams
+      { name: 'Team Gamma', hackathonName: 'NTU AI Challenge', status: 'FORMING', memberSlice: [9, 12] },
+      { name: 'Neural Ninjas', hackathonName: 'NTU AI Challenge', status: 'FORMING', memberSlice: [3, 7] },
+      // SUTD GameJam — 1 team
+      { name: 'Pixel Pirates', hackathonName: 'SUTD GameJam', status: 'FORMING', memberSlice: [5, 9] },
+      // SG Climate Hack — 1 team
+      { name: 'GreenByte', hackathonName: 'SG Climate Hack', status: 'FORMING', memberSlice: [0, 5] },
+      // BuildSG Online — 1 team
+      { name: 'ShipIt Squad', hackathonName: 'BuildSG Online 2026', status: 'FORMING', memberSlice: [7, 11] },
     ];
 
     for (const ts of teamSeeds) {
@@ -463,22 +482,24 @@ async function main() {
         continue;
       }
 
-      const leader = allUsers[0];
+      const teamMembers = allUsers.slice(ts.memberSlice[0], ts.memberSlice[1]);
+      if (teamMembers.length === 0) continue;
+
       const team = await prisma.team.create({
         data: {
           name: ts.name,
           hackathonId: hackathon.id,
-          createdById: leader.id,
+          createdById: teamMembers[0].id,
           status: ts.status,
           members: {
-            create: allUsers.map((u, idx) => ({
+            create: teamMembers.map((u, idx) => ({
               userId: u.id,
               role: idx === 0 ? 'LEADER' : 'MEMBER',
             })),
           },
         },
       });
-      console.log(`  Created: ${ts.name} (${allUsers.length} members) for ${hackathon.name}`);
+      console.log(`  Created: ${ts.name} (${teamMembers.length} members) for ${hackathon.name}`);
     }
 
     const teamCount = await prisma.team.count();

@@ -168,7 +168,28 @@ async function requireConversationMembership(conversationId, userId) {
 async function openOrCreateDmConversation(userId, participantUserId) {
   await requireMatch(userId, participantUserId);
 
-  const participantUser = await User.findByPk(participantUserId);
+  let participantUser = await User.findByPk(participantUserId);
+
+  // The participant may only exist in Prisma (e.g. seed profiles). Sync them
+  // into the Sequelize chat User table so DM conversations can be created.
+  if (!participantUser) {
+    try {
+      const prisma = require('../config/prisma');
+      const prismaUser = await prisma.user.findUnique({ where: { firebaseUid: participantUserId } });
+      if (prismaUser) {
+        [participantUser] = await User.upsert({
+          id: prismaUser.firebaseUid,
+          firebaseUid: prismaUser.firebaseUid,
+          email: prismaUser.email,
+          name: prismaUser.name || prismaUser.email || 'CodeCollab User',
+          avatarUrl: prismaUser.avatarUrl,
+          initials: getInitials(prismaUser.name || prismaUser.email || 'CodeCollab User'),
+        }, { returning: true });
+      }
+    } catch (err) {
+      console.error('Failed to sync participant from Prisma:', err);
+    }
+  }
 
   if (!participantUser) {
     const err = new Error('Matched user not found');
