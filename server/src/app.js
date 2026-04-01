@@ -16,7 +16,6 @@ const teamRoutes = require('./routes/teamRoutes');
 const discoverRoutes = require('./routes/discoverRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const { registerChatHandlers } = require('./socket/chatHandlers');
-const { syncDatabase } = require('./models');
 
 const app = express();
 const server = http.createServer(app);
@@ -134,16 +133,9 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-syncDatabase()
-  .then(() => {
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
-  })
-  .catch((error) => {
-    console.error('Failed to initialize database', error);
-    process.exit(1);
-  });
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
 
 module.exports = { app, server, io };

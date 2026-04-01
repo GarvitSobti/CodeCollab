@@ -2,8 +2,7 @@ const express = require('express');
 const prisma = require('../config/prisma');
 const authMiddleware = require('../middleware/authMiddleware');
 const { ExperienceLevel } = require('@prisma/client');
-const { Match } = require('../models');
-const { normalizePair } = require('../services/chatSeedService');
+const { normalizePair } = require('../utils/matchUtils');
 
 const router = express.Router();
 
@@ -155,9 +154,10 @@ router.post('/swipe', authMiddleware, async (req, res) => {
 
       if (reciprocal?.direction === 'right') {
         const [userOneId, userTwoId] = normalizePair(user.firebaseUid, target.firebaseUid);
-        await Match.findOrCreate({
-          where: { userOneId, userTwoId },
-          defaults: { userOneId, userTwoId, status: 'accepted', createdByUserId: user.firebaseUid },
+        await prisma.match.upsert({
+          where: { userOneId_userTwoId: { userOneId, userTwoId } },
+          update: {},
+          create: { userOneId, userTwoId, status: 'accepted', createdByUserId: user.firebaseUid },
         });
         matched = true;
       }
