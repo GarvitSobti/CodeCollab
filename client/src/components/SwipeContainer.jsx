@@ -17,6 +17,7 @@ function profileToUser(p) {
 
   return new User({
     id: p.id,
+    firebaseUid: p.firebaseUid,
     name: p.name || 'Unknown',
     email: p.email || '',
     avatarUrl: p.avatarUrl || p.profile?.photoDataUrl || null,
@@ -713,7 +714,7 @@ export default function SwipeContainer() {
 
   const handleMessage = async () => {
     if (!matchedProfile) return;
-    await openOrCreateDM(matchedProfile.id);
+    await openOrCreateDM(matchedProfile.firebaseUid || matchedProfile.id);
     setMatchedProfile(null);
     navigate('/messages');
   };
