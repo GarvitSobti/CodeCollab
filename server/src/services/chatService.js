@@ -111,6 +111,84 @@ async function getUserById(userId) {
   return User.findByPk(userId);
 }
 
+async function syncTeamConversations(userId) {
+  try {
+    const prisma = require('../config/prisma');
+
+    const prismaUser = await prisma.user.findUnique({ where: { firebaseUid: userId } });
+    if (!prismaUser) return;
+
+    const memberships = await prisma.teamMember.findMany({
+      where: { userId: prismaUser.id },
+      include: {
+        team: {
+          include: {
+            members: {
+              include: { user: true },
+            },
+          },
+        },
+      },
+    });
+
+    for (const membership of memberships) {
+      const team = membership.team;
+
+      const [conversation] = await Conversation.findOrCreate({
+        where: { teamId: team.id },
+        defaults: {
+          type: 'team',
+          name: team.name,
+          teamId: team.id,
+          createdByUserId: userId,
+        },
+      });
+
+      if (conversation.name !== team.name) {
+        await conversation.update({ name: team.name });
+      }
+
+      const teamFirebaseUids = new Set();
+      for (const member of team.members) {
+        const uid = member.user.firebaseUid;
+        teamFirebaseUids.add(uid);
+
+        await User.upsert({
+          id: uid,
+          firebaseUid: uid,
+          email: member.user.email,
+          name: member.user.name || member.user.email || 'CodeCollab User',
+          avatarUrl: member.user.avatarUrl,
+          initials: getInitials(member.user.name || member.user.email || 'CodeCollab User'),
+        }, { returning: false });
+
+        const existing = await ConversationParticipant.findOne({
+          where: { conversationId: conversation.id, userId: uid },
+        });
+        if (!existing) {
+          await ConversationParticipant.create({
+            conversationId: conversation.id,
+            userId: uid,
+            lastReadAt: null,
+            lastDeliveredAt: null,
+          });
+        }
+      }
+
+      const allParticipants = await ConversationParticipant.findAll({
+        where: { conversationId: conversation.id },
+      });
+      for (const participant of allParticipants) {
+        if (!teamFirebaseUids.has(participant.userId)) {
+          await participant.destroy();
+        }
+      }
+    }
+  } catch (err) {
+    console.error('syncTeamConversations error (non-fatal):', err.message);
+  }
+}
+
 async function requireMatch(userId, participantUserId) {
   if (userId === participantUserId) {
     throw new Error('Cannot open a conversation with yourself');
@@ -245,6 +323,10 @@ async function openOrCreateDmConversation(userId, participantUserId) {
 }
 
 async function listConversations(userId) {
+  await syncTeamConversations(userId).catch((err) => {
+    console.error('Team conversation sync failed:', err);
+  });
+
   const memberships = await ConversationParticipant.findAll({
     where: { userId },
     include: [
@@ -286,7 +368,8 @@ async function listConversations(userId) {
   }, {});
 
   const results = await Promise.all(memberships.map(async (membership) => {
-    const otherParticipantMembership = (participantsByConversation[membership.conversationId] || [])
+    const conversationParticipants = participantsByConversation[membership.conversationId] || [];
+    const otherParticipantMembership = conversationParticipants
       .find((participant) => participant.userId !== userId);
     const lastMessage = messageMap[membership.conversationId];
     const unreadCount = await Message.count({
@@ -299,18 +382,39 @@ async function listConversations(userId) {
       },
     });
 
-    return {
+    const isTeam = membership.conversation.type === 'team';
+
+    const base = {
       id: membership.conversation.id,
       type: membership.conversation.type,
-      participant: otherParticipantMembership?.user ? toUserSummary(otherParticipantMembership.user) : null,
       unreadCount,
       lastActivityAt: membership.conversation.lastMessageAt || membership.conversation.createdAt,
       lastMessage: lastMessage
         ? toMessagePayload(lastMessage, userId, otherParticipantMembership?.lastReadAt || null)
         : null,
     };
+
+    if (isTeam) {
+      return {
+        ...base,
+        name: membership.conversation.name,
+        teamId: membership.conversation.teamId,
+        participant: null,
+        participants: conversationParticipants
+          .filter((p) => p.userId !== userId)
+          .map((p) => (p.user ? toUserSummary(p.user) : null))
+          .filter(Boolean),
+      };
+    }
+
+    return {
+      ...base,
+      participant: otherParticipantMembership?.user ? toUserSummary(otherParticipantMembership.user) : null,
+      participants: [],
+    };
   }));
 
+  results.sort((a, b) => new Date(b.lastActivityAt || 0) - new Date(a.lastActivityAt || 0));
   return results;
 }
 

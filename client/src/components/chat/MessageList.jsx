@@ -117,7 +117,7 @@ function LinkPreview({ preview, isSelf }) {
   );
 }
 
-function MessageBubble({ message, participant, isSelf, currentUserId, onReact }) {
+function MessageBubble({ message, participant, isSelf, currentUserId, onReact, showSender }) {
   return (
     <div style={{
       display: 'flex',
@@ -145,6 +145,11 @@ function MessageBubble({ message, participant, isSelf, currentUserId, onReact })
       )}
 
       <div style={{ maxWidth: '72%' }}>
+        {showSender && !isSelf && (
+          <div style={{ fontSize: '0.64rem', fontWeight: 700, color: 'var(--text-soft)', marginBottom: 3, paddingLeft: 2 }}>
+            {participant?.name || message.sender?.name || 'Unknown'}
+          </div>
+        )}
         <div style={{
           padding: '10px 14px',
           borderRadius: 16,
@@ -203,7 +208,9 @@ export default function MessageList({
   hasMore = false,
   loading = false,
   onReact,
+  chatType = 'dm',
 }) {
+  const isGroupChat = chatType === 'team' || chatType === 'group';
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -300,6 +307,9 @@ export default function MessageList({
         const isSelf = item.senderId === currentUserId;
         const participant = participantMap[item.senderId] || item.sender;
 
+        const prevItem = groupedMessages[index - 1];
+        const showSender = isGroupChat && (!prevItem || prevItem.type === 'date' || prevItem.senderId !== item.senderId);
+
         return (
           <MessageBubble
             key={item.id || item.clientMessageId || index}
@@ -308,6 +318,7 @@ export default function MessageList({
             isSelf={isSelf}
             currentUserId={currentUserId}
             onReact={onReact}
+            showSender={showSender}
           />
         );
       })}
