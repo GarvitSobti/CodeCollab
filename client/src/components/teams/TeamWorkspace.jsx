@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const STATUS_STYLE = {
   FORMING: { color: 'var(--sky)', bg: 'rgba(66,165,245,0.12)', label: 'Forming' },
@@ -48,6 +49,7 @@ function getSkillNames(profile) {
 }
 
 export default function TeamWorkspace({ team, onOpenMessages, onDM, onInviteMember, onLeaveTeam }) {
+  const { user: currentUser } = useAuth();
   if (!team) return null;
 
   const statusStyle = STATUS_STYLE[team.status] || STATUS_STYLE.FORMING;
@@ -145,24 +147,26 @@ export default function TeamWorkspace({ team, onOpenMessages, onDM, onInviteMemb
                     {member.university || ''}{member.graduationYear ? ` · Year ${member.graduationYear}` : ''}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onDM(membership)}
-                  title={`Message ${(member.name || '').split(' ')[0]}`}
-                  style={{
-                    width: 32, height: 32, borderRadius: 10,
-                    border: '1.5px solid rgba(0,0,0,0.07)', background: 'var(--bg)',
-                    cursor: 'pointer', flexShrink: 0, display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    color: 'var(--text-soft)', transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg,var(--peach),var(--coral))'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'white'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-                  </svg>
-                </button>
+                {member.firebaseUid !== currentUser?.uid && (
+                  <button
+                    type="button"
+                    onClick={() => onDM(membership)}
+                    title={`Message ${(member.name || '').split(' ')[0]}`}
+                    style={{
+                      width: 32, height: 32, borderRadius: 10,
+                      border: '1.5px solid rgba(0,0,0,0.07)', background: 'var(--bg)',
+                      cursor: 'pointer', flexShrink: 0, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                      color: 'var(--text-soft)', transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg,var(--peach),var(--coral))'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'white'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)'; e.currentTarget.style.color = 'var(--text-soft)'; }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                    </svg>
+                  </button>
+                )}
               </div>
               <span
                 style={{
