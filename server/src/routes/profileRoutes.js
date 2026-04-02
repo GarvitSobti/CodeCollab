@@ -222,6 +222,7 @@ function toClientProfile(user, profile) {
   const assessment = sanitizeAssessment(profile?.assessmentResponses || {});
 
   return {
+    id: user.id,
     firebaseUid: user.firebaseUid,
     email: user.email,
     personal: {

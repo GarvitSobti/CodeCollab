@@ -242,12 +242,17 @@ router.post('/swipe', authMiddleware, async (req, res) => {
 // GET /api/v1/discover/relationship/:targetId — check match/team relationship
 router.get('/relationship/:targetId', authMiddleware, async (req, res) => {
   try {
-    const user = await resolveUserBasic(req.auth.uid);
+    const user = await resolveUser(req.auth.uid);
     if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
 
     const targetId = req.params.targetId;
+    const target = await prisma.user.findUnique({
+      where: { id: targetId },
+      select: { id: true, firebaseUid: true },
+    });
+    if (!target) return res.status(404).json({ error: { message: 'Target user not found', status: 404 } });
 
-    const [userOneId, userTwoId] = normalizePair(user.id, targetId);
+    const [userOneId, userTwoId] = normalizePair(user.firebaseUid, target.firebaseUid);
     const match = await prisma.match.findFirst({
       where: { userOneId, userTwoId, status: 'accepted' },
     });
@@ -255,7 +260,7 @@ router.get('/relationship/:targetId', authMiddleware, async (req, res) => {
     const sharedTeam = await prisma.teamMember.findFirst({
       where: {
         userId: user.id,
-        team: { members: { some: { userId: targetId } } },
+        team: { members: { some: { userId: target.id } } },
       },
     });
 
