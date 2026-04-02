@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
+import ReviewsPanel from '../components/ReviewsPanel';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-
-const SECTIONS = ['Welcome Setup', 'About You', 'Your Skills', 'Your Preferred Skills'];
+import { fetchUserReviews } from '../services/reviewService';
 
 const PROFICIENCY_LEVELS = [
   { value: 1, label: 'Beginner', description: 'Can follow guides and complete simple tasks with help.' },
@@ -194,7 +194,7 @@ function getInitials(name) {
 /*  VIEW MODE — mirrors the prototype design       */
 /* ─────────────────────────────────────────────── */
 
-function ProfileView({ profile, onEdit }) {
+function ProfileView({ profile, onEdit, reviewsData, reviewsLoading, reviewsError }) {
   const filledSkills = profile.skills.filter((s) => s.name.trim());
   const filledProjects = profile.projectExperience.filter((p) => p.title.trim());
   const filledWork = profile.workExperience.filter((w) => w.company.trim() || w.role.trim());
@@ -381,6 +381,16 @@ function ProfileView({ profile, onEdit }) {
             </div>
           </div>
         )}
+
+        <ReviewsPanel
+          title="Reviews You Received"
+          reviews={reviewsData.reviews}
+          positiveCount={reviewsData.positiveCount}
+          negativeCount={reviewsData.negativeCount}
+          total={reviewsData.total}
+          loading={reviewsLoading}
+          error={reviewsError}
+        />
       </div>
     </div>
   );
@@ -665,6 +675,27 @@ export default function Profile() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [editing, setEditing] = useState(false);
+  const [reviewsData, setReviewsData] = useState({ reviews: [], positiveCount: 0, negativeCount: 0, total: 0 });
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState('');
+
+  const loadReviews = useCallback(async (userId) => {
+    if (!userId) {
+      return;
+    }
+
+    setReviewsLoading(true);
+    setReviewsError('');
+
+    try {
+      const data = await fetchUserReviews(userId);
+      setReviewsData(data);
+    } catch (error) {
+      setReviewsError(error?.response?.data?.error?.message || 'Could not load reviews.');
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -678,6 +709,7 @@ export default function Profile() {
         if (!active) return;
         const loaded = normalizeIncomingProfile(response?.data?.profile, user);
         setProfile(loaded);
+        loadReviews(response?.data?.profile?.id);
         // If onboarding not done, go straight to edit mode
         if (!loaded.onboardingCompleted) setEditing(true);
       } catch (error) {
@@ -694,7 +726,7 @@ export default function Profile() {
 
     loadProfile();
     return () => { active = false; };
-  }, [user]);
+  }, [loadReviews, user]);
 
   const updateProfile = (updater) => {
     setProfile((previous) => {
@@ -759,6 +791,7 @@ export default function Profile() {
       const response = await api.put('/api/v1/profile/me', payload);
       const saved = normalizeIncomingProfile(response?.data?.profile, user);
       setProfile(saved);
+      loadReviews(response?.data?.profile?.id);
       await refreshOnboardingStatus();
       setSuccessMessage(markOnboardingComplete ? 'Profile updated.' : 'Draft saved.');
       // After successful save, switch back to view mode
@@ -813,6 +846,9 @@ export default function Profile() {
           <ProfileView
             profile={profile}
             onEdit={() => setEditing(true)}
+            reviewsData={reviewsData}
+            reviewsLoading={reviewsLoading}
+            reviewsError={reviewsError}
           />
         )}
       </div>

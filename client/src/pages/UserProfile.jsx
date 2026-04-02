@@ -2,8 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navigation from '../components/Navigation';
+import ReviewsPanel from '../components/ReviewsPanel';
 import { useChatContext } from '../contexts/ChatContext';
 import api from '../services/api';
+import { createReview, fetchReviewEligibility, fetchUserReviews } from '../services/reviewService';
 
 const SKILL_COLORS = [
   { bg: 'rgba(224,93,80,0.1)', text: '#e05d50' },
@@ -64,6 +66,40 @@ export default function UserProfile() {
   const [selectedTeam, setSelectedTeam] = useState('');
   const [inviteStatus, setInviteStatus] = useState('idle'); // idle | sending | sent | error
   const [inviteError, setInviteError] = useState('');
+  const [reviewsData, setReviewsData] = useState({ reviews: [], positiveCount: 0, negativeCount: 0, total: 0 });
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewsError, setReviewsError] = useState('');
+  const [reviewEligibility, setReviewEligibility] = useState(null);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewFormError, setReviewFormError] = useState('');
+  const [reviewFormSuccess, setReviewFormSuccess] = useState('');
+
+  const loadReviews = useCallback(async () => {
+    setReviewsLoading(true);
+    setReviewsError('');
+    try {
+      const data = await fetchUserReviews(id);
+      setReviewsData(data);
+    } catch (err) {
+      setReviewsError(err.response?.data?.error?.message || 'Could not load reviews.');
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, [id]);
+
+  const loadReviewEligibility = useCallback(async () => {
+    try {
+      const data = await fetchReviewEligibility(id);
+      setReviewEligibility(data);
+    } catch (err) {
+      setReviewEligibility({
+        canReview: false,
+        reason: err.response?.data?.error?.message || 'Could not load review eligibility.',
+        sharedTeams: [],
+        existingReviews: [],
+      });
+    }
+  }, [id]);
 
   useEffect(() => {
     let active = true;
@@ -86,8 +122,11 @@ export default function UserProfile() {
       })
       .catch(() => {});
 
+    loadReviews();
+    loadReviewEligibility();
+
     return () => { active = false; };
-  }, [id]);
+  }, [id, loadReviewEligibility, loadReviews]);
 
   // Fetch teams when invite section opens
   useEffect(() => {
@@ -118,6 +157,25 @@ export default function UserProfile() {
     await openOrCreateDM(profile.firebaseUid);
     navigate('/messages');
   };
+
+  const handleReviewSubmit = useCallback(async (payload) => {
+    setReviewSubmitting(true);
+    setReviewFormError('');
+    setReviewFormSuccess('');
+
+    try {
+      await createReview({
+        targetUserId: id,
+        ...payload,
+      });
+      setReviewFormSuccess('Review submitted.');
+      await Promise.all([loadReviews(), loadReviewEligibility()]);
+    } catch (err) {
+      setReviewFormError(err.response?.data?.error?.message || 'Failed to submit review.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  }, [id, loadReviewEligibility, loadReviews]);
 
   if (loading) {
     return (
@@ -554,6 +612,24 @@ export default function UserProfile() {
                 </div>
               </div>
             )}
+
+            <ReviewsPanel
+              reviews={reviewsData.reviews}
+              positiveCount={reviewsData.positiveCount}
+              negativeCount={reviewsData.negativeCount}
+              total={reviewsData.total}
+              loading={reviewsLoading}
+              error={reviewsError}
+              compose={{
+                enabled: Boolean(reviewEligibility?.canReview),
+                eligibility: reviewEligibility,
+                loading: !reviewEligibility,
+                submitting: reviewSubmitting,
+                error: reviewFormError,
+                success: reviewFormSuccess,
+                onSubmit: handleReviewSubmit,
+              }}
+            />
           </motion.div>
         </div>
       </div>
