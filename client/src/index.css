@@ -227,3 +227,356 @@ body {
   .nav-links .nav-link { padding: 4px 6px !important; font-size: 0.58rem !important; }
   .nav-right { gap: 4px !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* ═══ PROFILE PAGE ═══ */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+}
+
+/* --- Sidebar --- */
+.profile-sidebar {
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  height: fit-content;
+}
+
+.profile-cover {
+  height: 110px;
+  background: linear-gradient(135deg, #ffe0d6, #ffd4cc, #e8d4ff, #d6eaff);
+  position: relative;
+}
+
+.dark .profile-cover {
+  background: linear-gradient(135deg, #3a2520, #352832, #2a2840, #202838);
+}
+
+.profile-avatar-wrap {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.profile-avatar-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: white;
+  border: 3px solid var(--bg-card);
+  box-shadow: var(--shadow-soft);
+  background: linear-gradient(135deg, var(--peach), var(--coral));
+}
+
+.profile-sidebar-body {
+  padding: 44px 22px 24px;
+  text-align: center;
+}
+
+.profile-sidebar-body h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 3px;
+}
+
+.profile-uni {
+  font-size: 0.76rem;
+  color: var(--text-soft);
+  margin-bottom: 3px;
+}
+
+.profile-bio {
+  font-size: 0.78rem;
+  color: var(--text-body);
+  line-height: 1.6;
+  margin: 12px 0 18px;
+}
+
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.p-stat {
+  padding: 12px 6px;
+  border-radius: 14px;
+  background: var(--bg);
+  text-align: center;
+}
+
+.p-stat .p-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  display: block;
+  line-height: 1.3;
+}
+
+.p-stat .p-lbl {
+  font-size: 0.56rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.profile-social-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.profile-social-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: var(--bg);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-body);
+  text-decoration: none;
+  transition: color 0.2s, border-color 0.2s;
+  border: 1px solid transparent;
+}
+
+.profile-social-link:hover {
+  color: var(--accent);
+  border-color: var(--border-strong);
+}
+
+.profile-edit-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-card);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: border-color 0.25s, color 0.25s;
+}
+
+.profile-edit-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* --- Main content area --- */
+.profile-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-section {
+  padding: 22px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+}
+
+.profile-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dark);
+}
+
+/* Skills tags */
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.skill-tag {
+  padding: 5px 14px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: 'Fira Code', monospace;
+  transition: transform 0.2s;
+  cursor: default;
+}
+
+.skill-tag:hover { transform: scale(1.04); }
+
+/* Proficiency bars */
+.prof-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prof-bar-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.prof-bar-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.prof-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.prof-bar-val {
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Experience cards */
+.exp-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--bg);
+  transition: transform 0.2s;
+}
+
+.exp-card:hover { transform: translateX(3px); }
+
+.exp-card-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.exp-card-meta {
+  font-size: 0.7rem;
+  color: var(--text-soft);
+  margin-bottom: 6px;
+}
+
+.exp-card-desc {
+  font-size: 0.76rem;
+  color: var(--text-body);
+  line-height: 1.55;
+}
+
+.exp-card-techs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.exp-card-tech {
+  padding: 3px 9px;
+  border-radius: 7px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  font-family: 'Fira Code', monospace;
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+/* Empty state for sections with no data */
+.profile-empty {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.profile-empty-hint {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  margin-top: 4px;
+}
+
+/* Preferred skills */
+.preferred-tag {
+  padding: 5px 14px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1.5px dashed var(--border-strong);
+  color: var(--text-body);
+  background: transparent;
+}
+
+/* --- Edit mode panel --- */
+.profile-edit-panel {
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+  padding: 24px;
+}
+
+.profile-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.profile-edit-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-card);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: border-color 0.25s, color 0.25s;
+}
+
+.profile-edit-back:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* --- Responsive --- */
+@media (max-width: 860px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-sidebar {
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}

@@ -2,8 +2,7 @@ const express = require('express');
 const prisma = require('../config/prisma');
 const authMiddleware = require('../middleware/authMiddleware');
 const { ExperienceLevel } = require('@prisma/client');
-const { Match } = require('../models');
-const { normalizePair } = require('../services/chatSeedService');
+const { normalizePair } = require('../utils/matchUtils');
 
 const router = express.Router();
 
@@ -126,6 +125,75 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/v1/discover/users — browse all users with search
+router.get('/users', authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUserBasic(req.auth.uid);
+    if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
+
+    const { search, page = 1, limit = 24 } = req.query;
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const takeNum = Math.min(parseInt(limit) || 24, 50);
+    const skip = (pageNum - 1) * takeNum;
+
+    const where = {
+      profile: { onboardingCompleted: true, discoverable: true },
+    };
+
+    if (search && search.trim()) {
+      const term = search.trim();
+      where.OR = [
+        { name: { contains: term, mode: 'insensitive' } },
+        { university: { contains: term, mode: 'insensitive' } },
+        { bio: { contains: term, mode: 'insensitive' } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        include: {
+          profile: {
+            select: {
+              skills: true,
+              major: true,
+              interests: true,
+              academicYear: true,
+              photoDataUrl: true,
+              hackathonExperienceCount: true,
+              internalSkillTier: true,
+              internalSkillScore: true,
+            },
+          },
+        },
+        skip,
+        take: takeNum,
+        orderBy: { name: 'asc' },
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    const profiles = users.map((u) => ({
+      id: u.id,
+      firebaseUid: u.firebaseUid,
+      name: u.name,
+      avatarUrl: u.avatarUrl,
+      university: u.university,
+      bio: u.bio,
+      profile: u.profile,
+    }));
+
+    return res.json({
+      currentUserId: user.id,
+      users: profiles,
+      pagination: { page: pageNum, limit: takeNum, total, totalPages: Math.ceil(total / takeNum) },
+    });
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+    return res.status(500).json({ error: { message: 'Failed to fetch users', status: 500 } });
+  }
+});
+
 // POST /api/v1/discover/swipe — record a swipe (left or right)
 router.post('/swipe', authMiddleware, async (req, res) => {
   try {
@@ -155,9 +223,10 @@ router.post('/swipe', authMiddleware, async (req, res) => {
 
       if (reciprocal?.direction === 'right') {
         const [userOneId, userTwoId] = normalizePair(user.firebaseUid, target.firebaseUid);
-        await Match.findOrCreate({
-          where: { userOneId, userTwoId },
-          defaults: { userOneId, userTwoId, status: 'accepted', createdByUserId: user.firebaseUid },
+        await prisma.match.upsert({
+          where: { userOneId_userTwoId: { userOneId, userTwoId } },
+          update: {},
+          create: { userOneId, userTwoId, status: 'accepted', createdByUserId: user.firebaseUid },
         });
         matched = true;
       }
@@ -167,6 +236,38 @@ router.post('/swipe', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Failed to record swipe:', error);
     return res.status(500).json({ error: { message: 'Failed to record swipe', status: 500 } });
+  }
+});
+
+// GET /api/v1/discover/relationship/:targetId — check match/team relationship
+router.get('/relationship/:targetId', authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req.auth.uid);
+    if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
+
+    const targetId = req.params.targetId;
+    const target = await prisma.user.findUnique({
+      where: { id: targetId },
+      select: { id: true, firebaseUid: true },
+    });
+    if (!target) return res.status(404).json({ error: { message: 'Target user not found', status: 404 } });
+
+    const [userOneId, userTwoId] = normalizePair(user.firebaseUid, target.firebaseUid);
+    const match = await prisma.match.findFirst({
+      where: { userOneId, userTwoId, status: 'accepted' },
+    });
+
+    const sharedTeam = await prisma.teamMember.findFirst({
+      where: {
+        userId: user.id,
+        team: { members: { some: { userId: target.id } } },
+      },
+    });
+
+    return res.json({ matched: Boolean(match), onSameTeam: Boolean(sharedTeam) });
+  } catch (error) {
+    console.error('Failed to check relationship:', error);
+    return res.status(500).json({ error: { message: 'Failed to check relationship', status: 500 } });
   }
 });
 

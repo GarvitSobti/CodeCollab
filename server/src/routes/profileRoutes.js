@@ -222,6 +222,7 @@ function toClientProfile(user, profile) {
   const assessment = sanitizeAssessment(profile?.assessmentResponses || {});
 
   return {
+    id: user.id,
     firebaseUid: user.firebaseUid,
     email: user.email,
     personal: {
@@ -342,6 +343,24 @@ router.get('/me', authMiddleware, async (req, res) => {
   const authUser = req.auth;
   const user = await getOrCreateUserWithProfile(authUser);
   return res.status(200).json({ profile: toClientProfile(user, user.profile) });
+});
+
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      include: { profile: true },
+    });
+
+    if (!user || !user.profile) {
+      return res.status(404).json({ error: { message: 'User not found', status: 404 } });
+    }
+
+    return res.status(200).json({ profile: toClientProfile(user, user.profile) });
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error);
+    return res.status(500).json({ error: { message: 'Failed to fetch profile', status: 500 } });
+  }
 });
 
 router.put('/me', authMiddleware, async (req, res) => {

@@ -1,20 +1,67 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navigation from '../components/Navigation';
 import SwipeContainer from '../components/SwipeContainer';
+import UsersLookup from '../components/UsersLookup';
 
 const ease = [0.16, 1, 0.3, 1];
 
-// ─── Left panel: tips + today's activity ──────────────────────────────────────
+// ─── Mode toggle ─────────────────────────────────────────────────────────────
+
+function ModeToggle({ mode, onModeChange }) {
+  const modes = [
+    { key: 'swipe', label: 'Swipe' },
+    { key: 'browse', label: 'Browse All' },
+  ];
+
+  return (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: 2,
+      padding: 3, borderRadius: 12,
+      background: 'var(--bg-card)', border: '1px solid var(--border)',
+      boxShadow: 'var(--shadow-soft)',
+    }}>
+      {modes.map(({ key, label }) => (
+        <button
+          key={key}
+          onClick={() => onModeChange(key)}
+          style={{
+            position: 'relative', padding: '7px 20px', borderRadius: 9,
+            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+            fontSize: '0.8rem', fontWeight: 700, background: 'transparent',
+            color: mode === key ? 'white' : 'var(--text-soft)',
+            transition: 'color 0.2s ease', zIndex: 1,
+          }}
+        >
+          {mode === key && (
+            <motion.div
+              layoutId="discover-mode-pill"
+              style={{
+                position: 'absolute', inset: 0, borderRadius: 9,
+                background: 'linear-gradient(135deg, var(--accent), var(--peach))',
+                boxShadow: '0 2px 10px rgba(224,93,80,0.3)',
+                zIndex: -1,
+              }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            />
+          )}
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Left panel: tips + how it works ─────────────────────────────────────────
 
 function LeftPanel() {
   const tips = [
-    { icon: '🙃', text: 'Swiping right on everyone is technically a strategy. A bad one, but a strategy.' },
-    { icon: '🧠', text: 'Find someone whose skills fill your gaps. Two frontend devs do not a backend make.' },
-    { icon: '☕', text: 'The best teams form before the coffee runs out. Swipe fast.' },
-    { icon: '🤝', text: 'A high match score means your skill levels are close. Think training arc, not boss fight.' },
-    { icon: '🎲', text: 'Pro tip: read the bio. People put effort into those. Allegedly.' },
+    { icon: '\uD83D\uDE43', text: 'Swiping right on everyone is technically a strategy. A bad one, but a strategy.' },
+    { icon: '\uD83E\uDDE0', text: 'Find someone whose skills fill your gaps. Two frontend devs do not a backend make.' },
+    { icon: '\u2615', text: 'The best teams form before the coffee runs out. Swipe fast.' },
+    { icon: '\uD83E\uDD1D', text: 'A high match score means your skill levels are close. Think training arc, not boss fight.' },
+    { icon: '\uD83C\uDFB2', text: 'Pro tip: read the bio. People put effort into those. Allegedly.' },
   ];
   const [tip] = useState(() => tips[Math.floor(Math.random() * tips.length)]);
 
@@ -46,9 +93,9 @@ function LeftPanel() {
           How it works
         </div>
         {[
-          { icon: '👉', label: 'Swipe right', desc: 'show interest' },
-          { icon: '👈', label: 'Swipe left', desc: 'pass on them' },
-          { icon: '💬', label: 'Mutual match', desc: 'chat opens up' },
+          { icon: '\uD83D\uDC49', label: 'Swipe right', desc: 'show interest' },
+          { icon: '\uD83D\uDC48', label: 'Swipe left', desc: 'pass on them' },
+          { icon: '\uD83D\uDCAC', label: 'Mutual match', desc: 'chat opens up' },
         ].map(s => (
           <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <div style={{
@@ -67,7 +114,7 @@ function LeftPanel() {
   );
 }
 
-// ─── Right panel: match score legend + premium teaser ─────────────────────────
+// ─── Right panel: match score legend + premium teaser ────────────────────────
 
 function RightPanel() {
   const navigate = useNavigate();
@@ -119,7 +166,7 @@ function RightPanel() {
         <div style={{
           display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8,
         }}>
-          <div style={{ fontSize: '1rem' }}>⚡</div>
+          <div style={{ fontSize: '1rem' }}>{'\u26A1'}</div>
           <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent)' }}>Go Premium</span>
         </div>
         <p style={{ fontSize: '0.74rem', color: 'var(--text-body)', lineHeight: 1.6, marginBottom: 10, margin: '0 0 10px' }}>
@@ -130,14 +177,14 @@ function RightPanel() {
           background: 'linear-gradient(135deg, var(--accent), var(--peach))',
           color: 'white', fontSize: '0.72rem', fontWeight: 700,
         }}>
-          Upgrade →
+          Upgrade \u2192
         </div>
       </motion.div>
     </motion.div>
   );
 }
 
-// ─── Phone frame ──────────────────────────────────────────────────────────────
+// ─── Phone frame ─────────────────────────────────────────────────────────────
 
 function PhoneFrame({ children }) {
   return (
@@ -152,7 +199,7 @@ function PhoneFrame({ children }) {
       {/* Phone shell */}
       <div style={{
         position: 'relative', zIndex: 1,
-        width: 375, height: 'min(720px, calc(100vh - 140px))',
+        width: 375, height: 'min(720px, calc(100vh - 180px))',
         borderRadius: 52,
         border: '7px solid var(--border-strong)',
         background: 'var(--bg)',
@@ -179,29 +226,9 @@ function PhoneFrame({ children }) {
           }} />
         </div>
 
-        {/* Status bar */}
-        <div style={{
-          height: 28, flexShrink: 0, paddingTop: 6,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '6px 20px 0',
-        }}>
-          <span style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-faint)' }}>9:41</span>
-          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            {/* Signal bars */}
-            {[3, 5, 7, 9].map((h, i) => (
-              <div key={i} style={{ width: 3, height: h, borderRadius: 1.5, background: i < 3 ? 'var(--text-faint)' : 'var(--border-strong)' }} />
-            ))}
-            {/* Battery */}
-            <div style={{ width: 16, height: 8, borderRadius: 2, border: '1px solid var(--text-faint)', marginLeft: 2, position: 'relative' }}>
-              <div style={{ position: 'absolute', right: -3, top: 2, width: 2, height: 4, borderRadius: 1, background: 'var(--text-faint)' }} />
-              <div style={{ width: '70%', height: '100%', borderRadius: 1, background: 'var(--text-faint)' }} />
-            </div>
-          </div>
-        </div>
-
         {/* App header inside phone */}
         <div style={{
-          padding: '8px 20px 0',
+          padding: '36px 20px 0',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexShrink: 0,
         }}>
@@ -235,9 +262,10 @@ function PhoneFrame({ children }) {
   );
 }
 
-// ─── Discover page ─────────────────────────────────────────────────────────────
+// ─── Discover page ───────────────────────────────────────────────────────────
 
 export default function Discover() {
+  const [mode, setMode] = useState('swipe');
   const [showPanels, setShowPanels] = useState(window.innerWidth >= 960);
 
   useEffect(() => {
@@ -250,19 +278,45 @@ export default function Discover() {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
       <Navigation />
 
-      <div style={{
-        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        paddingTop: 72, gap: 28,
-        padding: '72px 24px 16px',
-        overflow: 'hidden',
-      }}>
-        {showPanels && <LeftPanel />}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 72, overflow: 'hidden' }}>
+        {/* Mode toggle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 24px 0', flexShrink: 0 }}>
+          <ModeToggle mode={mode} onModeChange={setMode} />
+        </div>
 
-        <PhoneFrame>
-          <SwipeContainer />
-        </PhoneFrame>
-
-        {showPanels && <RightPanel />}
+        {/* Content */}
+        <AnimatePresence mode="wait">
+          {mode === 'swipe' ? (
+            <motion.div
+              key="swipe"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 28, padding: '12px 24px 16px', overflow: 'hidden',
+              }}
+            >
+              {showPanels && <LeftPanel />}
+              <PhoneFrame>
+                <SwipeContainer />
+              </PhoneFrame>
+              {showPanels && <RightPanel />}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="browse"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ flex: 1, overflow: 'auto', padding: '20px 24px 24px' }}
+            >
+              <UsersLookup />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

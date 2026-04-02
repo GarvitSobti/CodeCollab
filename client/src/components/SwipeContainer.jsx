@@ -17,6 +17,7 @@ function profileToUser(p) {
 
   return new User({
     id: p.id,
+    firebaseUid: p.firebaseUid,
     name: p.name || 'Unknown',
     email: p.email || '',
     avatarUrl: p.avatarUrl || p.profile?.photoDataUrl || null,
@@ -63,168 +64,6 @@ function tierColor(tier) {
   if (tier === 'Advanced') return { color: 'var(--accent)', bg: 'rgba(224,93,80,0.1)' };
   if (tier === 'Intermediate') return { color: 'var(--sky)', bg: 'rgba(66,165,245,0.1)' };
   return { color: 'var(--text-soft)', bg: 'rgba(128,128,128,0.08)' };
-}
-
-// ─── Profile Detail Modal (shown on tap) ──────────────────────────────────────
-
-function ProfileDetailModal({ profile, gradient, onClose, onSwipeLeft, onSwipeRight }) {
-  const mc = matchColor(profile.match);
-  const tc = tierColor(profile.tier);
-
-  return (
-    <div
-      style={{
-        position: 'fixed', inset: 0, zIndex: 2000,
-        background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)',
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-      }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-        onClick={e => e.stopPropagation()}
-        style={{
-          width: '100%', maxWidth: 480,
-          background: 'var(--bg-card)',
-          borderTopLeftRadius: 28, borderTopRightRadius: 28,
-          maxHeight: '88vh', overflowY: 'auto',
-          boxShadow: '0 -20px 60px rgba(0,0,0,0.3)',
-        }}
-      >
-        {/* Banner */}
-        <div style={{ height: 140, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-          <div style={{ width: '100%', height: '100%', background: gradient }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.5))' }} />
-          {/* Pull handle */}
-          <div style={{
-            position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
-            width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.4)',
-          }} />
-          {/* Close */}
-          <button
-            onClick={onClose}
-            style={{
-              position: 'absolute', top: 14, right: 14, width: 30, height: 30,
-              borderRadius: '50%', background: 'rgba(0,0,0,0.3)', border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'white',
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          {/* Match badge */}
-          <div style={{
-            position: 'absolute', bottom: 12, right: 14, padding: '5px 10px',
-            borderRadius: 8, fontSize: '0.72rem', fontWeight: 800,
-            fontFamily: "'Fira Code', monospace",
-            background: mc.bg, color: mc.color, border: `1.5px solid ${mc.color}`,
-            backdropFilter: 'blur(12px)',
-            display: 'flex', alignItems: 'center', gap: 4,
-          }}>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: mc.color, animation: 'pulseDot 1.8s infinite' }} />
-            {profile.match}% match
-          </div>
-        </div>
-
-        {/* Content */}
-        <div style={{ padding: '0 22px 28px', position: 'relative' }}>
-          {/* Avatar */}
-          <div style={{ position: 'absolute', top: -34, left: 22 }}>
-            {profile.avatarUrl ? (
-              <img src={profile.avatarUrl} alt={profile.name}
-                style={{ width: 68, height: 68, borderRadius: 16, objectFit: 'cover', border: '3px solid var(--bg-card)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}
-              />
-            ) : (
-              <div style={{
-                width: 68, height: 68, borderRadius: 16, background: gradient,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 800, fontSize: '1.3rem', color: 'white',
-                border: '3px solid var(--bg-card)', boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-              }}>{profile.initials}</div>
-            )}
-          </div>
-
-          <div style={{ paddingTop: 44 }}>
-            {/* Name */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-              <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.03em' }}>{profile.name}</h2>
-              <span style={{ padding: '3px 10px', borderRadius: 8, fontSize: '0.63rem', fontWeight: 700, background: tc.bg, color: tc.color }}>{profile.tier}</span>
-            </div>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-soft)', fontWeight: 500, marginBottom: 18 }}>{profile.uni}</p>
-
-            {/* Stats */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
-              <div style={{ padding: '10px 16px', borderRadius: 12, background: 'var(--bg-warm)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--lavender)" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>{profile.hackathons}</span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-soft)' }}>{profile.hackathons === 1 ? 'Hackathon' : 'Hackathons'}</span>
-              </div>
-            </div>
-
-            {/* Skills */}
-            {profile.skills.length > 0 && (
-              <div style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-faint)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Skills</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {profile.skills.map((s, i) => {
-                    const c = SKILL_COLORS[i % SKILL_COLORS.length];
-                    return (
-                      <span key={s} style={{ padding: '6px 12px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, fontFamily: "'Fira Code', monospace", background: c.bg, color: c.color }}>{s}</span>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Bio */}
-            {profile.quote && (
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-faint)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>About</div>
-                <p style={{ fontSize: '0.84rem', color: 'var(--text-body)', lineHeight: 1.7, padding: '12px 14px', borderRadius: 12, background: 'var(--bg-warm)', borderLeft: '3px solid var(--accent)', margin: 0 }}>
-                  {profile.quote}
-                </p>
-              </div>
-            )}
-
-            {/* Action buttons */}
-            <div style={{ display: 'flex', gap: 10 }}>
-              <motion.button
-                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
-                onClick={() => { onClose(); onSwipeLeft(); }}
-                style={{
-                  flex: 1, padding: '13px', borderRadius: 14, border: '1.5px solid var(--border-strong)',
-                  background: 'transparent', color: 'var(--text-soft)', cursor: 'pointer',
-                  fontFamily: 'inherit', fontSize: '0.84rem', fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Pass
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
-                onClick={() => { onClose(); onSwipeRight(); }}
-                style={{
-                  flex: 2, padding: '13px', borderRadius: 14, border: 'none',
-                  background: 'linear-gradient(135deg, var(--accent), var(--peach))',
-                  color: 'white', cursor: 'pointer',
-                  fontFamily: 'inherit', fontSize: '0.84rem', fontWeight: 700,
-                  boxShadow: '0 4px 16px rgba(224,93,80,0.35)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                Connect
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
 }
 
 // ─── ProfileCard ──────────────────────────────────────────────────────────────
@@ -471,7 +310,7 @@ function ProfileCard({ profile, gradient, onSwipeLeft, onSwipeRight, onTap }) {
           fontSize: '0.65rem', color: 'var(--text-faint)', fontWeight: 500,
         }}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Tap card to see full profile
+          Tap to view full profile
         </div>
       </div>
     </div>
@@ -668,7 +507,6 @@ export default function SwipeContainer() {
   const [profiles, setProfiles] = useState([]);
   const [idx, setIdx] = useState(0);
   const [matchedProfile, setMatchedProfile] = useState(null);
-  const [detailProfile, setDetailProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -713,7 +551,7 @@ export default function SwipeContainer() {
 
   const handleMessage = async () => {
     if (!matchedProfile) return;
-    await openOrCreateDM(matchedProfile.id);
+    await openOrCreateDM(matchedProfile.firebaseUid || matchedProfile.id);
     setMatchedProfile(null);
     navigate('/messages');
   };
@@ -735,15 +573,6 @@ export default function SwipeContainer() {
             gradient={gradientFor(matchedProfile.id)}
             onMessage={handleMessage}
             onClose={() => setMatchedProfile(null)}
-          />
-        )}
-        {detailProfile && (
-          <ProfileDetailModal
-            profile={detailProfile}
-            gradient={gradientFor(detailProfile.id)}
-            onClose={() => setDetailProfile(null)}
-            onSwipeLeft={() => { setDetailProfile(null); handleSwipeLeft(); }}
-            onSwipeRight={() => { setDetailProfile(null); handleSwipeRight(); }}
           />
         )}
       </AnimatePresence>
@@ -825,7 +654,7 @@ export default function SwipeContainer() {
                   gradient={gradientFor(p.id)}
                   onSwipeLeft={handleSwipeLeft}
                   onSwipeRight={handleSwipeRight}
-                  onTap={() => setDetailProfile(p)}
+                  onTap={() => navigate(`/user/${p.id}`)}
                 />
               ) : (
                 <div style={{

@@ -12,7 +12,7 @@ datasource db {
 
 model User {
   id              String   @id @default(uuid())
-  firebaseUid     String?  @unique
+  firebaseUid     String   @unique
   email           String   @unique
   name            String
   avatarUrl       String?
@@ -33,13 +33,15 @@ model User {
   receivedInvites     TeamInvite[]       @relation("InviteReceiver")
   writtenReviews      Review[]           @relation("ReviewAuthor")
   receivedReviews     Review[]           @relation("ReviewTarget")
-  messages            Message[]
   notifications       Notification[]
   notificationPrefs   NotificationPreference?
   createdTeams        Team[]             @relation("TeamCreator")
   sentSwipes          Swipe[]            @relation("SwipeSender")
   receivedSwipes      Swipe[]            @relation("SwipeReceiver")
   profile             UserProfile?
+  chatMessages              ChatMessage[]              @relation("ChatMessageSender")
+  conversationParticipations ConversationParticipant[] @relation("ConversationParticipantUser")
+  messageReactions          MessageReaction[]          @relation("MessageReactionUser")
 }
 
 model UserProfile {
@@ -188,12 +190,12 @@ model Team {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  hackathon Hackathon    @relation(fields: [hackathonId], references: [id])
-  createdBy User         @relation("TeamCreator", fields: [createdById], references: [id])
-  members   TeamMember[]
-  invites   TeamInvite[]
-  messages  Message[]
-  reviews   Review[]
+  hackathon    Hackathon    @relation(fields: [hackathonId], references: [id])
+  createdBy    User         @relation("TeamCreator", fields: [createdById], references: [id])
+  members      TeamMember[]
+  invites      TeamInvite[]
+  reviews      Review[]
+  conversation Conversation?
 }
 
 enum TeamStatus {
@@ -265,23 +267,98 @@ enum ReviewRating {
 
 // ─── Messaging ──────────────────────────────────────────────
 
-model Message {
-  id        String      @id @default(uuid())
-  teamId    String
-  senderId  String
-  content   String
-  type      MessageType @default(TEXT)
-  createdAt DateTime    @default(now())
-
-  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  sender User @relation(fields: [senderId], references: [id])
-
-  @@index([teamId, createdAt])
+enum ConversationType {
+  DM
+  TEAM
 }
 
-enum MessageType {
+model Conversation {
+  id              String           @id @default(uuid())
+  type            ConversationType @default(DM)
+  name            String?
+  teamId          String?          @unique
+  createdByUserId String
+  lastMessageId   String?
+  lastMessageAt   DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  team         Team?                      @relation(fields: [teamId], references: [id])
+  participants ConversationParticipant[]
+  messages     ChatMessage[]
+}
+
+model ConversationParticipant {
+  id              String    @id @default(uuid())
+  conversationId  String
+  userId          String
+  lastReadAt      DateTime?
+  lastDeliveredAt DateTime?
+  joinedAt        DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation("ConversationParticipantUser", fields: [userId], references: [firebaseUid])
+
+  @@unique([conversationId, userId])
+}
+
+enum ChatMessageType {
   TEXT
+  IMAGE
+  FILE
   SYSTEM
+}
+
+model ChatMessage {
+  id                 String          @id @default(uuid())
+  conversationId     String
+  senderId           String
+  body               String?
+  messageType        ChatMessageType @default(TEXT)
+  attachmentUrl      String?
+  attachmentName     String?
+  attachmentMimeType String?
+  attachmentSize     Int?
+  linkPreviewJson    Json?
+  clientMessageId    String?
+  sentAt             DateTime        @default(now())
+  editedAt           DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  conversation Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User             @relation("ChatMessageSender", fields: [senderId], references: [firebaseUid])
+  reactions    MessageReaction[]
+
+  @@index([conversationId, sentAt])
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  message ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User        @relation("MessageReactionUser", fields: [userId], references: [firebaseUid])
+
+  @@unique([messageId, userId, emoji])
+}
+
+model Match {
+  id              String   @id @default(uuid())
+  userOneId       String
+  userTwoId       String
+  status          String   @default("accepted")
+  createdByUserId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userOneId, userTwoId])
 }
 
 // ─── Notifications ──────────────────────────────────────────
