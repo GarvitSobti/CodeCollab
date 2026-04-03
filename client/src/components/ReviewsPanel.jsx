@@ -117,9 +117,6 @@ export default function ReviewsPanel({
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-dark)' }}>Leave a teammate review</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-soft)', marginTop: 2 }}>
-                {compose.eligibility?.reason || 'Share honest feedback after collaborating together.'}
-              </div>
             </div>
             {compose.loading && <span style={{ fontSize: '0.72rem', color: 'var(--text-soft)', fontWeight: 600 }}>Loading...</span>}
           </div>
