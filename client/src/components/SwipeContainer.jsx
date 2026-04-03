@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatContext } from '../contexts/ChatContext';
 import api from '../services/api';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 import User from '../models/User';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -511,6 +512,7 @@ export default function SwipeContainer() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { openOrCreateDM } = useChatContext();
+  const { setPageLoading } = usePageLoading();
 
   const fetchProfiles = useCallback(async () => {
     setLoading(true);
@@ -523,8 +525,9 @@ export default function SwipeContainer() {
       setError('Failed to load profiles. Please try again.');
     } finally {
       setLoading(false);
+      setPageLoading(false);
     }
-  }, []);
+  }, [setPageLoading]);
 
   useEffect(() => { fetchProfiles(); }, [fetchProfiles]);
 
@@ -601,15 +604,30 @@ export default function SwipeContainer() {
         {loading && (
           <div style={{
             position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', gap: 12,
             borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)',
+            overflow: 'hidden',
           }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: '50%',
-              border: '3px solid var(--border)', borderTopColor: 'var(--accent)',
-              animation: 'spin 0.9s linear infinite',
-            }} />
-            <p style={{ color: 'var(--text-soft)', fontWeight: 600, fontSize: '0.82rem' }}>Finding your matches...</p>
+            <div style={{ height: 5, background: 'var(--bg-warm)' }} />
+            <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+              {/* Avatar placeholder */}
+              <div style={{
+                width: '100%', height: '45%', borderRadius: 16, background: 'var(--bg-warm)',
+                animation: 'pulse 1.8s ease-in-out infinite',
+              }} />
+              {/* Name */}
+              <div style={{ height: 16, width: '55%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: '0.1s' }} />
+              {/* University */}
+              <div style={{ height: 11, width: '40%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: '0.15s' }} />
+              {/* Bio lines */}
+              <div style={{ height: 10, width: '90%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: '0.2s' }} />
+              <div style={{ height: 10, width: '70%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: '0.25s' }} />
+              {/* Skill tags */}
+              <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                {[48, 56, 40].map((w, i) => (
+                  <div key={i} style={{ height: 22, width: w, borderRadius: 8, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${0.3 + i * 0.06}s` }} />
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import MessageInput from './MessageInput';
 import MessageList from './MessageList';
 
@@ -19,6 +20,7 @@ export default function ChatComponent({
   sending = false,
   onReact,
 }) {
+  const navigate = useNavigate();
   const isTeam = chatType === 'team';
   const primaryParticipant = participants[0] || {};
   const isOnline = !isTeam && Boolean(primaryParticipant.online);
@@ -66,68 +68,73 @@ export default function ChatComponent({
         borderBottom: '1px solid rgba(0,0,0,0.05)',
         flexShrink: 0,
       }}>
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          <div style={{
-            width: 42,
-            height: 42,
-            borderRadius: isTeam ? 12 : 13,
-            background: isTeam
-              ? 'linear-gradient(135deg,#667eea,#764ba2)'
-              : (primaryParticipant.gradient || 'linear-gradient(135deg,#ff8a65,#ff6b6b)'),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: '0.8rem',
-            color: 'white',
-          }}>
-            {isTeam ? teamInitials : (primaryParticipant.initials || '?')}
-          </div>
-          {isTeam ? (
+        <div
+          onClick={!isTeam && primaryParticipant.profileId ? () => navigate(`/user/${primaryParticipant.profileId}`) : undefined}
+          style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, cursor: !isTeam && primaryParticipant.profileId ? 'pointer' : 'default' }}
+        >
+          <div style={{ position: 'relative', flexShrink: 0 }}>
             <div style={{
-              position: 'absolute',
-              bottom: -2,
-              right: -2,
-              width: 16,
-              height: 16,
-              borderRadius: '50%',
-              background: 'var(--bg-card)',
+              width: 42,
+              height: 42,
+              borderRadius: isTeam ? 12 : 13,
+              background: isTeam
+                ? 'linear-gradient(135deg,#667eea,#764ba2)'
+                : (primaryParticipant.gradient || 'linear-gradient(135deg,#ff8a65,#ff6b6b)'),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              color: 'white',
             }}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+              {isTeam ? teamInitials : (primaryParticipant.initials || '?')}
             </div>
-          ) : (
-            <div style={{
-              position: 'absolute',
-              bottom: -1,
-              right: -1,
-              width: 11,
-              height: 11,
-              borderRadius: '50%',
-              background: isOnline ? 'var(--mint)' : 'var(--text-faint)',
-              border: '2px solid var(--bg-card)',
-            }} />
-          )}
-        </div>
+            {isTeam ? (
+              <div style={{
+                position: 'absolute',
+                bottom: -2,
+                right: -2,
+                width: 16,
+                height: 16,
+                borderRadius: '50%',
+                background: 'var(--bg-card)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+            ) : (
+              <div style={{
+                position: 'absolute',
+                bottom: -1,
+                right: -1,
+                width: 11,
+                height: 11,
+                borderRadius: '50%',
+                background: isOnline ? 'var(--mint)' : 'var(--text-faint)',
+                border: '2px solid var(--bg-card)',
+              }} />
+            )}
+          </div>
 
-        <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: 1 }}>
-            {headerName}
-          </h3>
-          <p style={{
-            fontSize: '0.68rem',
-            fontWeight: 500,
-            color: isTeam ? 'var(--text-soft)' : (isOnline ? 'var(--mint)' : 'var(--text-soft)'),
-          }}>
-            {headerSubtext}
-          </p>
+          <div style={{ flex: 1 }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: 1 }}>
+              {headerName}
+            </h3>
+            <p style={{
+              fontSize: '0.68rem',
+              fontWeight: 500,
+              color: isTeam ? 'var(--text-soft)' : (isOnline ? 'var(--mint)' : 'var(--text-soft)'),
+            }}>
+              {headerSubtext}
+            </p>
+          </div>
         </div>
 
         {headerActions}

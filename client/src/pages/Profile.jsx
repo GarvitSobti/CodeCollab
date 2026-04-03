@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import Navigation from '../components/Navigation';
+import { motion } from 'framer-motion';
+
 import ReviewsPanel from '../components/ReviewsPanel';
 import AISkillScanCard from '../components/AISkillScanCard';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { fetchUserReviews } from '../services/reviewService';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 
 const PROFICIENCY_LEVELS = [
   { value: 1, label: 'Beginner', description: 'Can follow guides and complete simple tasks with help.' },
@@ -688,6 +690,7 @@ function ProfileEdit({
 
 export default function Profile() {
   const { user, refreshOnboardingStatus } = useAuth();
+  const { setPageLoading } = usePageLoading();
   const [profile, setProfile] = useState(() => createDefaultProfile(user));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -722,6 +725,7 @@ export default function Profile() {
 
     async function loadProfile() {
       setLoading(true);
+      setPageLoading(true);
       setErrorMessage('');
 
       try {
@@ -740,7 +744,10 @@ export default function Profile() {
           error?.response?.data?.error?.message || 'Could not load profile, but you can continue editing.'
         );
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+          setPageLoading(false);
+        }
       }
     }
 
@@ -841,25 +848,19 @@ export default function Profile() {
   };
 
   if (loading) {
-    return (
-      <div style={{ minHeight: '100vh' }}>
-        <div className="mesh-bg"><div className="mesh-blob blob-1" /><div className="mesh-blob blob-2" /><div className="mesh-blob blob-3" /></div>
-        <div className="noise" />
-        <Navigation />
-        <div style={{ position: 'relative', zIndex: 2, minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
-          <p style={{ color: 'var(--text-soft)', fontWeight: 700 }}>Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <div style={{ minHeight: '100vh' }} />;
   }
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <div className="mesh-bg"><div className="mesh-blob blob-1" /><div className="mesh-blob blob-2" /><div className="mesh-blob blob-3" /></div>
       <div className="noise" />
-      <Navigation />
-
-      <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1120, margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        style={{ position: 'relative', zIndex: 2, padding: '28px 40px 60px', maxWidth: 1120, margin: '0 auto' }}
+      >
         {!editing && errorMessage && (
           <p style={{ margin: '0 0 12px', padding: '10px 12px', borderRadius: 10, background: 'rgba(224,93,80,0.1)', color: 'var(--accent)', fontSize: '0.78rem', fontWeight: 600 }}>
             {errorMessage}
@@ -901,7 +902,7 @@ export default function Profile() {
             reviewsError={reviewsError}
           />
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

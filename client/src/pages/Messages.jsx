@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+import { motion } from 'framer-motion';
+
 import ChatComponent from '../components/chat/ChatComponent';
 import { useChatContext } from '../contexts/ChatContext';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 
 function formatRelativeTime(value) {
   if (!value) {
@@ -49,7 +51,12 @@ export default function Messages() {
     loadOlderMessages,
     toggleReaction,
   } = useChatContext();
+  const { setPageLoading } = usePageLoading();
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    if (!loadingConversations) setPageLoading(false);
+  }, [loadingConversations, setPageLoading]);
 
   useEffect(() => {
     if (!userId) {
@@ -83,19 +90,27 @@ export default function Messages() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <Navigation />
-
-      <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
-        <div style={{ marginBottom: 36 }}>
+      <div style={{ position: 'relative', zIndex: 2, padding: '28px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          style={{ marginBottom: 36 }}
+        >
           <h1 style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.04em', marginBottom: 8 }}>
             Messages
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-body)' }}>
             Talk to potential teammates before you lock in a team.
           </p>
-        </div>
+        </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, minHeight: 600, height: 'calc(100vh - 240px)' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.06, ease: [0.16, 1, 0.3, 1] }}
+          style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, minHeight: 600, height: 'calc(100vh - 240px)' }}
+        >
           {/* Conversation list */}
           <div style={{
             borderRadius: 'var(--radius)',
@@ -133,9 +148,7 @@ export default function Messages() {
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto' }}>
-              {loadingConversations ? (
-                <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-soft)' }}>Loading conversations...</div>
-              ) : filteredConversations.length === 0 ? (
+              {loadingConversations ? null : filteredConversations.length === 0 ? (
                 <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-soft)' }}>
                   <div style={{ fontSize: '1.8rem', marginBottom: 8 }}>💬</div>
                   <p style={{ fontSize: '0.8rem' }}>No conversations yet</p>
@@ -332,7 +345,7 @@ export default function Messages() {
               </p>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

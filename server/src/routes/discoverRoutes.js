@@ -131,7 +131,7 @@ router.get('/users', authMiddleware, async (req, res) => {
     const user = await resolveUserBasic(req.auth.uid);
     if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
 
-    const { search, page = 1, limit = 24 } = req.query;
+    const { search, page = 1, limit = 24, filter } = req.query;
     const pageNum = Math.max(1, parseInt(page) || 1);
     const takeNum = Math.min(parseInt(limit) || 24, 50);
     const skip = (pageNum - 1) * takeNum;
@@ -139,6 +139,32 @@ router.get('/users', authMiddleware, async (req, res) => {
     const where = {
       profile: { onboardingCompleted: true, discoverable: true },
     };
+
+    // Apply relationship filters
+    if (filter === 'teammates') {
+      const memberships = await prisma.teamMember.findMany({
+        where: { userId: user.id },
+        select: { teamId: true },
+      });
+      const teamIds = memberships.map((m) => m.teamId);
+      const teammates = await prisma.teamMember.findMany({
+        where: { teamId: { in: teamIds }, userId: { not: user.id } },
+        select: { userId: true },
+      });
+      const teammateIds = [...new Set(teammates.map((t) => t.userId))];
+      where.id = { in: teammateIds };
+    } else if (filter === 'matches') {
+      const matches = await prisma.match.findMany({
+        where: {
+          OR: [{ userOneId: user.firebaseUid }, { userTwoId: user.firebaseUid }],
+        },
+        select: { userOneId: true, userTwoId: true },
+      });
+      const matchedFirebaseUids = matches.map((m) =>
+        m.userOneId === user.firebaseUid ? m.userTwoId : m.userOneId
+      );
+      where.firebaseUid = { in: matchedFirebaseUids };
+    }
 
     if (search && search.trim()) {
       const term = search.trim();
@@ -242,7 +268,7 @@ router.post('/swipe', authMiddleware, async (req, res) => {
 // GET /api/v1/discover/relationship/:targetId — check match/team relationship
 router.get('/relationship/:targetId', authMiddleware, async (req, res) => {
   try {
-    const user = await resolveUser(req.auth.uid);
+    const user = await resolveUserBasic(req.auth.uid);
     if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
 
     const targetId = req.params.targetId;

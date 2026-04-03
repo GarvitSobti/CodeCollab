@@ -4,6 +4,7 @@ import BrandFlower from './BrandFlower';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useChatContext } from '../contexts/ChatContext';
+import { NavLoadingBar, usePageLoading } from '../contexts/PageLoadingContext';
 
 const navLinks = [
   { label: 'Discover', path: '/discover' },
@@ -19,6 +20,7 @@ export default function Navigation() {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const { totalUnread } = useChatContext();
+  const { setPageLoading } = usePageLoading();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -37,10 +39,12 @@ export default function Navigation() {
   };
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const container = document.querySelector('.page-scroll-container');
+    const onScroll = () => setScrolled((container?.scrollTop || window.scrollY) > 8);
+    const target = container || window;
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    target.addEventListener('scroll', onScroll, { passive: true });
+    return () => target.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -64,6 +68,7 @@ export default function Navigation() {
         transition: 'box-shadow 0.25s ease',
       }}
     >
+      <NavLoadingBar />
       <a
         href="/discover"
         onClick={(e) => { e.preventDefault(); navigate('/discover'); }}
@@ -85,7 +90,7 @@ export default function Navigation() {
           return (
             <button
               key={path}
-              onClick={() => navigate(path)}
+              onClick={() => { if (!active) { setPageLoading(true); navigate(path); } }}
               aria-current={active ? 'page' : undefined}
               className={`nav-link${path === '/profile' ? ' nav-link-profile' : ''}`}
               style={{
@@ -116,25 +121,6 @@ export default function Navigation() {
       </div>
 
       <div className="nav-right" style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-        <button
-          aria-label="Notifications — new"
-          className="nav-icon-btn"
-          style={{
-            width: 38, height: 38, borderRadius: 12, background: 'var(--bg-card)',
-            border: '1px solid var(--border)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', cursor: 'pointer', position: 'relative', color: 'var(--text-soft)',
-            transition: 'border-color 0.2s ease',
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span style={{
-            position: 'absolute', top: 7, right: 7, width: 7, height: 7,
-            borderRadius: '50%', background: 'var(--accent)',
-          }} aria-hidden="true" />
-        </button>
         <button
           onClick={toggleTheme}
           aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}

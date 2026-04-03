@@ -54,9 +54,49 @@ body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--bg);
   color: var(--text-dark);
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100vh;
+  overflow: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scrollable content area below nav */
+.page-scroll-container {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.page-scroll-container--full {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+/* Scrollbar styling */
+.page-scroll-container::-webkit-scrollbar,
+.page-scroll-container--full::-webkit-scrollbar {
+  width: 10px;
+}
+.page-scroll-container::-webkit-scrollbar-track,
+.page-scroll-container--full::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+.page-scroll-container::-webkit-scrollbar-thumb,
+.page-scroll-container--full::-webkit-scrollbar-thumb {
+  background: var(--text-faint);
+  border-radius: 5px;
+}
+.page-scroll-container::-webkit-scrollbar-thumb:hover,
+.page-scroll-container--full::-webkit-scrollbar-thumb:hover {
+  background: var(--text-soft);
 }
 
 /* Brand flower logo */
@@ -103,6 +143,11 @@ body {
 @keyframes pulseDot {
   0%,100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.3; transform: scale(0.7); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }
 
 /* Home page entrance animations */

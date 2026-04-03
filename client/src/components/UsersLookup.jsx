@@ -168,21 +168,23 @@ function UserCard({ user, index, onClick, isSelf }) {
 
 // ─── Users Lookup ────────────────────────────────────────────────────────────
 
-export default function UsersLookup() {
+export default function UsersLookup({ onReady }) {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef(null);
 
-  const fetchUsers = useCallback(async (searchTerm, pageNum) => {
+  const fetchUsers = useCallback(async (searchTerm, pageNum, activeFilter) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.set('search', searchTerm);
+      if (activeFilter && activeFilter !== 'all') params.set('filter', activeFilter);
       params.set('page', String(pageNum));
       params.set('limit', '24');
       const { data } = await api.get(`/api/v1/discover/users?${params}`);
@@ -193,11 +195,19 @@ export default function UsersLookup() {
       console.error('Failed to fetch users:', err);
     } finally {
       setLoading(false);
+      if (onReady) onReady();
     }
-  }, []);
+  }, [onReady]);
+
+  const searchRef = useRef(search);
+  const filterRef = useRef(filter);
+  const pageRef = useRef(page);
+  searchRef.current = search;
+  filterRef.current = filter;
+  pageRef.current = page;
 
   useEffect(() => {
-    fetchUsers('', 1);
+    fetchUsers(searchRef.current, pageRef.current, filterRef.current);
   }, [fetchUsers]);
 
   const handleSearch = (value) => {
@@ -205,13 +215,19 @@ export default function UsersLookup() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(1);
-      fetchUsers(value, 1);
+      fetchUsers(value, 1, filter);
     }, 300);
+  };
+
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    setPage(1);
+    fetchUsers(search, 1, newFilter);
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchUsers(search, newPage);
+    fetchUsers(search, newPage, filter);
   };
 
   return (
@@ -244,7 +260,7 @@ export default function UsersLookup() {
           />
           {search && (
             <button
-              onClick={() => { setSearch(''); setPage(1); fetchUsers('', 1); }}
+              onClick={() => { setSearch(''); setPage(1); fetchUsers('', 1, filter); }}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
                 color: 'var(--text-faint)', padding: 2, display: 'flex',
@@ -256,31 +272,78 @@ export default function UsersLookup() {
             </button>
           )}
         </div>
-        {pagination && !loading && (
-          <div style={{
-            fontSize: '0.7rem', color: 'var(--text-faint)', marginTop: 8,
-            paddingLeft: 4, fontWeight: 500,
-          }}>
-            {pagination.total} {pagination.total === 1 ? 'member' : 'members'}
-            {search && ' found'}
-          </div>
-        )}
+        {/* Filter pills */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
+          {[
+            { key: 'all', label: 'All' },
+            { key: 'teammates', label: 'Teammates' },
+            { key: 'matches', label: 'Matches' },
+          ].map(({ key, label }) => {
+            const active = filter === key;
+            return (
+              <button
+                key={key}
+                onClick={() => handleFilterChange(key)}
+                style={{
+                  padding: '5px 14px', borderRadius: 8,
+                  border: active ? '1px solid var(--accent)' : '1px solid var(--border)',
+                  background: active ? 'rgba(224,93,80,0.1)' : 'var(--bg-card)',
+                  color: active ? 'var(--accent)' : 'var(--text-soft)',
+                  fontSize: '0.74rem', fontWeight: 600, fontFamily: 'inherit',
+                  cursor: 'pointer', transition: 'all 0.15s ease',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+          {pagination && !loading && (
+            <span style={{
+              fontSize: '0.7rem', color: 'var(--text-faint)',
+              marginLeft: 6, fontWeight: 500,
+            }}>
+              {pagination.total} {pagination.total === 1 ? 'member' : 'members'}
+              {search && ' found'}
+            </span>
+          )}
+        </div>
       </motion.div>
 
       {/* Content */}
       {loading ? (
         <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center', padding: 60, gap: 12,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+          gap: 12,
         }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: '50%',
-            border: '3px solid var(--border)', borderTopColor: 'var(--accent)',
-            animation: 'spin 0.9s linear infinite',
-          }} />
-          <p style={{ color: 'var(--text-soft)', fontWeight: 600, fontSize: '0.8rem' }}>
-            Loading...
-          </p>
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} style={{
+              borderRadius: 16, background: 'var(--bg-card)',
+              border: '1px solid var(--border)', overflow: 'hidden',
+            }}>
+              <div style={{ height: 4, background: 'var(--bg-warm)' }} />
+              <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12, background: 'var(--bg-warm)', flexShrink: 0,
+                    animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.08}s`,
+                  }} />
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ height: 12, width: '60%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.08}s` }} />
+                    <div style={{ height: 10, width: '45%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.12}s` }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {[48, 56, 40].map((w, j) => (
+                    <div key={j} style={{
+                      height: 18, width: w, borderRadius: 5, background: 'var(--bg-warm)',
+                      animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${(i + j) * 0.06}s`,
+                    }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : users.length === 0 ? (
         <motion.div
@@ -289,13 +352,21 @@ export default function UsersLookup() {
           style={{ textAlign: 'center', padding: '48px 24px' }}
         >
           <div style={{ fontSize: '2.2rem', marginBottom: 10 }}>
-            {search ? '\uD83D\uDD0D' : '\uD83C\uDF1F'}
+            {search ? '\uD83D\uDD0D' : filter === 'matches' ? '\uD83E\uDD1D' : filter === 'teammates' ? '\uD83D\uDC65' : '\uD83C\uDF1F'}
           </div>
           <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 6 }}>
-            {search ? 'No results' : 'No members yet'}
+            {search
+              ? 'No results'
+              : filter === 'matches' ? 'No matches yet'
+              : filter === 'teammates' ? 'No teammates yet'
+              : 'No members yet'}
           </h3>
           <p style={{ color: 'var(--text-soft)', fontSize: '0.82rem', margin: 0 }}>
-            {search ? 'Try a different search term' : 'Check back later for new members'}
+            {search
+              ? 'Try a different search term'
+              : filter === 'matches' ? 'Swipe right on people you like — when they swipe back, they\'ll show up here'
+              : filter === 'teammates' ? 'Join a team to see your teammates here'
+              : 'Check back later for new members'}
           </p>
         </motion.div>
       ) : (

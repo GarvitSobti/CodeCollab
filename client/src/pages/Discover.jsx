@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navigation from '../components/Navigation';
+
 import SwipeContainer from '../components/SwipeContainer';
 import UsersLookup from '../components/UsersLookup';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -186,7 +187,7 @@ function RightPanel() {
 
 // ─── Phone frame ─────────────────────────────────────────────────────────────
 
-function PhoneFrame({ children }) {
+function PhoneFrame({ children, onSearchClick }) {
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>
       {/* Glow behind phone */}
@@ -236,10 +237,14 @@ function PhoneFrame({ children }) {
             <div style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>Discover</div>
             <div style={{ fontSize: '0.65rem', color: 'var(--text-soft)', fontWeight: 500 }}>Find your teammate</div>
           </div>
-          <div style={{
-            width: 32, height: 32, borderRadius: 10, background: 'var(--bg-warm)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
+          <div
+            onClick={onSearchClick}
+            style={{
+              width: 32, height: 32, borderRadius: 10, background: 'var(--bg-warm)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: onSearchClick ? 'pointer' : 'default',
+            }}
+          >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" strokeWidth="2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
@@ -267,6 +272,7 @@ function PhoneFrame({ children }) {
 export default function Discover() {
   const [mode, setMode] = useState('swipe');
   const [showPanels, setShowPanels] = useState(window.innerWidth >= 960);
+  const { setPageLoading } = usePageLoading();
 
   useEffect(() => {
     const onResize = () => setShowPanels(window.innerWidth >= 960);
@@ -275,10 +281,8 @@ export default function Discover() {
   }, []);
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
-      <Navigation />
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 72, overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Mode toggle */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 24px 0', flexShrink: 0 }}>
           <ModeToggle mode={mode} onModeChange={setMode} />
@@ -299,7 +303,7 @@ export default function Discover() {
               }}
             >
               {showPanels && <LeftPanel />}
-              <PhoneFrame>
+              <PhoneFrame onSearchClick={() => setMode('browse')}>
                 <SwipeContainer />
               </PhoneFrame>
               {showPanels && <RightPanel />}
@@ -313,7 +317,7 @@ export default function Discover() {
               transition={{ duration: 0.2 }}
               style={{ flex: 1, overflow: 'auto', padding: '20px 24px 24px' }}
             >
-              <UsersLookup />
+              <UsersLookup onReady={() => setPageLoading(false)} />
             </motion.div>
           )}
         </AnimatePresence>

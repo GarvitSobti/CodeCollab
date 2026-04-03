@@ -1,22 +1,26 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+import { motion } from 'framer-motion';
+
 import TeamsSidebar from '../components/teams/TeamsSidebar';
 import TeamWorkspace from '../components/teams/TeamWorkspace';
 import CreateTeamModal from '../components/teams/CreateTeamModal';
 import InviteMemberModal from '../components/teams/InviteMemberModal';
 import PendingInvites from '../components/teams/PendingInvites';
 import { useChatContext } from '../contexts/ChatContext';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 import api from '../services/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { openOrCreateDM } = useChatContext();
+  const { setPageLoading } = usePageLoading();
   const [teams, setTeams] = useState([]);
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const initialLoad = useRef(true);
 
   const fetchTeams = useCallback(async () => {
     try {
@@ -30,8 +34,12 @@ export default function Dashboard() {
       console.error('Failed to load teams:', err);
     } finally {
       setLoading(false);
+      if (initialLoad.current) {
+        initialLoad.current = false;
+        setPageLoading(false);
+      }
     }
-  }, [selectedTeamId]);
+  }, [selectedTeamId, setPageLoading]);
 
   useEffect(() => {
     fetchTeams();
@@ -61,16 +69,15 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <Navigation />
-
-      <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        style={{ position: 'relative', zIndex: 2, padding: '28px 40px 60px', maxWidth: 1300, margin: '0 auto' }}
+      >
         <PendingInvites onRespond={fetchTeams} />
 
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-soft)', fontWeight: 600 }}>
-            Loading teams...
-          </div>
-        ) : teams.length === 0 ? (
+        {loading ? null : teams.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ fontSize: '3rem', marginBottom: 16 }}>👥</div>
             <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: 8 }}>No teams yet</h2>
@@ -105,7 +112,7 @@ export default function Dashboard() {
             />
           </div>
         )}
-      </div>
+      </motion.div>
 
       {showCreateModal && (
         <CreateTeamModal
