@@ -134,7 +134,20 @@ export default function Messages() {
 
             <div style={{ flex: 1, overflowY: 'auto' }}>
               {loadingConversations ? (
-                <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-soft)' }}>Loading conversations...</div>
+                <div style={{ padding: '8px 0' }}>
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
+                      <div style={{
+                        width: 42, height: 42, borderRadius: 13, background: 'var(--bg-warm)', flexShrink: 0,
+                        animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.08}s`,
+                      }} />
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ height: 12, width: `${65 + (i % 3) * 10}%`, borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.08}s` }} />
+                        <div style={{ height: 10, width: `${45 + (i % 2) * 20}%`, borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.12}s` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : filteredConversations.length === 0 ? (
                 <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-soft)' }}>
                   <div style={{ fontSize: '1.8rem', marginBottom: 8 }}>💬</div>

@@ -270,17 +270,38 @@ export default function UsersLookup() {
       {/* Content */}
       {loading ? (
         <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center', padding: 60, gap: 12,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+          gap: 12,
         }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: '50%',
-            border: '3px solid var(--border)', borderTopColor: 'var(--accent)',
-            animation: 'spin 0.9s linear infinite',
-          }} />
-          <p style={{ color: 'var(--text-soft)', fontWeight: 600, fontSize: '0.8rem' }}>
-            Loading...
-          </p>
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} style={{
+              borderRadius: 16, background: 'var(--bg-card)',
+              border: '1px solid var(--border)', overflow: 'hidden',
+            }}>
+              <div style={{ height: 4, background: 'var(--bg-warm)' }} />
+              <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12, background: 'var(--bg-warm)', flexShrink: 0,
+                    animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.08}s`,
+                  }} />
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ height: 12, width: '60%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.08}s` }} />
+                    <div style={{ height: 10, width: '45%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.12}s` }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {[48, 56, 40].map((w, j) => (
+                    <div key={j} style={{
+                      height: 18, width: w, borderRadius: 5, background: 'var(--bg-warm)',
+                      animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${(i + j) * 0.06}s`,
+                    }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : users.length === 0 ? (
         <motion.div

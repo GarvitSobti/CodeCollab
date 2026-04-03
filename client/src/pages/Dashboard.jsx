@@ -67,8 +67,48 @@ export default function Dashboard() {
         <PendingInvites onRespond={fetchTeams} />
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-soft)', fontWeight: 600 }}>
-            Loading teams...
+          <div style={{ display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr)', gap: 24, alignItems: 'start' }}>
+            {/* Skeleton sidebar */}
+            <div style={{
+              borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)',
+              padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 12,
+            }}>
+              {[1, 2, 3].map(i => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                  borderRadius: 14, background: 'var(--bg-warm)',
+                }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--border)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s`, flexShrink: 0 }} />
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ height: 12, width: '70%', borderRadius: 6, background: 'var(--border)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s` }} />
+                    <div style={{ height: 10, width: '45%', borderRadius: 6, background: 'var(--border)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.15}s` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Skeleton workspace */}
+            <div style={{
+              borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)',
+              overflow: 'hidden',
+            }}>
+              <div style={{ height: 6, background: 'var(--bg-warm)' }} />
+              <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ height: 22, width: '40%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite' }} />
+                <div style={{ height: 14, width: '60%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: '0.1s' }} />
+                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                  {[1, 2, 3].map(i => (
+                    <div key={i} style={{
+                      width: 56, height: 56, borderRadius: 14, background: 'var(--bg-warm)',
+                      animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s`,
+                    }} />
+                  ))}
+                </div>
+                <div style={{ height: 1, background: 'var(--border)', marginTop: 8 }} />
+                {[1, 2, 3].map(i => (
+                  <div key={i} style={{ height: 14, width: `${80 - i * 15}%`, borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s` }} />
+                ))}
+              </div>
+            </div>
           </div>
         ) : teams.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
