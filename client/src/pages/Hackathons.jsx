@@ -265,6 +265,7 @@ export default function Hackathons() {
   }, [isAuthenticated]);
 
   const filtered = hackathons.filter((h) => {
+    if (h.status === 'ENDED') return false;
     if (activeFilter === 'All Events') return true;
     if (activeFilter === 'Live Now') return h.status === 'LIVE';
     if (activeFilter === 'Open Registration') return h.status === 'OPEN';
