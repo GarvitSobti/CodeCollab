@@ -42,7 +42,8 @@ function createProfile(overrides = {}) {
 describe('aiScanService', () => {
   test('detects whether a profile has enough signal', () => {
     expect(hasSufficientAiScanSignal(createProfile())).toBe(true);
-    expect(hasSufficientAiScanSignal({ skills: [{ name: 'React', level: 4 }] })).toBe(false);
+    expect(hasSufficientAiScanSignal({ skills: [{ name: 'React', level: 4 }] })).toBe(true);
+    expect(hasSufficientAiScanSignal({ skills: [] })).toBe(false);
   });
 
   test('returns deterministic output for the same profile and seed', () => {
@@ -57,12 +58,9 @@ describe('aiScanService', () => {
   test('changes output when the profile content changes', () => {
     const base = createProfile();
     const changed = createProfile({
-      projectExperience: [
-        {
-          title: 'Backend control plane',
-          description: 'Built Node.js services and CI deployment flows.',
-          technologies: 'Node.js, Docker, PostgreSQL',
-        },
+      skills: [
+        { name: 'React', level: 2 },
+        { name: 'Node.js', level: 5 },
       ],
     });
 
@@ -72,12 +70,23 @@ describe('aiScanService', () => {
     expect(second).not.toEqual(first);
   });
 
-  test('reseeded scan state changes on manual rescan', () => {
+  test('keeps estimated levels in range and can differ from claimed levels', () => {
+    const scan = generateAiScanSnapshot(createProfile(), {
+      userId: 'user-1',
+      seed: 'seed-1',
+      scannedAt: new Date('2026-04-03T10:30:00.000Z'),
+    });
+
+    expect(scan.skills.every((skill) => skill.estimatedLevel >= 1 && skill.estimatedLevel <= 5)).toBe(true);
+    expect(scan.skills.some((skill) => skill.estimatedLevel !== skill.claimedLevel)).toBe(true);
+  });
+
+  test('reuses an existing seed for automatic scans', () => {
     const profile = createProfile();
     const first = buildAiScanState(profile, { userId: 'user-1', existingSeed: 'seed-1', forceNewSeed: false });
-    const second = buildAiScanState(profile, { userId: 'user-1', existingSeed: 'seed-1', forceNewSeed: true });
+    const second = buildAiScanState(profile, { userId: 'user-1', existingSeed: 'seed-1', forceNewSeed: false });
 
-    expect(second.aiScanSeed).not.toEqual(first.aiScanSeed);
-    expect(second.aiScanSnapshot).not.toEqual(first.aiScanSnapshot);
+    expect(second.aiScanSeed).toEqual(first.aiScanSeed);
+    expect(second.aiScanSnapshot).toEqual(first.aiScanSnapshot);
   });
 });
