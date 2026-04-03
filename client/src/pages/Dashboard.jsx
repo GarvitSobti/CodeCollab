@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const initialLoad = useRef(true);
 
   const fetchTeams = useCallback(async () => {
     try {
@@ -33,14 +34,16 @@ export default function Dashboard() {
       console.error('Failed to load teams:', err);
     } finally {
       setLoading(false);
-      setPageLoading(false);
+      if (initialLoad.current) {
+        initialLoad.current = false;
+        setPageLoading(false);
+      }
     }
   }, [selectedTeamId, setPageLoading]);
 
   useEffect(() => {
-    setPageLoading(true);
     fetchTeams();
-  }, [fetchTeams]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchTeams]);
 
   const selectedTeam = teams.find((t) => t.id === selectedTeamId) || null;
 

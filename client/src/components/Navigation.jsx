@@ -90,7 +90,7 @@ export default function Navigation() {
           return (
             <button
               key={path}
-              onClick={() => { setPageLoading(true); navigate(path); }}
+              onClick={() => { if (!active) { setPageLoading(true); navigate(path); } }}
               aria-current={active ? 'page' : undefined}
               className={`nav-link${path === '/profile' ? ' nav-link-profile' : ''}`}
               style={{
