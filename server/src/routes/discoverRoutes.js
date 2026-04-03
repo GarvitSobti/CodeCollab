@@ -32,33 +32,38 @@ function skillNames(profile) {
 /**
  * Compatibility score (0–100) between the current user and a candidate.
  *
- * Tier proximity    50 pts — same tier = 50, one apart = 25, two apart = 0
- * Skill complement  30 pts — candidate has skills the current user doesn't (fills gaps)
- * Experience match  20 pts — closeness of hackathon count
+ * Tier proximity         40 pts — same tier = 40, one apart = 20, two apart = 0
+ * Skill complement       25 pts — candidate has skills the current user doesn't (fills gaps)
+ * Experience match       15 pts — closeness of hackathon count
+ * Shared hackathon interest 20 pts — both expressed interest in the same hackathons
  */
-function compatibilityScore(myProfile, candidateProfile) {
-  // ── Tier proximity (0–50) ─────────────────────────────────────────────────
+function compatibilityScore(myProfile, candidateProfile, sharedHackathonCount = 0) {
+  // ── Tier proximity (0–40) ─────────────────────────────────────────────────
   const myTier  = tierRank(myProfile?.internalSkillTier);
   const canTier = tierRank(candidateProfile?.internalSkillTier);
   const tierDiff = Math.abs(myTier - canTier);
-  const tierScore = tierDiff === 0 ? 50 : tierDiff === 1 ? 25 : 0;
+  const tierScore = tierDiff === 0 ? 40 : tierDiff === 1 ? 20 : 0;
 
-  // ── Skill complementarity (0–30) ─────────────────────────────────────────
+  // ── Skill complementarity (0–25) ─────────────────────────────────────────
   // Count skills the candidate has that the current user doesn't
   const mySkills  = skillNames(myProfile);
   const canSkills = skillNames(candidateProfile);
   const newSkills = [...canSkills].filter((s) => !mySkills.has(s)).length;
-  // More gaps filled = better, cap at 5 skills → 30 pts
-  const complementScore = Math.min(newSkills / 5, 1) * 30;
+  // More gaps filled = better, cap at 5 skills → 25 pts
+  const complementScore = Math.min(newSkills / 5, 1) * 25;
 
-  // ── Experience proximity (0–20) ───────────────────────────────────────────
+  // ── Experience proximity (0–15) ───────────────────────────────────────────
   const myHack  = myProfile?.hackathonExperienceCount ?? 0;
   const canHack = candidateProfile?.hackathonExperienceCount ?? 0;
   const hackDiff = Math.abs(myHack - canHack);
   // Within 2 hackathons = full score; ≥6 apart = 0
-  const expScore = Math.max(0, (1 - hackDiff / 6)) * 20;
+  const expScore = Math.max(0, (1 - hackDiff / 6)) * 15;
 
-  return Math.round(tierScore + complementScore + expScore);
+  // ── Shared hackathon interest (0–20) ──────────────────────────────────────
+  // 1 shared hackathon = 10 pts, 2+ = full 20 pts
+  const interestScore = Math.min(sharedHackathonCount / 2, 1) * 20;
+
+  return Math.round(tierScore + complementScore + expScore + interestScore);
 }
 
 // GET /api/v1/discover — ranked candidate profiles for swiping
@@ -74,6 +79,13 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const swipedIds = new Set(existingSwipes.map((s) => s.targetId));
     swipedIds.add(user.id);
+
+    // Fetch the current user's hackathon interests
+    const myInterests = await prisma.hackathonInterest.findMany({
+      where: { userId: user.id },
+      select: { hackathonId: true },
+    });
+    const myHackathonIds = new Set(myInterests.map((i) => i.hackathonId));
 
     const candidates = await prisma.user.findMany({
       where: {
@@ -96,6 +108,9 @@ router.get('/', authMiddleware, async (req, res) => {
             internalSkillScore: true,
           },
         },
+        hackathonInterests: {
+          select: { hackathonId: true },
+        },
       },
       take: 100, // fetch more than needed so ranking is meaningful
     });
@@ -103,7 +118,10 @@ router.get('/', authMiddleware, async (req, res) => {
     // Rank by compatibility against the current user's profile
     const myProfile = user.profile;
     const ranked = candidates
-      .map((c) => ({ candidate: c, score: compatibilityScore(myProfile, c.profile) }))
+      .map((c) => {
+        const sharedCount = c.hackathonInterests.filter((i) => myHackathonIds.has(i.hackathonId)).length;
+        return { candidate: c, score: compatibilityScore(myProfile, c.profile, sharedCount) };
+      })
       .sort((a, b) => b.score - a.score)
       .slice(0, 20);
 

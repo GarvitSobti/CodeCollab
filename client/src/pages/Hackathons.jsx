@@ -80,12 +80,13 @@ function HackathonCard({ h, isRegistered, isToggling, onToggle, isAuthenticated,
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: idx * 0.06, ease: [0.16, 1, 0.3, 1] }}
+      onClick={() => h.url && window.open(h.url, '_blank', 'noopener,noreferrer')}
       style={{
         borderRadius: 20, background: 'var(--bg-card)',
         border: `1px solid var(--border)`,
         overflow: 'hidden', display: 'flex', flexDirection: 'column',
         transition: 'box-shadow 0.25s ease, transform 0.25s ease',
-        cursor: 'default',
+        cursor: h.url ? 'pointer' : 'default',
       }}
       whileHover={{ boxShadow: '0 8px 32px rgba(0,0,0,0.1)', y: -2 }}
     >
@@ -193,27 +194,51 @@ function HackathonCard({ h, isRegistered, isToggling, onToggle, isAuthenticated,
             {deadline && <span style={{ color: h.status === 'LIVE' ? 'var(--accent)' : 'var(--text-faint)' }}>{deadline}</span>}
           </span>
 
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            disabled={isToggling || !isAuthenticated}
-            onClick={() => onToggle(h.id)}
-            style={{
-              padding: '9px 20px', borderRadius: 10, fontSize: '0.78rem', fontWeight: 700,
-              border: isRegistered ? '1.5px solid var(--border-strong)' : 'none',
-              cursor: isAuthenticated ? 'pointer' : 'not-allowed',
-              fontFamily: 'inherit', flexShrink: 0,
-              transition: 'opacity 0.2s',
-              background: isRegistered
-                ? 'transparent'
-                : 'linear-gradient(135deg, var(--accent), var(--peach))',
-              color: isRegistered ? 'var(--text-soft)' : 'white',
-              opacity: isToggling ? 0.5 : 1,
-              boxShadow: isRegistered ? 'none' : '0 4px 14px rgba(224,93,80,0.3)',
-            }}
-          >
-            {isRegistered ? '✓ Registered' : 'Register'}
-          </motion.button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {h.url && (
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(h.url, '_blank', 'noopener,noreferrer');
+                }}
+                style={{
+                  width: 36, height: 36, borderRadius: 10, display: 'grid', placeItems: 'center',
+                  border: '1.5px solid var(--border-strong)', background: 'transparent',
+                  cursor: 'pointer', flexShrink: 0, padding: 0,
+                }}
+                title="Open hackathon page"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </motion.button>
+            )}
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              disabled={isToggling || !isAuthenticated}
+              onClick={(e) => { e.stopPropagation(); onToggle(h.id); }}
+              style={{
+                padding: '9px 20px', borderRadius: 10, fontSize: '0.78rem', fontWeight: 700,
+                border: isRegistered ? '1.5px solid var(--border-strong)' : 'none',
+                cursor: isAuthenticated ? 'pointer' : 'not-allowed',
+                fontFamily: 'inherit', flexShrink: 0,
+                transition: 'opacity 0.2s',
+                background: isRegistered
+                  ? 'transparent'
+                  : 'linear-gradient(135deg, var(--accent), var(--peach))',
+                color: isRegistered ? 'var(--text-soft)' : 'white',
+                opacity: isToggling ? 0.5 : 1,
+                boxShadow: isRegistered ? 'none' : '0 4px 14px rgba(224,93,80,0.3)',
+              }}
+            >
+              {isRegistered ? '✓ Interested' : "I'm Interested"}
+            </motion.button>
+          </div>
         </div>
       </div>
     </motion.div>
