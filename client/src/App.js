@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import './App.css';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -50,31 +50,28 @@ function PublicOnlyRoute({ children }) {
   return children;
 }
 
-const pageTransition = {
+const pageEnter = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } },
-  exit: { opacity: 0, transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] } },
-};
-
-const reducedMotion = {
-  initial: { opacity: 1 },
-  animate: { opacity: 1 },
-  exit: { opacity: 1 },
 };
 
 function AnimatedRoutes() {
   const location = useLocation();
   const prefersReducedMotion = useReducedMotion();
   const firstSegment = location.pathname.split('/').filter(Boolean)[0] || 'home';
-  const variants = prefersReducedMotion ? reducedMotion : pageTransition;
+  // User profiles are viewed from Discover context — keep same key to avoid transition
+  const routeKey = firstSegment === 'user' ? 'discover' : firstSegment;
   const showNav = NAV_SEGMENTS.has(firstSegment);
 
   return (
     <>
       {showNav && <Navigation />}
-      <AnimatePresence mode="wait">
-        <motion.div key={firstSegment} {...variants}>
-          <Routes location={location}>
+      <motion.div
+        key={routeKey}
+        initial={prefersReducedMotion ? false : pageEnter.initial}
+        animate={pageEnter.animate}
+      >
+        <Routes location={location}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
           <Route path="/register" element={<Navigate to="/register/account" replace />} />
@@ -148,7 +145,6 @@ function AnimatedRoutes() {
           />
         </Routes>
       </motion.div>
-    </AnimatePresence>
     </>
   );
 }

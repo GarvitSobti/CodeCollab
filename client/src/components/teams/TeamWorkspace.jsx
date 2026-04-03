@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const STATUS_STYLE = {
@@ -50,6 +51,7 @@ function getSkillNames(profile) {
 
 export default function TeamWorkspace({ team, onOpenMessages, onDM, onInviteMember, onLeaveTeam }) {
   const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
   if (!team) return null;
 
   const statusStyle = STATUS_STYLE[team.status] || STATUS_STYLE.FORMING;
@@ -128,10 +130,11 @@ export default function TeamWorkspace({ team, onOpenMessages, onDM, onInviteMemb
           return (
             <div
               key={member.id || idx}
+              onClick={() => member.id && navigate(member.firebaseUid === currentUser?.uid ? '/profile' : `/user/${member.id}`)}
               style={{
                 padding: 22, borderRadius: 20, background: 'var(--bg-card)',
                 boxShadow: 'var(--shadow-card)', border: '1px solid rgba(0,0,0,0.04)',
-                transition: 'all 0.3s', position: 'relative',
+                transition: 'all 0.3s', position: 'relative', cursor: 'pointer',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-heavy)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'var(--shadow-card)'; }}
@@ -150,7 +153,7 @@ export default function TeamWorkspace({ team, onOpenMessages, onDM, onInviteMemb
                 {member.firebaseUid !== currentUser?.uid && (
                   <button
                     type="button"
-                    onClick={() => onDM(membership)}
+                    onClick={(e) => { e.stopPropagation(); onDM(membership); }}
                     title={`Message ${(member.name || '').split(' ')[0]}`}
                     style={{
                       width: 32, height: 32, borderRadius: 10,

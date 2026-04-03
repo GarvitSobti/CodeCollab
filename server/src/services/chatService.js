@@ -24,6 +24,7 @@ function getInitials(name = '') {
 function toUserSummary(user) {
   return {
     id: user.firebaseUid,
+    profileId: user.id,
     name: user.name,
     email: user.email,
     avatarUrl: user.avatarUrl,

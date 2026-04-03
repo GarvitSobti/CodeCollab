@@ -242,7 +242,7 @@ router.post('/swipe', authMiddleware, async (req, res) => {
 // GET /api/v1/discover/relationship/:targetId — check match/team relationship
 router.get('/relationship/:targetId', authMiddleware, async (req, res) => {
   try {
-    const user = await resolveUser(req.auth.uid);
+    const user = await resolveUserBasic(req.auth.uid);
     if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
 
     const targetId = req.params.targetId;
