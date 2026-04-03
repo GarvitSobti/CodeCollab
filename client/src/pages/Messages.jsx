@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+
 import ChatComponent from '../components/chat/ChatComponent';
 import { useChatContext } from '../contexts/ChatContext';
 
@@ -83,8 +83,6 @@ export default function Messages() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <Navigation />
-
       <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
         <div style={{ marginBottom: 36 }}>
           <h1 style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.04em', marginBottom: 8 }}>

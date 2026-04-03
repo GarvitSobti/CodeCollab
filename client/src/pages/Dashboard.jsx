@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+
 import TeamsSidebar from '../components/teams/TeamsSidebar';
 import TeamWorkspace from '../components/teams/TeamWorkspace';
 import CreateTeamModal from '../components/teams/CreateTeamModal';
@@ -61,8 +61,6 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <Navigation />
-
       <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
         <PendingInvites onRespond={fetchTeams} />
 

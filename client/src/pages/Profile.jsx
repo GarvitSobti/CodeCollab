@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import Navigation from '../components/Navigation';
+
 import ReviewsPanel from '../components/ReviewsPanel';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -808,7 +808,7 @@ export default function Profile() {
       <div style={{ minHeight: '100vh' }}>
         <div className="mesh-bg"><div className="mesh-blob blob-1" /><div className="mesh-blob blob-2" /><div className="mesh-blob blob-3" /></div>
         <div className="noise" />
-        <Navigation />
+
         <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1120, margin: '0 auto' }}>
           {/* Skeleton profile header */}
           <div style={{
@@ -854,8 +854,6 @@ export default function Profile() {
     <div style={{ minHeight: '100vh' }}>
       <div className="mesh-bg"><div className="mesh-blob blob-1" /><div className="mesh-blob blob-2" /><div className="mesh-blob blob-3" /></div>
       <div className="noise" />
-      <Navigation />
-
       <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1120, margin: '0 auto' }}>
         {editing ? (
           <ProfileEdit

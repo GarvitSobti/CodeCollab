@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navigation from '../components/Navigation';
+
 import ReviewsPanel from '../components/ReviewsPanel';
 import { useChatContext } from '../contexts/ChatContext';
 import api from '../services/api';
@@ -180,7 +180,7 @@ export default function UserProfile() {
   if (loading) {
     return (
       <>
-        <Navigation />
+
         <div style={{ paddingTop: 72, minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{
@@ -199,7 +199,7 @@ export default function UserProfile() {
   if (error || !profile) {
     return (
       <>
-        <Navigation />
+
         <div style={{ paddingTop: 72, minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
           <div style={{ textAlign: 'center', maxWidth: 360, padding: 24 }}>
             <div style={{ fontSize: '2.4rem', marginBottom: 12 }}>:/</div>
@@ -236,7 +236,6 @@ export default function UserProfile() {
 
   return (
     <>
-      <Navigation />
       <div style={{
         paddingTop: 88, paddingBottom: 48,
         maxWidth: 1040, margin: '0 auto',

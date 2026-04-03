@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import Navigation from '../components/Navigation';
+
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -277,8 +277,6 @@ export default function Hackathons() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <Navigation />
-
       <div style={{ padding: '96px clamp(16px, 4vw, 40px) 80px', maxWidth: 1200, margin: '0 auto' }}>
 
         {/* Header */}

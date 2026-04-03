@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navigation from '../components/Navigation';
+
 import SwipeContainer from '../components/SwipeContainer';
 import UsersLookup from '../components/UsersLookup';
 
@@ -276,8 +276,6 @@ export default function Discover() {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
-      <Navigation />
-
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 72, overflow: 'hidden' }}>
         {/* Mode toggle */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 24px 0', flexShrink: 0 }}>

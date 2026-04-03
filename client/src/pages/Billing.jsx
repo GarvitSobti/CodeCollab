@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import Navigation from '../components/Navigation';
+
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -112,8 +112,6 @@ export default function Billing() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text-dark)' }}>
-      <Navigation />
-
       <div style={{ paddingTop: 72 }}>
 
         {/* ─── Hero ─── */}
