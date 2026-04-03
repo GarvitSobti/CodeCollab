@@ -122,25 +122,6 @@ export default function Navigation() {
 
       <div className="nav-right" style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
         <button
-          aria-label="Notifications — new"
-          className="nav-icon-btn"
-          style={{
-            width: 38, height: 38, borderRadius: 12, background: 'var(--bg-card)',
-            border: '1px solid var(--border)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', cursor: 'pointer', position: 'relative', color: 'var(--text-soft)',
-            transition: 'border-color 0.2s ease',
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span style={{
-            position: 'absolute', top: 7, right: 7, width: 7, height: 7,
-            borderRadius: '50%', background: 'var(--accent)',
-          }} aria-hidden="true" />
-        </button>
-        <button
           onClick={toggleTheme}
           aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           className="nav-icon-btn"

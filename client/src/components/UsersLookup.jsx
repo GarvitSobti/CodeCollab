@@ -173,16 +173,18 @@ export default function UsersLookup({ onReady }) {
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef(null);
 
-  const fetchUsers = useCallback(async (searchTerm, pageNum) => {
+  const fetchUsers = useCallback(async (searchTerm, pageNum, activeFilter) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (searchTerm) params.set('search', searchTerm);
+      if (activeFilter && activeFilter !== 'all') params.set('filter', activeFilter);
       params.set('page', String(pageNum));
       params.set('limit', '24');
       const { data } = await api.get(`/api/v1/discover/users?${params}`);
@@ -197,8 +199,15 @@ export default function UsersLookup({ onReady }) {
     }
   }, [onReady]);
 
+  const searchRef = useRef(search);
+  const filterRef = useRef(filter);
+  const pageRef = useRef(page);
+  searchRef.current = search;
+  filterRef.current = filter;
+  pageRef.current = page;
+
   useEffect(() => {
-    fetchUsers('', 1);
+    fetchUsers(searchRef.current, pageRef.current, filterRef.current);
   }, [fetchUsers]);
 
   const handleSearch = (value) => {
@@ -206,13 +215,19 @@ export default function UsersLookup({ onReady }) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(1);
-      fetchUsers(value, 1);
+      fetchUsers(value, 1, filter);
     }, 300);
+  };
+
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    setPage(1);
+    fetchUsers(search, 1, newFilter);
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    fetchUsers(search, newPage);
+    fetchUsers(search, newPage, filter);
   };
 
   return (
@@ -245,7 +260,7 @@ export default function UsersLookup({ onReady }) {
           />
           {search && (
             <button
-              onClick={() => { setSearch(''); setPage(1); fetchUsers('', 1); }}
+              onClick={() => { setSearch(''); setPage(1); fetchUsers('', 1, filter); }}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
                 color: 'var(--text-faint)', padding: 2, display: 'flex',
@@ -257,15 +272,41 @@ export default function UsersLookup({ onReady }) {
             </button>
           )}
         </div>
-        {pagination && !loading && (
-          <div style={{
-            fontSize: '0.7rem', color: 'var(--text-faint)', marginTop: 8,
-            paddingLeft: 4, fontWeight: 500,
-          }}>
-            {pagination.total} {pagination.total === 1 ? 'member' : 'members'}
-            {search && ' found'}
-          </div>
-        )}
+        {/* Filter pills */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
+          {[
+            { key: 'all', label: 'All' },
+            { key: 'teammates', label: 'Teammates' },
+            { key: 'matches', label: 'Matches' },
+          ].map(({ key, label }) => {
+            const active = filter === key;
+            return (
+              <button
+                key={key}
+                onClick={() => handleFilterChange(key)}
+                style={{
+                  padding: '5px 14px', borderRadius: 8,
+                  border: active ? '1px solid var(--accent)' : '1px solid var(--border)',
+                  background: active ? 'rgba(224,93,80,0.1)' : 'var(--bg-card)',
+                  color: active ? 'var(--accent)' : 'var(--text-soft)',
+                  fontSize: '0.74rem', fontWeight: 600, fontFamily: 'inherit',
+                  cursor: 'pointer', transition: 'all 0.15s ease',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+          {pagination && !loading && (
+            <span style={{
+              fontSize: '0.7rem', color: 'var(--text-faint)',
+              marginLeft: 6, fontWeight: 500,
+            }}>
+              {pagination.total} {pagination.total === 1 ? 'member' : 'members'}
+              {search && ' found'}
+            </span>
+          )}
+        </div>
       </motion.div>
 
       {/* Content */}
@@ -311,13 +352,21 @@ export default function UsersLookup({ onReady }) {
           style={{ textAlign: 'center', padding: '48px 24px' }}
         >
           <div style={{ fontSize: '2.2rem', marginBottom: 10 }}>
-            {search ? '\uD83D\uDD0D' : '\uD83C\uDF1F'}
+            {search ? '\uD83D\uDD0D' : filter === 'matches' ? '\uD83E\uDD1D' : filter === 'teammates' ? '\uD83D\uDC65' : '\uD83C\uDF1F'}
           </div>
           <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 6 }}>
-            {search ? 'No results' : 'No members yet'}
+            {search
+              ? 'No results'
+              : filter === 'matches' ? 'No matches yet'
+              : filter === 'teammates' ? 'No teammates yet'
+              : 'No members yet'}
           </h3>
           <p style={{ color: 'var(--text-soft)', fontSize: '0.82rem', margin: 0 }}>
-            {search ? 'Try a different search term' : 'Check back later for new members'}
+            {search
+              ? 'Try a different search term'
+              : filter === 'matches' ? 'Swipe right on people you like — when they swipe back, they\'ll show up here'
+              : filter === 'teammates' ? 'Join a team to see your teammates here'
+              : 'Check back later for new members'}
           </p>
         </motion.div>
       ) : (

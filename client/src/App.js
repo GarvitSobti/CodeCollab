@@ -64,18 +64,17 @@ function AnimatedRoutes() {
   const routeKey = firstSegment === 'user' ? 'discover' : firstSegment;
   const showNav = NAV_SEGMENTS.has(firstSegment);
 
-  const ContentWrapper = showNav ? 'div' : React.Fragment;
-  const wrapperProps = showNav ? { className: 'page-scroll-container' } : {};
+  const scrollClass = showNav ? 'page-scroll-container' : 'page-scroll-container--full';
 
   React.useEffect(() => {
-    const container = document.querySelector('.page-scroll-container');
+    const container = document.querySelector(`.${scrollClass}`);
     if (container) container.scrollTop = 0;
-  }, [location.pathname]);
+  }, [location.pathname, scrollClass]);
 
   return (
     <>
       {showNav && <Navigation />}
-      <ContentWrapper {...wrapperProps}>
+      <div className={scrollClass}>
         <motion.div
           key={routeKey}
           initial={prefersReducedMotion ? false : pageEnter.initial}
@@ -155,7 +154,7 @@ function AnimatedRoutes() {
           />
         </Routes>
       </motion.div>
-      </ContentWrapper>
+      </div>
     </>
   );
 }
