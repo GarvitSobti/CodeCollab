@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navigation from '../components/Navigation';
 import ReviewsPanel from '../components/ReviewsPanel';
+import AISkillScanCard from '../components/AISkillScanCard';
 import { useChatContext } from '../contexts/ChatContext';
 import api from '../services/api';
 import { createReview, fetchReviewEligibility, fetchUserReviews } from '../services/reviewService';
@@ -482,6 +483,12 @@ export default function UserProfile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.08 }}
           >
+            <AISkillScanCard
+              profile={profile}
+              aiScan={profile.aiScan}
+              title="AI Skill Estimate"
+            />
+
             {/* Skills & Technologies */}
             <div className="profile-section">
               <h3 className="profile-section-title">Skills & Technologies</h3>

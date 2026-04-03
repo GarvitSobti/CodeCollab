@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
 import ReviewsPanel from '../components/ReviewsPanel';
+import AISkillScanCard from '../components/AISkillScanCard';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { fetchUserReviews } from '../services/reviewService';
@@ -97,6 +98,7 @@ function createDefaultProfile(authUser) {
       linkedinVerified: false,
       universityVerified: false,
     },
+    aiScan: null,
     onboardingCompleted: false,
     completion: 0,
   };
@@ -145,6 +147,7 @@ function normalizeIncomingProfile(data, authUser) {
       ...base.verification,
       ...(data?.verification || {}),
     },
+    aiScan: data?.aiScan || null,
     bio: data?.bio || base.bio,
     projectExperience:
       Array.isArray(data?.projectExperience) && data.projectExperience.length
@@ -194,7 +197,15 @@ function getInitials(name) {
 /*  VIEW MODE — mirrors the prototype design       */
 /* ─────────────────────────────────────────────── */
 
-function ProfileView({ profile, onEdit, reviewsData, reviewsLoading, reviewsError }) {
+function ProfileView({
+  profile,
+  onEdit,
+  onRescan,
+  rescanning,
+  reviewsData,
+  reviewsLoading,
+  reviewsError,
+}) {
   const filledSkills = profile.skills.filter((s) => s.name.trim());
   const filledProjects = profile.projectExperience.filter((p) => p.title.trim());
   const filledWork = profile.workExperience.filter((w) => w.company.trim() || w.role.trim());
@@ -270,6 +281,14 @@ function ProfileView({ profile, onEdit, reviewsData, reviewsLoading, reviewsErro
 
       {/* ── Main content ── */}
       <div className="profile-main">
+        <AISkillScanCard
+          profile={profile}
+          aiScan={profile.aiScan}
+          canRescan
+          rescanning={rescanning}
+          onRescan={onRescan}
+        />
+
         {/* Skills & Technologies */}
         <div className="profile-section">
           <h3 className="profile-section-title">Skills & Technologies</h3>
@@ -672,6 +691,7 @@ export default function Profile() {
   const [profile, setProfile] = useState(() => createDefaultProfile(user));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [rescanning, setRescanning] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [editing, setEditing] = useState(false);
@@ -803,6 +823,23 @@ export default function Profile() {
     }
   };
 
+  const runAiScan = async () => {
+    setRescanning(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    try {
+      const response = await api.post('/api/v1/profile/me/ai-scan');
+      const saved = normalizeIncomingProfile(response?.data?.profile, user);
+      setProfile(saved);
+      setSuccessMessage(response?.data?.message || 'AI skill scan updated.');
+    } catch (error) {
+      setErrorMessage(error?.response?.data?.error?.message || 'Failed to run AI skill scan.');
+    } finally {
+      setRescanning(false);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh' }}>
@@ -823,6 +860,17 @@ export default function Profile() {
       <Navigation />
 
       <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1120, margin: '0 auto' }}>
+        {!editing && errorMessage && (
+          <p style={{ margin: '0 0 12px', padding: '10px 12px', borderRadius: 10, background: 'rgba(224,93,80,0.1)', color: 'var(--accent)', fontSize: '0.78rem', fontWeight: 600 }}>
+            {errorMessage}
+          </p>
+        )}
+        {!editing && successMessage && (
+          <p style={{ margin: '0 0 12px', padding: '10px 12px', borderRadius: 10, background: 'rgba(102,187,106,0.12)', color: 'var(--mint)', fontSize: '0.78rem', fontWeight: 600 }}>
+            {successMessage}
+          </p>
+        )}
+
         {editing ? (
           <ProfileEdit
             profile={profile}
@@ -846,6 +894,8 @@ export default function Profile() {
           <ProfileView
             profile={profile}
             onEdit={() => setEditing(true)}
+            onRescan={runAiScan}
+            rescanning={rescanning}
             reviewsData={reviewsData}
             reviewsLoading={reviewsLoading}
             reviewsError={reviewsError}
