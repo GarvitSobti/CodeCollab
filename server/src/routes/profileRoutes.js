@@ -10,6 +10,7 @@ const {
   scoreFromCaseResponses,
   computeCombinedScore,
 } = require('../services/scoringService');
+const { buildAiScanState } = require('../services/aiScanService');
 
 const router = express.Router();
 
@@ -217,6 +218,33 @@ function safeJsonArray(value, fallback = []) {
   return Array.isArray(value) ? value : fallback;
 }
 
+function sanitizeAiScan(snapshot, updatedAt) {
+  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+    return null;
+  }
+
+  const skills = safeJsonArray(snapshot.skills, [])
+    .map((skill) => ({
+      name: normalizeString(skill?.name),
+      claimedLevel: clamp(Math.round(Number(skill?.claimedLevel) || 1), 1, 5),
+      estimatedLevel: clamp(Math.round(Number(skill?.estimatedLevel) || 1), 1, 5),
+      confidence: clamp(Math.round(Number(skill?.confidence) || 0), 0, 100),
+      evidence: safeJsonArray(skill?.evidence, []).map((item) => normalizeString(item)).filter(Boolean).slice(0, 4),
+    }))
+    .filter((skill) => skill.name);
+
+  if (!skills.length) {
+    return null;
+  }
+
+  return {
+    overallScore: clamp(Math.round(Number(snapshot.overallScore) || 0), 0, 100),
+    summary: normalizeString(snapshot.summary),
+    lastScannedAt: snapshot.lastScannedAt || updatedAt?.toISOString?.() || null,
+    skills,
+  };
+}
+
 function toClientProfile(user, profile) {
   const skillsFromJson = safeJsonArray(profile?.skills, []);
   const assessment = sanitizeAssessment(profile?.assessmentResponses || {});
@@ -261,6 +289,7 @@ function toClientProfile(user, profile) {
     completion: profile?.completion || 0,
     skillScore: profile?.internalSkillScore || 0,
     skillTier: tierToLabel(profile?.internalSkillTier),
+    aiScan: sanitizeAiScan(profile?.aiScanSnapshot, profile?.aiScanUpdatedAt),
     createdAt: profile?.createdAt,
     updatedAt: profile?.updatedAt,
   };
@@ -345,6 +374,42 @@ router.get('/me', authMiddleware, async (req, res) => {
   return res.status(200).json({ profile: toClientProfile(user, user.profile) });
 });
 
+router.post('/me/ai-scan', authMiddleware, async (req, res) => {
+  try {
+    const authUser = req.auth;
+    const user = await getOrCreateUserWithProfile(authUser);
+    const scanProfile = toClientProfile(user, user.profile);
+    const aiScanState = buildAiScanState(scanProfile, {
+      userId: user.id,
+      existingSeed: user.profile?.aiScanSeed,
+      forceNewSeed: true,
+    });
+
+    await prisma.userProfile.update({
+      where: { userId: user.id },
+      data: aiScanState,
+    });
+
+    const refreshed = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { profile: true },
+    });
+
+    return res.status(200).json({
+      message: aiScanState.aiScanSnapshot ? 'AI skill scan updated.' : 'Not enough profile detail to run the AI skill scan yet.',
+      profile: toClientProfile(refreshed, refreshed.profile),
+    });
+  } catch (error) {
+    console.error('Failed to rescan profile:', error);
+    return res.status(500).json({
+      error: {
+        message: 'Failed to run AI skill scan',
+        status: 500,
+      },
+    });
+  }
+});
+
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
@@ -376,6 +441,16 @@ router.put('/me', authMiddleware, async (req, res) => {
     const selfScore = computeSkillScore(incoming);
     const internalSkillScore = await computeCombinedScore(user.id, selfScore, storedGithubScore);
     const internalSkillTier = scoreToTier(internalSkillScore);
+    const aiScanState = buildAiScanState(
+      {
+        ...incoming,
+        completion,
+      },
+      {
+        userId: user.id,
+        existingSeed: user.profile?.aiScanSeed,
+      },
+    );
 
     await prisma.user.update({
       where: { id: user.id },
@@ -414,6 +489,9 @@ router.put('/me', authMiddleware, async (req, res) => {
         completion,
         internalSkillScore,
         internalSkillTier,
+        aiScanSnapshot: aiScanState.aiScanSnapshot,
+        aiScanSeed: aiScanState.aiScanSeed,
+        aiScanUpdatedAt: aiScanState.aiScanUpdatedAt,
       },
       create: {
         userId: user.id,
@@ -438,6 +516,9 @@ router.put('/me', authMiddleware, async (req, res) => {
         completion,
         internalSkillScore,
         internalSkillTier,
+        aiScanSnapshot: aiScanState.aiScanSnapshot,
+        aiScanSeed: aiScanState.aiScanSeed,
+        aiScanUpdatedAt: aiScanState.aiScanUpdatedAt,
       },
     });
 
