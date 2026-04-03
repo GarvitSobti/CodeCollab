@@ -636,24 +636,6 @@ body {
   color: var(--text-body);
 }
 
-.ai-scan-button {
-  border: none;
-  border-radius: 999px;
-  padding: 11px 16px;
-  background: linear-gradient(135deg, var(--accent), var(--peach));
-  color: white;
-  font-family: inherit;
-  font-size: 0.78rem;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 12px 24px rgba(224, 93, 80, 0.18);
-}
-
-.ai-scan-button:disabled {
-  cursor: wait;
-  opacity: 0.7;
-}
-
 .ai-scan-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -912,10 +894,6 @@ body {
   .ai-scan-head,
   .ai-scan-skill-top {
     flex-direction: column;
-  }
-
-  .ai-scan-button {
-    width: 100%;
   }
 
   .ai-scan-metrics,

@@ -374,42 +374,6 @@ router.get('/me', authMiddleware, async (req, res) => {
   return res.status(200).json({ profile: toClientProfile(user, user.profile) });
 });
 
-router.post('/me/ai-scan', authMiddleware, async (req, res) => {
-  try {
-    const authUser = req.auth;
-    const user = await getOrCreateUserWithProfile(authUser);
-    const scanProfile = toClientProfile(user, user.profile);
-    const aiScanState = buildAiScanState(scanProfile, {
-      userId: user.id,
-      existingSeed: user.profile?.aiScanSeed,
-      forceNewSeed: true,
-    });
-
-    await prisma.userProfile.update({
-      where: { userId: user.id },
-      data: aiScanState,
-    });
-
-    const refreshed = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: { profile: true },
-    });
-
-    return res.status(200).json({
-      message: aiScanState.aiScanSnapshot ? 'AI skill scan updated.' : 'Not enough profile detail to run the AI skill scan yet.',
-      profile: toClientProfile(refreshed, refreshed.profile),
-    });
-  } catch (error) {
-    console.error('Failed to rescan profile:', error);
-    return res.status(500).json({
-      error: {
-        message: 'Failed to run AI skill scan',
-        status: 500,
-      },
-    });
-  }
-});
-
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({

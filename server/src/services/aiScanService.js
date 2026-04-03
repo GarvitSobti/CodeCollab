@@ -28,146 +28,53 @@ function createSeededRandom(seedInput) {
   };
 }
 
-function getSkillVariants(name) {
-  const base = normalizeText(name).toLowerCase();
-  if (!base) return [];
-
-  const variants = new Set([
-    base,
-    base.replace(/\./g, ''),
-    base.replace(/\s+/g, ''),
-    base.replace(/[^\w+#]+/g, ' ').trim(),
-  ]);
-
-  const aliasMap = {
-    javascript: ['js'],
-    'node.js': ['nodejs', 'node js'],
-    typescript: ['ts'],
-    postgresql: ['postgres', 'postgresql', 'psql'],
-    react: ['reactjs', 'react js'],
-    'next.js': ['nextjs', 'next js'],
-    python: ['py'],
-  };
-
-  for (const [target, aliases] of Object.entries(aliasMap)) {
-    if (variants.has(target)) {
-      aliases.forEach((alias) => variants.add(alias));
-    }
-  }
-
-  return Array.from(variants).filter(Boolean);
-}
-
-function matchesSkill(text, skillName) {
-  const haystack = normalizeText(text).toLowerCase();
-  if (!haystack) return false;
-  return getSkillVariants(skillName).some((variant) => haystack.includes(variant));
-}
-
-function collectSignals(profile) {
-  const projects = toSafeArray(profile?.projectExperience);
-  const work = toSafeArray(profile?.workExperience);
-  const portfolioLinks = toSafeArray(profile?.portfolioLinks);
-  const bio = normalizeText(profile?.bio);
-  const github = normalizeText(profile?.social?.github);
-  const linkedin = normalizeText(profile?.social?.linkedin);
-  const hackathonCount = Number(profile?.hackathonExperience?.count) || 0;
-  const hackathonSummary = normalizeText(profile?.hackathonExperience?.summary);
-  const completion = Number(profile?.completion) || 0;
-
-  return {
-    bio,
-    projects,
-    work,
-    portfolioLinks,
-    github,
-    linkedin,
-    hackathonCount,
-    hackathonSummary,
-    completion,
-  };
-}
-
 function hasSufficientAiScanSignal(profile) {
-  const skills = toSafeArray(profile?.skills).filter((skill) => normalizeText(skill?.name));
-  const signals = collectSignals(profile);
-  return Boolean(
-    skills.length &&
-    (
-      signals.bio ||
-      signals.projects.length ||
-      signals.work.length ||
-      signals.portfolioLinks.length ||
-      signals.github ||
-      signals.linkedin ||
-      signals.hackathonCount > 0 ||
-      signals.hackathonSummary
-    )
-  );
+  return toSafeArray(profile?.skills).some((skill) => normalizeText(skill?.name));
 }
 
 function fingerprintProfile(profile) {
-  const signals = collectSignals(profile);
   return stableHash(JSON.stringify({
-    bio: signals.bio,
-    completion: signals.completion,
-    github: signals.github,
-    linkedin: signals.linkedin,
-    hackathonCount: signals.hackathonCount,
-    hackathonSummary: signals.hackathonSummary,
-    portfolioLinks: signals.portfolioLinks,
-    projects: signals.projects,
     skills: toSafeArray(profile?.skills).map((skill) => ({
       name: normalizeText(skill?.name).toLowerCase(),
       level: Number(skill?.level) || 1,
     })),
-    work: signals.work,
   }));
-}
-
-function buildSkillEvidence(skillName, profileSignals) {
-  const evidence = [];
-
-  const projectHit = profileSignals.projects.some((project) => (
-    matchesSkill(project?.title, skillName) ||
-    matchesSkill(project?.description, skillName) ||
-    matchesSkill(project?.technologies, skillName)
-  ));
-  if (projectHit) evidence.push('Projects');
-
-  const workHit = profileSignals.work.some((item) => (
-    matchesSkill(item?.role, skillName) ||
-    matchesSkill(item?.description, skillName) ||
-    matchesSkill(item?.company, skillName)
-  ));
-  if (workHit) evidence.push('Work');
-
-  if (matchesSkill(profileSignals.bio, skillName)) evidence.push('Bio');
-  if (profileSignals.github) evidence.push('GitHub link');
-  if (profileSignals.linkedin) evidence.push('LinkedIn');
-  if (profileSignals.portfolioLinks.length) evidence.push('Portfolio');
-  if (profileSignals.hackathonCount > 0 || profileSignals.hackathonSummary) evidence.push('Hackathons');
-
-  return { evidence, projectHit, workHit };
 }
 
 function summarizeScan(skills) {
   if (!skills.length) {
-    return 'Add skills and supporting experience to generate an estimate.';
+    return 'Add a few skills and the app will auto-fill estimated actual levels.';
   }
 
-  const averageEstimate = skills.reduce((sum, skill) => sum + skill.estimatedLevel, 0) / skills.length;
-  const highConfidence = skills.filter((skill) => skill.confidence >= 75).length;
+  const biggestGap = [...skills].sort(
+    (left, right) => Math.abs(right.claimedLevel - right.estimatedLevel) - Math.abs(left.claimedLevel - left.estimatedLevel),
+  )[0];
 
-  if (averageEstimate >= 4) {
-    return `Reads as a strong execution profile with ${highConfidence || 'a few'} high-confidence signals across shipped work.`;
+  if (!biggestGap) {
+    return 'The app generated a simple claimed-vs-estimated comparison for your listed skills.';
   }
 
-  if (averageEstimate >= 3) {
-    return 'Shows credible hands-on experience with room to strengthen proof around your most ambitious skills.';
+  if (biggestGap.estimatedLevel < biggestGap.claimedLevel) {
+    return `Biggest gap right now: ${biggestGap.name} was listed at ${biggestGap.claimedLevel}/5, but the estimate lands at ${biggestGap.estimatedLevel}/5.`;
   }
 
-  return 'Looks early-stage today. More concrete project and work detail should raise confidence quickly.';
+  if (biggestGap.estimatedLevel > biggestGap.claimedLevel) {
+    return `${biggestGap.name} comes out stronger than listed: ${biggestGap.claimedLevel}/5 claimed vs ${biggestGap.estimatedLevel}/5 estimated.`;
+  }
+
+  return `The estimate mostly matches what was claimed, starting with ${biggestGap.name}.`;
+}
+
+function getEstimatedLevel(claimedLevel, random) {
+  const roll = random();
+  let delta = 0;
+
+  if (roll < 0.16) delta = -2;
+  else if (roll < 0.5) delta = -1;
+  else if (roll < 0.82) delta = 0;
+  else delta = 1;
+
+  return clamp(claimedLevel + delta, 1, 5);
 }
 
 function generateAiScanSnapshot(profile, { userId, seed, scannedAt = new Date() }) {
@@ -175,7 +82,6 @@ function generateAiScanSnapshot(profile, { userId, seed, scannedAt = new Date() 
     return null;
   }
 
-  const profileSignals = collectSignals(profile);
   const profileFingerprint = fingerprintProfile(profile);
   const skills = toSafeArray(profile?.skills)
     .filter((skill) => normalizeText(skill?.name))
@@ -186,31 +92,11 @@ function generateAiScanSnapshot(profile, { userId, seed, scannedAt = new Date() 
 
   const scanSkills = skills.map((skill, index) => {
     const random = createSeededRandom(`${userId}:${seed}:${profileFingerprint}:${skill.name}:${index}`);
-    const { evidence, projectHit, workHit } = buildSkillEvidence(skill.name, profileSignals);
-
-    const proofWeight =
-      (projectHit ? 0.52 : 0) +
-      (workHit ? 0.64 : 0) +
-      (evidence.includes('Bio') ? 0.18 : 0) +
-      (evidence.includes('Portfolio') ? 0.16 : 0) +
-      (evidence.includes('GitHub link') ? 0.12 : 0) +
-      Math.min(profileSignals.hackathonCount, 4) * 0.06 +
-      (profileSignals.completion / 100) * 0.32;
-
-    const variance = (random() - 0.5) * 1.05;
-    const baseline = skill.claimedLevel - 0.55 + proofWeight + variance;
-    const estimatedLevel = clamp(Math.round(baseline), 1, 5);
+    const estimatedLevel = getEstimatedLevel(skill.claimedLevel, random);
     const confidence = clamp(
-      Math.round(
-        38 +
-        evidence.length * 9 +
-        (projectHit ? 10 : 0) +
-        (workHit ? 12 : 0) +
-        profileSignals.completion * 0.15 +
-        random() * 14
-      ),
-      32,
-      92,
+      Math.round(62 + random() * 32),
+      55,
+      94,
     );
 
     return {
@@ -218,16 +104,16 @@ function generateAiScanSnapshot(profile, { userId, seed, scannedAt = new Date() 
       claimedLevel: skill.claimedLevel,
       estimatedLevel,
       confidence,
-      evidence: evidence.slice(0, 4),
+      evidence: [],
     };
   });
 
   const overallRandom = createSeededRandom(`${userId}:${seed}:${profileFingerprint}:overall`);
   const overallScore = clamp(
     Math.round(
-      (scanSkills.reduce((sum, skill) => sum + skill.estimatedLevel, 0) / Math.max(scanSkills.length, 1)) * 14 +
-      (scanSkills.reduce((sum, skill) => sum + skill.confidence, 0) / Math.max(scanSkills.length, 1)) * 0.28 +
-      ((overallRandom() - 0.5) * 8)
+      (scanSkills.reduce((sum, skill) => sum + skill.estimatedLevel, 0) / Math.max(scanSkills.length, 1)) * 18 +
+      6 +
+      ((overallRandom() - 0.5) * 10)
     ),
     0,
     100,
