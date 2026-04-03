@@ -6,6 +6,7 @@ import ReviewsPanel from '../components/ReviewsPanel';
 import { useChatContext } from '../contexts/ChatContext';
 import api from '../services/api';
 import { createReview, fetchReviewEligibility, fetchUserReviews } from '../services/reviewService';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 
 const SKILL_COLORS = [
   { bg: 'rgba(224,93,80,0.1)', text: '#e05d50' },
@@ -52,6 +53,7 @@ export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { openOrCreateDM } = useChatContext();
+  const { setPageLoading } = usePageLoading();
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -104,6 +106,7 @@ export default function UserProfile() {
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setPageLoading(true);
     setError('');
     setCanMessage(false);
 
@@ -114,7 +117,7 @@ export default function UserProfile() {
       .catch((err) => {
         if (active) setError(err.response?.data?.error?.message || 'Could not load profile.');
       })
-      .finally(() => { if (active) setLoading(false); });
+      .finally(() => { if (active) { setLoading(false); setPageLoading(false); } });
 
     api.get(`/api/v1/discover/relationship/${id}`)
       .then(({ data }) => {
@@ -181,7 +184,7 @@ export default function UserProfile() {
     return (
       <>
 
-        <div style={{ paddingTop: 72, minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+        <div style={{ minHeight: '100%', display: 'grid', placeItems: 'center' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{
               width: 36, height: 36, borderRadius: '50%', margin: '0 auto 12px',
@@ -200,7 +203,7 @@ export default function UserProfile() {
     return (
       <>
 
-        <div style={{ paddingTop: 72, minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+        <div style={{ minHeight: '100%', display: 'grid', placeItems: 'center' }}>
           <div style={{ textAlign: 'center', maxWidth: 360, padding: 24 }}>
             <div style={{ fontSize: '2.4rem', marginBottom: 12 }}>:/</div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 6 }}>Profile not found</h2>
@@ -237,9 +240,9 @@ export default function UserProfile() {
   return (
     <>
       <div style={{
-        paddingTop: 88, paddingBottom: 48,
+        paddingTop: 16, paddingBottom: 48,
         maxWidth: 1040, margin: '0 auto',
-        padding: '88px clamp(16px, 3vw, 40px) 48px',
+        padding: '16px clamp(16px, 3vw, 40px) 48px',
       }}>
         {/* Breadcrumb */}
         <motion.div

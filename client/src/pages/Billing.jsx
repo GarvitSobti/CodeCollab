@@ -112,7 +112,7 @@ export default function Billing() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text-dark)' }}>
-      <div style={{ paddingTop: 72 }}>
+      <div>
 
         {/* ─── Hero ─── */}
         <div style={{ textAlign: 'center', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 4vw, 40px) 0' }}>

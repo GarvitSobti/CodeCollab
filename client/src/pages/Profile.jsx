@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 import ReviewsPanel from '../components/ReviewsPanel';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { fetchUserReviews } from '../services/reviewService';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 
 const PROFICIENCY_LEVELS = [
   { value: 1, label: 'Beginner', description: 'Can follow guides and complete simple tasks with help.' },
@@ -669,6 +671,7 @@ function ProfileEdit({
 
 export default function Profile() {
   const { user, refreshOnboardingStatus } = useAuth();
+  const { setPageLoading } = usePageLoading();
   const [profile, setProfile] = useState(() => createDefaultProfile(user));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -702,6 +705,7 @@ export default function Profile() {
 
     async function loadProfile() {
       setLoading(true);
+      setPageLoading(true);
       setErrorMessage('');
 
       try {
@@ -720,7 +724,10 @@ export default function Profile() {
           error?.response?.data?.error?.message || 'Could not load profile, but you can continue editing.'
         );
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+          setPageLoading(false);
+        }
       }
     }
 
@@ -804,57 +811,19 @@ export default function Profile() {
   };
 
   if (loading) {
-    return (
-      <div style={{ minHeight: '100vh' }}>
-        <div className="mesh-bg"><div className="mesh-blob blob-1" /><div className="mesh-blob blob-2" /><div className="mesh-blob blob-3" /></div>
-        <div className="noise" />
-
-        <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1120, margin: '0 auto' }}>
-          {/* Skeleton profile header */}
-          <div style={{
-            borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)',
-            overflow: 'hidden', marginBottom: 20,
-          }}>
-            <div style={{ height: 6, background: 'var(--bg-warm)' }} />
-            <div style={{ padding: '28px 28px 24px', display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-              <div style={{
-                width: 80, height: 80, borderRadius: 20, background: 'var(--bg-warm)', flexShrink: 0,
-                animation: 'pulse 1.8s ease-in-out infinite',
-              }} />
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 4 }}>
-                <div style={{ height: 20, width: '35%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite' }} />
-                <div style={{ height: 13, width: '50%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: '0.1s' }} />
-                <div style={{ height: 13, width: '30%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: '0.2s' }} />
-              </div>
-            </div>
-          </div>
-          {/* Skeleton bio + skills */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-            {[1, 2].map(i => (
-              <div key={i} style={{
-                borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)',
-                overflow: 'hidden',
-              }}>
-                <div style={{ height: 6, background: 'var(--bg-warm)' }} />
-                <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ height: 16, width: '40%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s` }} />
-                  {[80, 65, 90, 50].map((w, j) => (
-                    <div key={j} style={{ height: 12, width: `${w}%`, borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${(i + j) * 0.08}s` }} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <div style={{ minHeight: '100vh' }} />;
   }
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <div className="mesh-bg"><div className="mesh-blob blob-1" /><div className="mesh-blob blob-2" /><div className="mesh-blob blob-3" /></div>
       <div className="noise" />
-      <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1120, margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        style={{ position: 'relative', zIndex: 2, padding: '28px 40px 60px', maxWidth: 1120, margin: '0 auto' }}
+      >
         {editing ? (
           <ProfileEdit
             profile={profile}
@@ -883,7 +852,7 @@ export default function Profile() {
             reviewsError={reviewsError}
           />
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

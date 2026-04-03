@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 
 const FILTERS = ['All Events', 'Live Now', 'Open Registration', 'Coming Soon'];
 
@@ -221,6 +222,7 @@ function HackathonCard({ h, isRegistered, isToggling, onToggle, isAuthenticated,
 
 export default function Hackathons() {
   const { isAuthenticated } = useAuth();
+  const { setPageLoading } = usePageLoading();
   const [hackathons, setHackathons] = useState([]);
   const [registeredIds, setRegisteredIds] = useState(new Set());
   const [activeFilter, setActiveFilter] = useState('All Events');
@@ -228,6 +230,7 @@ export default function Hackathons() {
   const [togglingId, setTogglingId] = useState(null);
 
   useEffect(() => {
+    setPageLoading(true);
     async function load() {
       try {
         const [hackRes, interestRes] = await Promise.all([
@@ -242,10 +245,11 @@ export default function Hackathons() {
         console.error('Failed to load hackathons:', err);
       } finally {
         setLoading(false);
+        setPageLoading(false);
       }
     }
     load();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, setPageLoading]);
 
   const toggleInterest = useCallback(async (id) => {
     if (!isAuthenticated) return;
@@ -277,7 +281,7 @@ export default function Hackathons() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <div style={{ padding: '96px clamp(16px, 4vw, 40px) 80px', maxWidth: 1200, margin: '0 auto' }}>
+      <div style={{ padding: '24px clamp(16px, 4vw, 40px) 80px', maxWidth: 1200, margin: '0 auto' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 36 }}>
@@ -331,29 +335,7 @@ export default function Hackathons() {
         </div>
 
         {/* Cards */}
-        {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
-            {[1, 2, 3].map(i => (
-              <div key={i} style={{
-                height: 300, borderRadius: 20, background: 'var(--bg-card)',
-                border: '1px solid var(--border)', overflow: 'hidden',
-              }}>
-                <div style={{ height: 6, background: 'var(--bg-warm)' }} />
-                <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {[80, 60, 120, 40].map((w, j) => (
-                    <div key={j} style={{
-                      height: j === 0 ? 20 : j === 2 ? 36 : 14,
-                      width: `${w}%`, borderRadius: 6,
-                      background: 'var(--bg-warm)',
-                      animation: 'pulse 1.8s ease-in-out infinite',
-                      animationDelay: `${j * 0.1}s`,
-                    }} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
+        {loading ? null : filtered.length === 0 ? (
           <div style={{
             textAlign: 'center', padding: '80px 0', color: 'var(--text-soft)',
           }}>

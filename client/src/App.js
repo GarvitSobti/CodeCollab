@@ -26,6 +26,7 @@ import Navigation from './components/Navigation';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ChatProvider } from './contexts/ChatContext';
+import { PageLoadingProvider } from './contexts/PageLoadingContext';
 
 const NAV_SEGMENTS = new Set(['discover', 'team', 'hackathons', 'messages', 'profile', 'user', 'billing']);
 
@@ -63,14 +64,23 @@ function AnimatedRoutes() {
   const routeKey = firstSegment === 'user' ? 'discover' : firstSegment;
   const showNav = NAV_SEGMENTS.has(firstSegment);
 
+  const ContentWrapper = showNav ? 'div' : React.Fragment;
+  const wrapperProps = showNav ? { className: 'page-scroll-container' } : {};
+
+  React.useEffect(() => {
+    const container = document.querySelector('.page-scroll-container');
+    if (container) container.scrollTop = 0;
+  }, [location.pathname]);
+
   return (
     <>
       {showNav && <Navigation />}
-      <motion.div
-        key={routeKey}
-        initial={prefersReducedMotion ? false : pageEnter.initial}
-        animate={pageEnter.animate}
-      >
+      <ContentWrapper {...wrapperProps}>
+        <motion.div
+          key={routeKey}
+          initial={prefersReducedMotion ? false : pageEnter.initial}
+          animate={pageEnter.animate}
+        >
         <Routes location={location}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
@@ -145,6 +155,7 @@ function AnimatedRoutes() {
           />
         </Routes>
       </motion.div>
+      </ContentWrapper>
     </>
   );
 }
@@ -155,9 +166,11 @@ function App() {
       <AuthProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <ChatProvider>
-            <div className="App">
-              <AnimatedRoutes />
-            </div>
+            <PageLoadingProvider>
+              <div className="App">
+                <AnimatedRoutes />
+              </div>
+            </PageLoadingProvider>
           </ChatProvider>
         </Router>
       </AuthProvider>

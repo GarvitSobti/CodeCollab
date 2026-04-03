@@ -4,6 +4,7 @@ import BrandFlower from './BrandFlower';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useChatContext } from '../contexts/ChatContext';
+import { NavLoadingBar, usePageLoading } from '../contexts/PageLoadingContext';
 
 const navLinks = [
   { label: 'Discover', path: '/discover' },
@@ -19,6 +20,7 @@ export default function Navigation() {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const { totalUnread } = useChatContext();
+  const { setPageLoading } = usePageLoading();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -37,10 +39,12 @@ export default function Navigation() {
   };
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const container = document.querySelector('.page-scroll-container');
+    const onScroll = () => setScrolled((container?.scrollTop || window.scrollY) > 8);
+    const target = container || window;
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    target.addEventListener('scroll', onScroll, { passive: true });
+    return () => target.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -64,6 +68,7 @@ export default function Navigation() {
         transition: 'box-shadow 0.25s ease',
       }}
     >
+      <NavLoadingBar />
       <a
         href="/discover"
         onClick={(e) => { e.preventDefault(); navigate('/discover'); }}
@@ -85,7 +90,7 @@ export default function Navigation() {
           return (
             <button
               key={path}
-              onClick={() => navigate(path)}
+              onClick={() => { setPageLoading(true); navigate(path); }}
               aria-current={active ? 'page' : undefined}
               className={`nav-link${path === '/profile' ? ' nav-link-profile' : ''}`}
               style={{

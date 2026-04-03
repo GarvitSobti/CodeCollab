@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 import TeamsSidebar from '../components/teams/TeamsSidebar';
 import TeamWorkspace from '../components/teams/TeamWorkspace';
@@ -7,11 +8,13 @@ import CreateTeamModal from '../components/teams/CreateTeamModal';
 import InviteMemberModal from '../components/teams/InviteMemberModal';
 import PendingInvites from '../components/teams/PendingInvites';
 import { useChatContext } from '../contexts/ChatContext';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 import api from '../services/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { openOrCreateDM } = useChatContext();
+  const { setPageLoading } = usePageLoading();
   const [teams, setTeams] = useState([]);
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -30,12 +33,14 @@ export default function Dashboard() {
       console.error('Failed to load teams:', err);
     } finally {
       setLoading(false);
+      setPageLoading(false);
     }
-  }, [selectedTeamId]);
+  }, [selectedTeamId, setPageLoading]);
 
   useEffect(() => {
+    setPageLoading(true);
     fetchTeams();
-  }, [fetchTeams]);
+  }, [fetchTeams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedTeam = teams.find((t) => t.id === selectedTeamId) || null;
 
@@ -61,54 +66,15 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <div style={{ position: 'relative', zIndex: 2, padding: '100px 40px 60px', maxWidth: 1300, margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        style={{ position: 'relative', zIndex: 2, padding: '28px 40px 60px', maxWidth: 1300, margin: '0 auto' }}
+      >
         <PendingInvites onRespond={fetchTeams} />
 
-        {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr)', gap: 24, alignItems: 'start' }}>
-            {/* Skeleton sidebar */}
-            <div style={{
-              borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)',
-              padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 12,
-            }}>
-              {[1, 2, 3].map(i => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-                  borderRadius: 14, background: 'var(--bg-warm)',
-                }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--border)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s`, flexShrink: 0 }} />
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ height: 12, width: '70%', borderRadius: 6, background: 'var(--border)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s` }} />
-                    <div style={{ height: 10, width: '45%', borderRadius: 6, background: 'var(--border)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.15}s` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Skeleton workspace */}
-            <div style={{
-              borderRadius: 20, background: 'var(--bg-card)', border: '1px solid var(--border)',
-              overflow: 'hidden',
-            }}>
-              <div style={{ height: 6, background: 'var(--bg-warm)' }} />
-              <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ height: 22, width: '40%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite' }} />
-                <div style={{ height: 14, width: '60%', borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: '0.1s' }} />
-                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                  {[1, 2, 3].map(i => (
-                    <div key={i} style={{
-                      width: 56, height: 56, borderRadius: 14, background: 'var(--bg-warm)',
-                      animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s`,
-                    }} />
-                  ))}
-                </div>
-                <div style={{ height: 1, background: 'var(--border)', marginTop: 8 }} />
-                {[1, 2, 3].map(i => (
-                  <div key={i} style={{ height: 14, width: `${80 - i * 15}%`, borderRadius: 6, background: 'var(--bg-warm)', animation: 'pulse 1.8s ease-in-out infinite', animationDelay: `${i * 0.1}s` }} />
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : teams.length === 0 ? (
+        {loading ? null : teams.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ fontSize: '3rem', marginBottom: 16 }}>👥</div>
             <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: 8 }}>No teams yet</h2>
@@ -143,7 +109,7 @@ export default function Dashboard() {
             />
           </div>
         )}
-      </div>
+      </motion.div>
 
       {showCreateModal && (
         <CreateTeamModal

@@ -212,20 +212,18 @@ export default function MessageList({
 }) {
   const isGroupChat = chatType === 'team' || chatType === 'group';
   const bottomRef = useRef(null);
+  const listRef = useRef(null);
 
   useEffect(() => {
-    const bottomEl = bottomRef.current;
-    if (!bottomEl) return;
-
-    const rect = bottomEl.getBoundingClientRect();
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    const container = listRef.current;
+    if (!container) return;
 
     // Only auto-scroll when the user is already near the bottom.
-    const threshold = 150; // px
-    const isNearBottom = rect.bottom - viewportHeight < threshold;
+    const threshold = 150;
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
 
     if (isNearBottom) {
-      bottomEl.scrollIntoView({ behavior: 'smooth' });
+      container.scrollTop = container.scrollHeight;
     }
   }, [messages, typingUsers]);
 
@@ -256,7 +254,7 @@ export default function MessageList({
   }
 
   return (
-    <div style={{
+    <div ref={listRef} style={{
       flex: 1,
       overflowY: 'auto',
       padding: '20px 24px',

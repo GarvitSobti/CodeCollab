@@ -168,7 +168,7 @@ function UserCard({ user, index, onClick, isSelf }) {
 
 // ─── Users Lookup ────────────────────────────────────────────────────────────
 
-export default function UsersLookup() {
+export default function UsersLookup({ onReady }) {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -193,8 +193,9 @@ export default function UsersLookup() {
       console.error('Failed to fetch users:', err);
     } finally {
       setLoading(false);
+      if (onReady) onReady();
     }
-  }, []);
+  }, [onReady]);
 
   useEffect(() => {
     fetchUsers('', 1);

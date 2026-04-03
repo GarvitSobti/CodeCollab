@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import SwipeContainer from '../components/SwipeContainer';
 import UsersLookup from '../components/UsersLookup';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -267,6 +268,7 @@ function PhoneFrame({ children }) {
 export default function Discover() {
   const [mode, setMode] = useState('swipe');
   const [showPanels, setShowPanels] = useState(window.innerWidth >= 960);
+  const { setPageLoading } = usePageLoading();
 
   useEffect(() => {
     const onResize = () => setShowPanels(window.innerWidth >= 960);
@@ -275,8 +277,8 @@ export default function Discover() {
   }, []);
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 72, overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Mode toggle */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 24px 0', flexShrink: 0 }}>
           <ModeToggle mode={mode} onModeChange={setMode} />
@@ -311,7 +313,7 @@ export default function Discover() {
               transition={{ duration: 0.2 }}
               style={{ flex: 1, overflow: 'auto', padding: '20px 24px 24px' }}
             >
-              <UsersLookup />
+              <UsersLookup onReady={() => setPageLoading(false)} />
             </motion.div>
           )}
         </AnimatePresence>

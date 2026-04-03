@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatContext } from '../contexts/ChatContext';
 import api from '../services/api';
+import { usePageLoading } from '../contexts/PageLoadingContext';
 import User from '../models/User';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -511,6 +512,7 @@ export default function SwipeContainer() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { openOrCreateDM } = useChatContext();
+  const { setPageLoading } = usePageLoading();
 
   const fetchProfiles = useCallback(async () => {
     setLoading(true);
@@ -523,8 +525,9 @@ export default function SwipeContainer() {
       setError('Failed to load profiles. Please try again.');
     } finally {
       setLoading(false);
+      setPageLoading(false);
     }
-  }, []);
+  }, [setPageLoading]);
 
   useEffect(() => { fetchProfiles(); }, [fetchProfiles]);
 
