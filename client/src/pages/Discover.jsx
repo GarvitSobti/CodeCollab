@@ -187,7 +187,7 @@ function RightPanel() {
 
 // ─── Phone frame ─────────────────────────────────────────────────────────────
 
-function PhoneFrame({ children }) {
+function PhoneFrame({ children, onSearchClick }) {
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>
       {/* Glow behind phone */}
@@ -237,10 +237,14 @@ function PhoneFrame({ children }) {
             <div style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>Discover</div>
             <div style={{ fontSize: '0.65rem', color: 'var(--text-soft)', fontWeight: 500 }}>Find your teammate</div>
           </div>
-          <div style={{
-            width: 32, height: 32, borderRadius: 10, background: 'var(--bg-warm)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
+          <div
+            onClick={onSearchClick}
+            style={{
+              width: 32, height: 32, borderRadius: 10, background: 'var(--bg-warm)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: onSearchClick ? 'pointer' : 'default',
+            }}
+          >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" strokeWidth="2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
@@ -299,7 +303,7 @@ export default function Discover() {
               }}
             >
               {showPanels && <LeftPanel />}
-              <PhoneFrame>
+              <PhoneFrame onSearchClick={() => setMode('browse')}>
                 <SwipeContainer />
               </PhoneFrame>
               {showPanels && <RightPanel />}
