@@ -17,6 +17,18 @@ function levelLabel(level) {
   return ['Unrated', 'Beginner', 'Elementary', 'Intermediate', 'Advanced', 'Expert'][level] || 'Estimated';
 }
 
+function deltaLabel(claimedLevel, estimatedLevel) {
+  if (estimatedLevel < claimedLevel) {
+    return `Actually reads ${claimedLevel - estimatedLevel} level${claimedLevel - estimatedLevel > 1 ? 's' : ''} lower`;
+  }
+
+  if (estimatedLevel > claimedLevel) {
+    return `Actually reads ${estimatedLevel - claimedLevel} level${estimatedLevel - claimedLevel > 1 ? 's' : ''} higher`;
+  }
+
+  return 'Estimate matches the claimed level';
+}
+
 function formatScanDate(value) {
   if (!value) return 'Not scanned yet';
 
@@ -33,9 +45,6 @@ function formatScanDate(value) {
 export default function AISkillScanCard({
   profile,
   aiScan,
-  canRescan = false,
-  rescanning = false,
-  onRescan,
   title = 'AI Skill Scan',
 }) {
   const skillCount = (profile?.skills || []).filter((skill) => skill.name?.trim()).length;
@@ -51,20 +60,9 @@ export default function AISkillScanCard({
           <div className="ai-scan-eyebrow">Profile Intelligence</div>
           <h3 className="profile-section-title ai-scan-title">{title}</h3>
           <p className="ai-scan-subtitle">
-            AI-style estimate based on your profile signals, projects, work history, and links. No external model calls in this MVP.
+            Default teammate-check signal. The app compares what the user claimed against a fake estimated actual level in the background.
           </p>
         </div>
-
-        {canRescan && (
-          <button
-            type="button"
-            className="ai-scan-button"
-            onClick={onRescan}
-            disabled={rescanning}
-          >
-            {rescanning ? 'Scanning...' : aiScan ? 'Rescan' : 'Run Scan'}
-          </button>
-        )}
       </div>
 
       {aiScan ? (
@@ -97,9 +95,9 @@ export default function AISkillScanCard({
                   <div>
                     <div className="ai-scan-skill-name">{skill.name}</div>
                     <div className="ai-scan-skill-levels">
-                      <span>Claimed {skill.claimedLevel}/5</span>
+                      <span>User indicated {skill.claimedLevel}/5</span>
                       <span className="ai-scan-dot" />
-                      <span>Estimated {skill.estimatedLevel}/5</span>
+                      <span>Estimated actual {skill.estimatedLevel}/5</span>
                     </div>
                   </div>
                   <span className="ai-scan-confidence">{skill.confidence}% confidence</span>
@@ -113,14 +111,16 @@ export default function AISkillScanCard({
                 </div>
 
                 <div className="ai-scan-level-caption">
-                  Reads closest to <strong>{levelLabel(skill.estimatedLevel)}</strong>
+                  <strong>{levelLabel(skill.estimatedLevel)}</strong> . {deltaLabel(skill.claimedLevel, skill.estimatedLevel)}
                 </div>
 
-                <div className="ai-scan-evidence">
-                  {skill.evidence.map((item) => (
-                    <span key={item} className="ai-scan-evidence-chip">{item}</span>
-                  ))}
-                </div>
+                {skill.evidence.length > 0 && (
+                  <div className="ai-scan-evidence">
+                    {skill.evidence.map((item) => (
+                      <span key={item} className="ai-scan-evidence-chip">{item}</span>
+                    ))}
+                  </div>
+                )}
               </article>
             ))}
           </div>
@@ -128,13 +128,13 @@ export default function AISkillScanCard({
       ) : (
         <div className="ai-scan-empty">
           <div className="ai-scan-empty-copy">
-            <strong>No scan yet.</strong>
+            <strong>No fake numbers yet.</strong>
             <p>
               {skillCount === 0
-                ? 'Add a few skills first so the scan has something to estimate.'
+                ? 'Add at least one skill and the app will automatically generate a claimed-vs-estimated comparison.'
                 : hasSupportingSignal(profile)
-                  ? 'Your profile is ready. Run the scan to generate estimated skill levels.'
-                  : 'Add project details, work experience, or links so the scan has enough signal to work with.'}
+                  ? 'Your numbers should already be here. Save the profile once if you just added new skills.'
+                  : 'Add a skill first and the automatic fake scan will fill in the rest.'}
             </p>
           </div>
 

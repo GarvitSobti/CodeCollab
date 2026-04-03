@@ -200,8 +200,6 @@ function getInitials(name) {
 function ProfileView({
   profile,
   onEdit,
-  onRescan,
-  rescanning,
   reviewsData,
   reviewsLoading,
   reviewsError,
@@ -284,9 +282,6 @@ function ProfileView({
         <AISkillScanCard
           profile={profile}
           aiScan={profile.aiScan}
-          canRescan
-          rescanning={rescanning}
-          onRescan={onRescan}
         />
 
         {/* Skills & Technologies */}
@@ -691,7 +686,6 @@ export default function Profile() {
   const [profile, setProfile] = useState(() => createDefaultProfile(user));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [rescanning, setRescanning] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [editing, setEditing] = useState(false);
@@ -823,23 +817,6 @@ export default function Profile() {
     }
   };
 
-  const runAiScan = async () => {
-    setRescanning(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-
-    try {
-      const response = await api.post('/api/v1/profile/me/ai-scan');
-      const saved = normalizeIncomingProfile(response?.data?.profile, user);
-      setProfile(saved);
-      setSuccessMessage(response?.data?.message || 'AI skill scan updated.');
-    } catch (error) {
-      setErrorMessage(error?.response?.data?.error?.message || 'Failed to run AI skill scan.');
-    } finally {
-      setRescanning(false);
-    }
-  };
-
   if (loading) {
     return (
       <div style={{ minHeight: '100vh' }}>
@@ -894,8 +871,6 @@ export default function Profile() {
           <ProfileView
             profile={profile}
             onEdit={() => setEditing(true)}
-            onRescan={runAiScan}
-            rescanning={rescanning}
             reviewsData={reviewsData}
             reviewsLoading={reviewsLoading}
             reviewsError={reviewsError}
