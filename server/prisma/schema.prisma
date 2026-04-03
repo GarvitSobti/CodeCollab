@@ -51,6 +51,9 @@ model UserProfile {
   major                     String?
   interests                 String[]        @default([])
   skills                    Json?
+  aiScanSnapshot            Json?
+  aiScanSeed                String?
+  aiScanUpdatedAt           DateTime?
   assessmentResponses       Json?
   hackathonExperienceCount  Int             @default(0)
   hackathonExperienceNotes  String?

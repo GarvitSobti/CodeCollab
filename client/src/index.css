@@ -565,6 +565,274 @@ body {
   margin-top: 4px;
 }
 
+.ai-scan-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(255, 202, 40, 0.18), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(66, 165, 245, 0.14), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(250, 247, 242, 0.94));
+}
+
+.dark .ai-scan-card {
+  background:
+    radial-gradient(circle at top right, rgba(255, 202, 40, 0.12), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(66, 165, 245, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(34, 34, 56, 0.96), rgba(22, 22, 37, 0.94));
+}
+
+.ai-scan-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.32) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.32) 1px, transparent 1px);
+  background-size: 18px 18px;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.dark .ai-scan-card::before {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+}
+
+.ai-scan-head,
+.ai-scan-metrics,
+.ai-scan-summary,
+.ai-scan-grid,
+.ai-scan-empty {
+  position: relative;
+  z-index: 1;
+}
+
+.ai-scan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.ai-scan-eyebrow {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.ai-scan-title {
+  margin-bottom: 10px;
+}
+
+.ai-scan-subtitle {
+  max-width: 640px;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--text-body);
+}
+
+.ai-scan-button {
+  border: none;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: linear-gradient(135deg, var(--accent), var(--peach));
+  color: white;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(224, 93, 80, 0.18);
+}
+
+.ai-scan-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.ai-scan-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ai-scan-metric {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+}
+
+.dark .ai-scan-metric {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(34, 34, 56, 0.52);
+}
+
+.ai-scan-metric-label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-bottom: 8px;
+}
+
+.ai-scan-metric strong {
+  font-size: 1.1rem;
+  letter-spacing: -0.03em;
+}
+
+.ai-scan-summary {
+  font-size: 0.82rem;
+  color: var(--text-body);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.ai-scan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ai-scan-skill-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  backdrop-filter: blur(12px);
+}
+
+.dark .ai-scan-skill-card {
+  background: rgba(34, 34, 56, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.ai-scan-skill-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ai-scan-skill-name {
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.ai-scan-skill-levels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-soft);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ai-scan-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+
+.ai-scan-confidence {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(102, 187, 106, 0.12);
+  color: var(--mint);
+  font-size: 0.66rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ai-scan-level-track {
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(26, 26, 46, 0.08);
+  overflow: hidden;
+}
+
+.dark .ai-scan-level-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ai-scan-level-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--peach), #ffd54f);
+}
+
+.ai-scan-level-caption {
+  margin-top: 10px;
+  font-size: 0.76rem;
+  color: var(--text-body);
+}
+
+.ai-scan-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.ai-scan-evidence-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(66, 165, 245, 0.1);
+  color: var(--sky);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.ai-scan-empty {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0 4px;
+}
+
+.ai-scan-empty-copy strong {
+  display: block;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+}
+
+.ai-scan-empty-copy p {
+  max-width: 580px;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--text-body);
+}
+
+.ai-scan-empty-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.ai-scan-empty-hints span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
 /* Preferred skills */
 .preferred-tag {
   padding: 5px 14px;
@@ -623,5 +891,35 @@ body {
     max-width: 400px;
     margin: 0 auto;
     width: 100%;
+  }
+
+  .ai-scan-metrics,
+  .ai-scan-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ai-scan-empty {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ai-scan-empty-hints {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .ai-scan-head,
+  .ai-scan-skill-top {
+    flex-direction: column;
+  }
+
+  .ai-scan-button {
+    width: 100%;
+  }
+
+  .ai-scan-metrics,
+  .ai-scan-grid {
+    grid-template-columns: 1fr;
   }
 }
