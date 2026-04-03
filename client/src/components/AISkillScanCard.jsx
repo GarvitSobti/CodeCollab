@@ -60,7 +60,7 @@ export default function AISkillScanCard({
           <div className="ai-scan-eyebrow">Profile Intelligence</div>
           <h3 className="profile-section-title ai-scan-title">{title}</h3>
           <p className="ai-scan-subtitle">
-            Default teammate-check signal. The app compares what the user claimed against a fake estimated actual level in the background.
+            Default teammate-check signal. The app compares what the user claimed against an estimated actual level in the background.
           </p>
         </div>
       </div>
@@ -128,13 +128,13 @@ export default function AISkillScanCard({
       ) : (
         <div className="ai-scan-empty">
           <div className="ai-scan-empty-copy">
-            <strong>No fake numbers yet.</strong>
+            <strong>No estimate yet.</strong>
             <p>
               {skillCount === 0
                 ? 'Add at least one skill and the app will automatically generate a claimed-vs-estimated comparison.'
                 : hasSupportingSignal(profile)
                   ? 'Your numbers should already be here. Save the profile once if you just added new skills.'
-                  : 'Add a skill first and the automatic fake scan will fill in the rest.'}
+                  : 'Add a skill first and the automatic scan will fill in the rest.'}
             </p>
           </div>
 

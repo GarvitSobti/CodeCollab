@@ -43,7 +43,7 @@ function fingerprintProfile(profile) {
 
 function summarizeScan(skills) {
   if (!skills.length) {
-    return 'Add a few skills and the app will auto-fill some fake estimated actual levels.';
+    return 'Add a few skills and the app will auto-fill estimated actual levels.';
   }
 
   const biggestGap = [...skills].sort(
@@ -62,7 +62,7 @@ function summarizeScan(skills) {
     return `${biggestGap.name} comes out stronger than listed: ${biggestGap.claimedLevel}/5 claimed vs ${biggestGap.estimatedLevel}/5 estimated.`;
   }
 
-  return `The fake estimate mostly matches what was claimed, starting with ${biggestGap.name}.`;
+  return `The estimate mostly matches what was claimed, starting with ${biggestGap.name}.`;
 }
 
 function getEstimatedLevel(claimedLevel, random) {
