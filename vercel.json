@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm --prefix ./client run build",
-  "outputDirectory": "client/build",
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "rootDirectory": "client",
   "functions": {
     "api/index.js": {
       "includeFiles": "server/**"
