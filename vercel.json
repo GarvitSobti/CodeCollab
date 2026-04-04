@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm --prefix client run build",
+  "buildCommand": "cd client && ./node_modules/.bin/react-scripts build",
   "outputDirectory": "client/build",
   "functions": {
     "api/index.js": {
