@@ -11,9 +11,9 @@ async function resolveUserWithProfile(uid) {
   return prisma.user.findUnique({ where: { firebaseUid: uid }, include: { profile: true } });
 }
 
-// Lightweight fetch — used by POST /swipe (only needs id + firebaseUid)
+// Lightweight fetch — used by POST /swipe
 async function resolveUserBasic(uid) {
-  return prisma.user.findUnique({ where: { firebaseUid: uid }, select: { id: true, firebaseUid: true } });
+  return prisma.user.findUnique({ where: { firebaseUid: uid }, select: { id: true, firebaseUid: true, name: true } });
 }
 
 // Maps tier enum to a numeric rank for proximity math
@@ -267,11 +267,27 @@ router.post('/swipe', authMiddleware, async (req, res) => {
 
       if (reciprocal?.direction === 'right') {
         const [userOneId, userTwoId] = normalizePair(user.firebaseUid, target.firebaseUid);
+        const existing = await prisma.match.findUnique({
+          where: { userOneId_userTwoId: { userOneId, userTwoId } },
+        });
         await prisma.match.upsert({
           where: { userOneId_userTwoId: { userOneId, userTwoId } },
           update: {},
           create: { userOneId, userTwoId, status: 'accepted', createdByUserId: user.firebaseUid },
         });
+        // Notify the first swiper (target) — they already moved on and won't see the modal
+        if (!existing) {
+          prisma.notification.create({
+            data: {
+              userId: target.id,
+              type: 'NEW_MATCH',
+              title: "It's a Match!",
+              content: `You and ${user.name} both want to collaborate. Go to Matches to message them!`,
+              relatedId: user.firebaseUid,
+              relatedType: 'user',
+            },
+          }).catch((e) => console.warn('[match notify]', e.message));
+        }
         matched = true;
       }
     }
@@ -280,6 +296,51 @@ router.post('/swipe', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Failed to record swipe:', error);
     return res.status(500).json({ error: { message: 'Failed to record swipe', status: 500 } });
+  }
+});
+
+// GET /api/v1/discover/matches — all mutual matches for current user
+router.get('/matches', authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUserBasic(req.auth.uid);
+    if (!user) return res.status(401).json({ error: { message: 'User not found', status: 401 } });
+
+    const matches = await prisma.match.findMany({
+      where: {
+        OR: [{ userOneId: user.firebaseUid }, { userTwoId: user.firebaseUid }],
+        status: 'accepted',
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const result = await Promise.all(matches.map(async (match) => {
+      const otherUid = match.userOneId === user.firebaseUid ? match.userTwoId : match.userOneId;
+      // Skip demo seed users
+      if (otherUid.startsWith('seed-')) return null;
+      const other = await prisma.user.findUnique({
+        where: { firebaseUid: otherUid },
+        include: { profile: true },
+      });
+      if (!other) return null;
+      return {
+        matchId: match.id,
+        matchedAt: match.createdAt,
+        user: {
+          id: other.id,
+          firebaseUid: other.firebaseUid,
+          name: other.name,
+          avatarUrl: other.avatarUrl,
+          university: other.university,
+          bio: other.bio,
+          profile: other.profile,
+        },
+      };
+    }));
+
+    return res.json({ matches: result.filter(Boolean) });
+  } catch (error) {
+    console.error('Failed to fetch matches:', error);
+    return res.status(500).json({ error: { message: 'Failed to fetch matches', status: 500 } });
   }
 });
 

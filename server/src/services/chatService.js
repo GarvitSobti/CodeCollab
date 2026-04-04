@@ -86,7 +86,11 @@ async function ensureCurrentUser(authUser) {
     && process.env.CHAT_DEMO_SEED !== 'false';
 
   if (shouldSeedDemoMatches) {
-    await ensureDemoMatchesForUser(authUser.uid);
+    try {
+      await ensureDemoMatchesForUser(authUser.uid);
+    } catch (err) {
+      console.warn('[chatSeed] Demo seed skipped:', err.message);
+    }
   }
 
   const user = await prisma.user.findUnique({ where: { firebaseUid: authUser.uid } });

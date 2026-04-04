@@ -504,7 +504,7 @@ function ActionButtons({ onLeft, onRight }) {
 
 // ─── SwipeContainer ───────────────────────────────────────────────────────────
 
-export default function SwipeContainer() {
+export default function SwipeContainer({ onNewMatch }) {
   const [profiles, setProfiles] = useState([]);
   const [idx, setIdx] = useState(0);
   const [matchedProfile, setMatchedProfile] = useState(null);
@@ -534,9 +534,9 @@ export default function SwipeContainer() {
   const recordSwipe = useCallback(async (profile, direction) => {
     try {
       const { data } = await api.post('/api/v1/discover/swipe', { targetId: profile.id, direction });
-      if (data.matched) setMatchedProfile(profile);
+      if (data.matched) { setMatchedProfile(profile); onNewMatch?.(); }
     } catch { }
-  }, []);
+  }, [onNewMatch]);
 
   const advance = useCallback(() => setIdx((i) => i + 1), []);
 

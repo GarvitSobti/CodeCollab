@@ -105,8 +105,8 @@ export default function Billing() {
   const navigate = useNavigate();
   const [billing, setBilling] = useState('monthly'); // 'monthly' | 'yearly'
 
-  const monthlyPrice = 9;
-  const yearlyPrice = 6; // billed as 72/yr
+  const monthlyPrice = 5;
+  const yearlyPrice = 4; // billed as 48/yr
   const price = billing === 'monthly' ? monthlyPrice : yearlyPrice;
   const priceSuffix = billing === 'monthly' ? '/mo' : '/mo, billed yearly';
 
@@ -296,12 +296,12 @@ export default function Billing() {
                 Premium
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
-                <span style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.04em' }}>${price}</span>
+                <span style={{ fontSize: '2.4rem', fontWeight: 800, letterSpacing: '-0.04em' }}>SGD {price}</span>
                 <span style={{ color: 'var(--text-soft)', fontSize: '0.85rem' }}>{priceSuffix}</span>
               </div>
               {billing === 'yearly' && (
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-soft)', marginBottom: 8 }}>
-                  Billed as <strong style={{ color: 'var(--text-body)' }}>$72/year</strong> — save $36
+                  Billed as <strong style={{ color: 'var(--text-body)' }}>SGD 48/year</strong> — save SGD 12
                 </div>
               )}
               <p style={{ fontSize: '0.83rem', color: 'var(--text-body)', lineHeight: 1.5, margin: 0 }}>

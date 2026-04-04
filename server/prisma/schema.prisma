@@ -388,6 +388,7 @@ enum NotificationType {
   REVIEW_RECEIVED
   TEAM_UPDATE
   SYSTEM
+  NEW_MATCH
 }
 
 model NotificationPreference {

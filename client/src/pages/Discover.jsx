@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import SwipeContainer from '../components/SwipeContainer';
-import UsersLookup from '../components/UsersLookup';
-import { usePageLoading } from '../contexts/PageLoadingContext';
+import MatchesList from '../components/MatchesList';
+import api from '../services/api';
 
 const ease = [0.16, 1, 0.3, 1];
 
 // ─── Mode toggle ─────────────────────────────────────────────────────────────
 
-function ModeToggle({ mode, onModeChange }) {
+function ModeToggle({ mode, onModeChange, matchBadge }) {
   const modes = [
     { key: 'swipe', label: 'Swipe' },
-    { key: 'browse', label: 'Browse All' },
+    { key: 'matches', label: 'Matches' },
   ];
 
   return (
@@ -33,6 +33,7 @@ function ModeToggle({ mode, onModeChange }) {
             fontSize: '0.8rem', fontWeight: 700, background: 'transparent',
             color: mode === key ? 'white' : 'var(--text-soft)',
             transition: 'color 0.2s ease', zIndex: 1,
+            display: 'flex', alignItems: 'center', gap: 6,
           }}
         >
           {mode === key && (
@@ -48,6 +49,13 @@ function ModeToggle({ mode, onModeChange }) {
             />
           )}
           {label}
+          {key === 'matches' && matchBadge > 0 && (
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%',
+              background: mode === 'matches' ? 'rgba(255,255,255,0.7)' : '#ef4444',
+              flexShrink: 0,
+            }} />
+          )}
         </button>
       ))}
     </div>
@@ -76,21 +84,23 @@ function LeftPanel() {
       {/* Tip card */}
       <div style={{
         borderRadius: 18, background: 'var(--bg-card)', border: '1px solid var(--border)',
-        padding: '18px 18px', boxShadow: 'var(--shadow-soft)',
+        borderLeft: '3px solid var(--peach)',
+        padding: '16px 16px 16px 14px', boxShadow: 'var(--shadow-soft)',
       }}>
-        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-faint)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--peach)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10, opacity: 0.8 }}>
           Quick tip
         </div>
         <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>{tip.icon}</div>
-        <p style={{ fontSize: '0.78rem', color: 'var(--text-body)', lineHeight: 1.65, margin: 0 }}>{tip.text}</p>
+        <p style={{ fontSize: '0.77rem', color: 'var(--text-body)', lineHeight: 1.65, margin: 0 }}>{tip.text}</p>
       </div>
 
       {/* How it works */}
       <div style={{
         borderRadius: 18, background: 'var(--bg-card)', border: '1px solid var(--border)',
-        padding: '18px 18px', boxShadow: 'var(--shadow-soft)',
+        borderLeft: '3px solid var(--lavender)',
+        padding: '16px 16px 16px 14px', boxShadow: 'var(--shadow-soft)',
       }}>
-        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-faint)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
+        <div style={{ fontSize: '0.63rem', fontWeight: 700, color: 'var(--lavender)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12, opacity: 0.8 }}>
           How it works
         </div>
         {[
@@ -178,7 +188,7 @@ function RightPanel() {
           background: 'linear-gradient(135deg, var(--accent), var(--peach))',
           color: 'white', fontSize: '0.72rem', fontWeight: 700,
         }}>
-          Upgrade \u2192
+          Upgrade →
         </div>
       </motion.div>
     </motion.div>
@@ -190,62 +200,91 @@ function RightPanel() {
 function PhoneFrame({ children, onSearchClick }) {
   return (
     <div style={{ position: 'relative', flexShrink: 0 }}>
-      {/* Glow behind phone */}
+      {/* Warm ambient glow */}
       <div style={{
-        position: 'absolute', inset: -40, borderRadius: '50%',
-        background: 'radial-gradient(ellipse at center, rgba(224,93,80,0.08) 0%, transparent 70%)',
-        pointerEvents: 'none', zIndex: 0,
+        position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
+        width: 340, height: 340, borderRadius: '50%',
+        background: 'radial-gradient(ellipse at center, rgba(224,93,80,0.13) 0%, rgba(255,138,101,0.06) 45%, transparent 70%)',
+        pointerEvents: 'none', zIndex: 0, filter: 'blur(12px)',
       }} />
+
+      {/* Left side buttons (volume + mute) */}
+      <div style={{ position: 'absolute', left: -11, top: 100, zIndex: 2, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {/* Mute switch */}
+        <div style={{ width: 4, height: 28, borderRadius: 2, background: 'var(--border-strong)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)' }} />
+        {/* Volume up */}
+        <div style={{ width: 4, height: 44, borderRadius: 2, background: 'var(--border-strong)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)' }} />
+        {/* Volume down */}
+        <div style={{ width: 4, height: 44, borderRadius: 2, background: 'var(--border-strong)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)' }} />
+      </div>
+
+      {/* Right side button (power) */}
+      <div style={{ position: 'absolute', right: -11, top: 140, zIndex: 2 }}>
+        <div style={{ width: 4, height: 64, borderRadius: 2, background: 'var(--border-strong)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3)' }} />
+      </div>
 
       {/* Phone shell */}
       <div style={{
         position: 'relative', zIndex: 1,
         width: 375, height: 'min(720px, calc(100vh - 180px))',
         borderRadius: 52,
-        border: '7px solid var(--border-strong)',
+        border: '8px solid var(--border-strong)',
         background: 'var(--bg)',
         boxShadow: `
-          0 40px 80px rgba(0,0,0,0.18),
-          0 0 0 1px var(--border),
-          inset 0 0 0 1px var(--border)
+          0 48px 96px rgba(0,0,0,0.22),
+          0 12px 32px rgba(0,0,0,0.14),
+          0 0 0 1px rgba(255,255,255,0.04),
+          inset 0 1px 0 rgba(255,255,255,0.06),
+          inset 0 0 0 1px rgba(255,255,255,0.03)
         `,
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
       }}>
-        {/* Notch */}
+        {/* Screen glare */}
         <div style={{
-          position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-          width: 110, height: 26, zIndex: 20, flexShrink: 0,
-          background: 'var(--border-strong)',
-          borderBottomLeftRadius: 16, borderBottomRightRadius: 16,
+          position: 'absolute', top: 0, left: 0, right: 0, height: '40%',
+          background: 'linear-gradient(160deg, rgba(255,255,255,0.03) 0%, transparent 60%)',
+          pointerEvents: 'none', zIndex: 15, borderRadius: '44px 44px 0 0',
+        }} />
+
+        {/* Dynamic island style notch */}
+        <div style={{
+          position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
+          width: 120, height: 30, zIndex: 20, flexShrink: 0,
+          background: '#0a0a0f',
+          borderRadius: 20,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+          paddingRight: 16, gap: 6,
         }}>
+          {/* Mic dot */}
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#1a1a2a' }} />
           {/* Camera dot */}
-          <div style={{
-            position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)',
-            width: 8, height: 8, borderRadius: '50%',
-            background: 'rgba(128,128,128,0.3)',
-          }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#1a1a2a', position: 'relative' }}>
+            <div style={{ position: 'absolute', inset: 3, borderRadius: '50%', background: 'rgba(66,165,245,0.15)' }} />
+          </div>
         </div>
 
         {/* App header inside phone */}
         <div style={{
-          padding: '36px 20px 0',
+          padding: '50px 20px 0',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexShrink: 0,
         }}>
           <div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>Discover</div>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text-soft)', fontWeight: 500 }}>Find your teammate</div>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-dark)' }}>Discover</div>
+            <div style={{ fontSize: '0.63rem', color: 'var(--text-soft)', fontWeight: 500 }}>Find your teammate</div>
           </div>
           <div
             onClick={onSearchClick}
             style={{
-              width: 32, height: 32, borderRadius: 10, background: 'var(--bg-warm)',
+              width: 34, height: 34, borderRadius: 11, background: 'var(--bg-warm)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: onSearchClick ? 'pointer' : 'default',
+              border: '1px solid var(--border)',
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" strokeWidth="2" strokeLinecap="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" strokeWidth="2.2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
           </div>
@@ -258,9 +297,12 @@ function PhoneFrame({ children, onSearchClick }) {
 
         {/* Home indicator */}
         <div style={{
-          height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <div style={{ width: 100, height: 4, borderRadius: 2, background: 'var(--border-strong)' }} />
+          <div style={{
+            width: 120, height: 4.5, borderRadius: 3,
+            background: 'var(--border-strong)',
+          }} />
         </div>
       </div>
     </div>
@@ -272,7 +314,7 @@ function PhoneFrame({ children, onSearchClick }) {
 export default function Discover() {
   const [mode, setMode] = useState('swipe');
   const [showPanels, setShowPanels] = useState(window.innerWidth >= 960);
-  const { setPageLoading } = usePageLoading();
+  const [matchBadge, setMatchBadge] = useState(0);
 
   useEffect(() => {
     const onResize = () => setShowPanels(window.innerWidth >= 960);
@@ -280,12 +322,33 @@ export default function Discover() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  // Poll for unread match notifications
+  useEffect(() => {
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const { data } = await api.get('/api/v1/notifications');
+        if (!cancelled) setMatchBadge(data.unreadMatchCount || 0);
+      } catch { /* silent */ }
+    };
+    poll();
+    const interval = setInterval(poll, 30000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
+
+  const handleNewMatch = useCallback(() => setMatchBadge((n) => n + 1), []);
+
+  const handleModeChange = (next) => {
+    setMode(next);
+    if (next === 'matches') setMatchBadge(0);
+  };
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)', overflow: 'hidden' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Mode toggle */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 24px 0', flexShrink: 0 }}>
-          <ModeToggle mode={mode} onModeChange={setMode} />
+          <ModeToggle mode={mode} onModeChange={handleModeChange} matchBadge={matchBadge} />
         </div>
 
         {/* Content */}
@@ -303,21 +366,21 @@ export default function Discover() {
               }}
             >
               {showPanels && <LeftPanel />}
-              <PhoneFrame onSearchClick={() => setMode('browse')}>
-                <SwipeContainer />
+              <PhoneFrame onSearchClick={() => handleModeChange('browse')}>
+                <SwipeContainer onNewMatch={handleNewMatch} />
               </PhoneFrame>
               {showPanels && <RightPanel />}
             </motion.div>
           ) : (
             <motion.div
-              key="browse"
+              key="matches"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               style={{ flex: 1, overflow: 'auto', padding: '20px 24px 24px' }}
             >
-              <UsersLookup onReady={() => setPageLoading(false)} />
+              <MatchesList onUnreadCount={setMatchBadge} />
             </motion.div>
           )}
         </AnimatePresence>
