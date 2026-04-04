@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install && cd client && rm -f package-lock.json && npm install --legacy-peer-deps && cd ../server && npm install && cd .. && npx prisma generate",
+  "installCommand": "npm install && cd client && rm -f package-lock.json && npm install --legacy-peer-deps && cd ../server && npm install && npx prisma generate",
   "buildCommand": "cd client && npx react-scripts build",
   "outputDirectory": "client/build",
   "functions": {
