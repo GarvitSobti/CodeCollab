@@ -126,6 +126,14 @@ router.post('/', authMiddleware, async (req, res) => {
     const hackathon = await prisma.hackathon.findUnique({ where: { id: hackathonId } });
     if (!hackathon) return res.status(404).json({ error: { message: 'Hackathon not found', status: 404 } });
 
+    // Creator must have expressed interest in this hackathon
+    const interest = await prisma.hackathonInterest.findUnique({
+      where: { userId_hackathonId: { userId: user.id, hackathonId } },
+    });
+    if (!interest) {
+      return res.status(400).json({ error: { message: 'You must indicate interest in this hackathon before creating a team', status: 400 } });
+    }
+
     const team = await prisma.team.create({
       data: {
         name: String(name).trim(),
@@ -177,6 +185,14 @@ router.post('/:id/invite', authMiddleware, async (req, res) => {
 
     if (team.members.some((m) => m.userId === targetUser.id)) {
       return res.status(400).json({ error: { message: 'User is already a team member', status: 400 } });
+    }
+
+    // Invitee must have expressed interest in the hackathon this team belongs to
+    const inviteeInterest = await prisma.hackathonInterest.findUnique({
+      where: { userId_hackathonId: { userId: targetUser.id, hackathonId: team.hackathonId } },
+    });
+    if (!inviteeInterest) {
+      return res.status(400).json({ error: { message: 'This user has not indicated interest in this hackathon', status: 400 } });
     }
 
     // Check for existing pending invite

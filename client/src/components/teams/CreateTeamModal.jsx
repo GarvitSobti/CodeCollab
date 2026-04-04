@@ -9,9 +9,15 @@ export default function CreateTeamModal({ onClose, onCreated }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/api/v1/hackathons')
-      .then((res) => setHackathons(res.data.hackathons || []))
-      .catch(() => {});
+    // Fetch all hackathons and the user's interests, then show only interested ones
+    Promise.all([
+      api.get('/api/v1/hackathons'),
+      api.get('/api/v1/hackathons/me/interests').catch(() => ({ data: { hackathonIds: [] } })),
+    ]).then(([hackRes, interestRes]) => {
+      const interestedIds = new Set(interestRes.data.hackathonIds || []);
+      const all = hackRes.data.hackathons || [];
+      setHackathons(all.filter((h) => interestedIds.has(h.id)));
+    }).catch(() => {});
   }, []);
 
   const handleSubmit = async (e) => {
