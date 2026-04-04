@@ -1,10 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install && cd client && npm install --legacy-peer-deps && cd ../server && npm install && npx prisma generate",
-  "buildCommand": "cd ./client && CI=false npm run build",
-  "env": {
-    "CI": "false"
-  },
+  "buildCommand": "npm --prefix ./client run build",
   "outputDirectory": "client/build",
   "functions": {
     "api/index.js": {
