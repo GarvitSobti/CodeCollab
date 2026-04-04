@@ -176,7 +176,17 @@ async function requireMatch(userId, participantUserId) {
     throw new Error('Cannot open a conversation with yourself');
   }
 
-  const [userOneId, userTwoId] = normalizePair(userId, participantUserId);
+  // Get database IDs for both users
+  const user1 = await prisma.user.findUnique({ where: { firebaseUid: userId }, select: { id: true } });
+  const user2 = await prisma.user.findUnique({ where: { firebaseUid: participantUserId }, select: { id: true } });
+
+  if (!user1 || !user2) {
+    const error = new Error('User not found');
+    error.status = 404;
+    throw error;
+  }
+
+  const [userOneId, userTwoId] = normalizePair(user1.id, user2.id);
   const match = await prisma.match.findUnique({
     where: { userOneId_userTwoId: { userOneId, userTwoId } },
   });
@@ -185,18 +195,13 @@ async function requireMatch(userId, participantUserId) {
 
   // Also allow if users are members of the same team
   try {
-    const user1 = await prisma.user.findUnique({ where: { firebaseUid: userId }, select: { id: true } });
-    const user2 = await prisma.user.findUnique({ where: { firebaseUid: participantUserId }, select: { id: true } });
-
-    if (user1 && user2) {
-      const sharedTeam = await prisma.teamMember.findFirst({
-        where: {
-          userId: user1.id,
-          team: { members: { some: { userId: user2.id } } },
-        },
-      });
-      if (sharedTeam) return;
-    }
+    const sharedTeam = await prisma.teamMember.findFirst({
+      where: {
+        userId: user1.id,
+        team: { members: { some: { userId: user2.id } } },
+      },
+    });
+    if (sharedTeam) return;
   } catch (err) {
     console.error('Team membership check failed:', err);
   }

@@ -174,14 +174,14 @@ router.get('/users', authMiddleware, async (req, res) => {
     } else if (filter === 'matches') {
       const matches = await prisma.match.findMany({
         where: {
-          OR: [{ userOneId: user.firebaseUid }, { userTwoId: user.firebaseUid }],
+          OR: [{ userOneId: user.id }, { userTwoId: user.id }],
         },
         select: { userOneId: true, userTwoId: true },
       });
-      const matchedFirebaseUids = matches.map((m) =>
-        m.userOneId === user.firebaseUid ? m.userTwoId : m.userOneId
+      const matchedUserIds = matches.map((m) =>
+        m.userOneId === user.id ? m.userTwoId : m.userOneId
       );
-      where.firebaseUid = { in: matchedFirebaseUids };
+      where.id = { in: matchedUserIds };
     }
 
     if (search && search.trim()) {
@@ -266,14 +266,14 @@ router.post('/swipe', authMiddleware, async (req, res) => {
       });
 
       if (reciprocal?.direction === 'right') {
-        const [userOneId, userTwoId] = normalizePair(user.firebaseUid, target.firebaseUid);
+        const [userOneId, userTwoId] = normalizePair(user.id, target.id);
         const existing = await prisma.match.findUnique({
           where: { userOneId_userTwoId: { userOneId, userTwoId } },
         });
         await prisma.match.upsert({
           where: { userOneId_userTwoId: { userOneId, userTwoId } },
           update: {},
-          create: { userOneId, userTwoId, status: 'accepted', createdByUserId: user.firebaseUid },
+          create: { userOneId, userTwoId, status: 'accepted', createdByUserId: user.id },
         });
         // Notify the first swiper (target) — they already moved on and won't see the modal
         if (!existing) {
@@ -283,7 +283,7 @@ router.post('/swipe', authMiddleware, async (req, res) => {
               type: 'NEW_MATCH',
               title: "It's a Match!",
               content: `You and ${user.name} both want to collaborate. Go to Matches to message them!`,
-              relatedId: user.firebaseUid,
+              relatedId: user.id,
               relatedType: 'user',
             },
           }).catch((e) => console.warn('[match notify]', e.message));
@@ -307,21 +307,18 @@ router.get('/matches', authMiddleware, async (req, res) => {
 
     const matches = await prisma.match.findMany({
       where: {
-        OR: [{ userOneId: user.firebaseUid }, { userTwoId: user.firebaseUid }],
+        OR: [{ userOneId: user.id }, { userTwoId: user.id }],
         status: 'accepted',
+      },
+      include: {
+        userOne: { include: { profile: true } },
+        userTwo: { include: { profile: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
 
-    const result = await Promise.all(matches.map(async (match) => {
-      const otherUid = match.userOneId === user.firebaseUid ? match.userTwoId : match.userOneId;
-      // Skip demo seed users
-      if (otherUid.startsWith('seed-')) return null;
-      const other = await prisma.user.findUnique({
-        where: { firebaseUid: otherUid },
-        include: { profile: true },
-      });
-      if (!other) return null;
+    const result = matches.map((match) => {
+      const other = match.userOneId === user.id ? match.userTwo : match.userOne;
       return {
         matchId: match.id,
         matchedAt: match.createdAt,
@@ -335,9 +332,9 @@ router.get('/matches', authMiddleware, async (req, res) => {
           profile: other.profile,
         },
       };
-    }));
+    });
 
-    return res.json({ matches: result.filter(Boolean) });
+    return res.json({ matches: result });
   } catch (error) {
     console.error('Failed to fetch matches:', error);
     return res.status(500).json({ error: { message: 'Failed to fetch matches', status: 500 } });
@@ -353,11 +350,11 @@ router.get('/relationship/:targetId', authMiddleware, async (req, res) => {
     const targetId = req.params.targetId;
     const target = await prisma.user.findUnique({
       where: { id: targetId },
-      select: { id: true, firebaseUid: true },
+      select: { id: true },
     });
     if (!target) return res.status(404).json({ error: { message: 'Target user not found', status: 404 } });
 
-    const [userOneId, userTwoId] = normalizePair(user.firebaseUid, target.firebaseUid);
+    const [userOneId, userTwoId] = normalizePair(user.id, target.id);
     const match = await prisma.match.findFirst({
       where: { userOneId, userTwoId, status: 'accepted' },
     });

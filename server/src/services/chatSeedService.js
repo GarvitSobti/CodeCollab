@@ -62,10 +62,25 @@ async function ensureSeedUsers() {
   }
 }
 
-async function ensureDemoMatchesForUser(userId) {
+async function ensureDemoMatchesForUser(firebaseUid) {
   await ensureSeedUsers();
+
+  // Get the current user's database ID
+  const currentUser = await prisma.user.findUnique({
+    where: { firebaseUid },
+    select: { id: true },
+  });
+  if (!currentUser) return;
+
   for (const demoUser of DEMO_USERS) {
-    const [userOneId, userTwoId] = normalizePair(userId, demoUser.firebaseUid);
+    // Get the demo user's database ID
+    const demoDbUser = await prisma.user.findUnique({
+      where: { firebaseUid: demoUser.firebaseUid },
+      select: { id: true },
+    });
+    if (!demoDbUser) continue;
+
+    const [userOneId, userTwoId] = normalizePair(currentUser.id, demoDbUser.id);
     await prisma.match.upsert({
       where: { userOneId_userTwoId: { userOneId, userTwoId } },
       update: {},
@@ -73,7 +88,7 @@ async function ensureDemoMatchesForUser(userId) {
         userOneId,
         userTwoId,
         status: 'accepted',
-        createdByUserId: userId,
+        createdByUserId: currentUser.id,
       },
     });
   }
