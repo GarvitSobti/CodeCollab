@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { auth } from '../config/firebase';
+import { getApiOrigin } from '../utils/runtimeConfig';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3003',
+  baseURL: getApiOrigin(),
   withCredentials: false,
 });
 

@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client';
+import { getSocketOrigin, isRealtimeEnabled } from '../utils/runtimeConfig';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_API_URL || 'http://localhost:3003';
+const SOCKET_URL = getSocketOrigin();
 
 class ChatService {
   constructor() {
@@ -12,6 +13,11 @@ class ChatService {
   connect(token) {
     if (this.socket) {
       this.socket.disconnect();
+    }
+
+    if (!isRealtimeEnabled()) {
+      this._emit('connection-status', 'disconnected');
+      return;
     }
 
     this.socket = io(SOCKET_URL, {

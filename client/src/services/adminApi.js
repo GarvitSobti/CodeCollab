@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { getApiOrigin } from '../utils/runtimeConfig';
 
-const API_BASE = `${process.env.REACT_APP_API_URL || 'http://localhost:3003'}/api/admin`;
+const API_BASE = `${getApiOrigin()}/api/admin`;
 
 const http = axios.create({
   baseURL: API_BASE

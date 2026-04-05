@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApi } from '../../services/adminApi';
+import { getApiOrigin } from '../../utils/runtimeConfig';
 
 const initialForm = {
   eventName: '',
@@ -70,7 +71,7 @@ export default function AdminHackathonForm() {
       const response = await adminApi.uploadSponsorLogo(file);
       const uploadedPath = response?.data?.path || '';
       if (uploadedPath) {
-        const absolutePath = `${process.env.REACT_APP_API_URL || 'http://localhost:3003'}${uploadedPath}`;
+        const absolutePath = `${getApiOrigin()}${uploadedPath}`;
         setForm((previous) => {
           const current = (previous.sponsorsText || '').trim();
           const updated = current

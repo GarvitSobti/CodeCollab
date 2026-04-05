@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { getApiOrigin } from '../../utils/runtimeConfig';
 
 function getDateLabel(isoDate) {
   const date = new Date(isoDate);
@@ -53,7 +54,7 @@ function Attachment({ message }) {
 
   const fullUrl = message.attachmentUrl.startsWith('http')
     ? message.attachmentUrl
-    : `${process.env.REACT_APP_API_URL || 'http://localhost:3003'}${message.attachmentUrl}`;
+    : `${getApiOrigin()}${message.attachmentUrl}`;
 
   if (message.messageType === 'image') {
     return (
